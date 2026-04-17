@@ -2,12 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "MadeSoulmaze";
+  src:
+    url("./assets/fonts/made-soulmaze.woff2") format("woff2"),
+    url("./assets/fonts/made-soulmaze.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: clip;
   }
   body {
-    @apply bg-dark text-white font-sans overflow-x-hidden selection:bg-neon selection:text-black;
+    @apply bg-dark text-white font-sans selection:bg-neon selection:text-black;
+    max-width: 100%;
+    overflow-x: clip;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+  }
+  #root {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  * {
+    min-width: 0;
+    box-sizing: border-box;
   }
   a:focus-visible,
   button:focus-visible,
@@ -23,9 +47,25 @@
 }
 
 @layer components {
+  .container-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10;
+  }
+  .surface-panel {
+    @apply rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-sm;
+  }
+  .accent-script {
+    font-family: MadeSoulmaze, "Segoe Script", "Bradley Hand", cursive;
+  }
+  .text-glow {
+    text-shadow:
+      0 0 8px rgba(204, 255, 0, 0.34),
+      0 0 26px rgba(204, 255, 0, 0.2),
+      0 0 52px rgba(204, 255, 0, 0.1);
+  }
   [data-glow] {
     position: relative;
-    transition: box-shadow 250ms ease, transform 250ms ease, border-color 250ms ease, color 250ms ease;
+    transition: box-shadow 220ms ease, transform 220ms ease, border-color 220ms ease, color 220ms ease;
+    will-change: transform;
   }
   [data-glow]::after {
     content: "";
@@ -44,30 +84,21 @@
   [data-glow]:focus-visible::after {
     opacity: 1;
   }
+
+  .episode-glow {
+    --ep-glow: 204 255 0;
+    transition: transform 300ms ease, border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease;
+  }
+
+  .episode-glow:hover,
+  .episode-glow:focus-visible {
+    border-color: rgb(var(--ep-glow) / 0.6);
+    box-shadow: 0 0 0 1px rgb(var(--ep-glow) / 0.18), 0 0 34px rgb(var(--ep-glow) / 0.16);
+    background-color: rgba(255, 255, 255, 0.03);
+  }
 }
 
 @layer utilities {
-  .text-outline {
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
-    color: transparent;
-    transition: all 0.3s ease;
-  }
-  
-  .text-outline:hover {
-    -webkit-text-stroke: 1px #CCFF00;
-    text-shadow: 0 0 20px rgba(204, 255, 0, 0.4);
-  }
-  
-  .text-outline-neon {
-    -webkit-text-stroke: 1px #CCFF00;
-    color: transparent;
-  }
-
-  .text-outline-cyber {
-    -webkit-text-stroke: 1px #FF003C;
-    color: transparent;
-  }
-
   .glass-panel {
     @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
   }
@@ -113,6 +144,7 @@
 .marquee-content {
   display: flex;
   animation: marquee 20s linear infinite;
+  will-change: transform;
 }
 
 @keyframes marquee {
@@ -120,12 +152,10 @@
   100% { transform: translateX(-50%); }
 }
 
-.glitch-hover {
-  position: relative;
-}
-
-.glitch-hover:hover {
-  animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
-  color: #CCFF00;
-  text-shadow: 2px 0 #FF003C, -2px 0 #00FFFF;
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

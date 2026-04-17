@@ -67,52 +67,52 @@ export default function Artist() {
 
   if (!artist) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-display text-4xl uppercase relative z-20">
+      <div className="relative z-20 flex min-h-screen items-center justify-center font-display text-4xl uppercase">
         Artist not found
       </div>
     );
   }
 
   return (
-    <div className="w-full pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto relative z-20">
-      <Link to="/#artists" className="inline-flex items-center gap-2 font-sans text-neon uppercase tracking-widest mb-12 hover:text-white transition-colors font-bold">
+    <div className="container-shell relative z-20 w-full pb-24 pt-28 sm:pt-32">
+      <Link to="/#artists" className="mb-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neon transition-colors hover:text-white sm:mb-12">
         <ArrowLeft size={20} /> Back to Artists
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-        <motion.div 
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-14">
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
-          className="relative aspect-[4/5] w-full"
+          className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-black"
         >
-          <img src={artist.imageUrl} alt={artist.name} className="w-full h-full object-cover grayscale" />
-          <div className="absolute inset-0 border-2 border-neon mix-blend-overlay pointer-events-none"></div>
+          <img src={artist.imageUrl} alt={artist.name} className="h-full w-full object-cover grayscale" />
+          <div className="pointer-events-none absolute inset-0 border border-neon/40 mix-blend-screen" />
         </motion.div>
 
         <div className="flex flex-col">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="font-display text-6xl md:text-8xl font-extrabold uppercase leading-none mb-4"
+            className="mb-3 font-display text-[clamp(2.3rem,8vw,5.8rem)] font-extrabold uppercase leading-[0.88] tracking-[-0.07em]"
           >
             {artist.name}
           </motion.h1>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="font-sans text-xl text-neon font-bold uppercase tracking-widest mb-8"
+            className="mb-8 text-sm uppercase tracking-[0.24em] text-neon sm:text-base"
           >
             {artist.role}
           </motion.div>
           
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="font-sans text-lg leading-relaxed text-white/80 mb-16"
+            className="mb-12 text-base leading-relaxed text-white/78 sm:text-lg"
           >
             {artist.bio}
           </motion.div>
@@ -123,19 +123,19 @@ export default function Artist() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <h2 className="font-display text-3xl font-extrabold uppercase mb-8 border-b border-white/20 pb-4">Releases on TMH</h2>
-              <div className="flex flex-col gap-6">
+              <h2 className="mb-6 border-b border-white/20 pb-3 font-display text-3xl font-extrabold uppercase tracking-[-0.04em]">Releases on TMH</h2>
+              <div className="flex flex-col gap-5">
                 {artistReleases.map(release => (
-                  <div key={release.id} className="flex items-center gap-6 group cursor-pointer">
-                    <div className="w-24 h-24 bg-zinc-900 relative overflow-hidden flex-shrink-0">
-                      <img src={release.coverUrl} alt={release.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0" />
+                  <div key={release.id} className="group flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-3 sm:gap-5">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-zinc-900 sm:h-24 sm:w-24">
+                      <img src={release.coverUrl} alt={release.title} loading="lazy" className="h-full w-full object-cover grayscale transition-[transform,filter] duration-300 group-hover:scale-105 group-hover:grayscale-0" />
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Play className="text-neon" size={24} />
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-display text-xl font-extrabold uppercase group-hover:text-neon transition-colors">{release.title}</h3>
-                      <p className="font-sans text-sm text-white/50 uppercase tracking-widest font-bold">{release.id} • {release.date}</p>
+                    <div className="min-w-0">
+                      <h3 className="font-display text-xl font-extrabold uppercase tracking-[-0.04em] transition-colors group-hover:text-neon">{release.title}</h3>
+                      <p className="text-xs uppercase tracking-[0.2em] text-white/60">{release.id} • {release.date}</p>
                     </div>
                   </div>
                 ))}

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { TMH_LOGO_OBJECT_POSITION, TMH_LOGO_SRC } from '../branding/logo';
 
 type PreloaderProps = {
   visible: boolean;
@@ -74,9 +75,10 @@ export default function Preloader({ visible, durationMs = 2400, onDone }: Preloa
                 transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
               />
               <motion.img
-                src="/assets/tmh-logo-white.png"
+                src={TMH_LOGO_SRC}
                 alt="Tech My House"
-                className="w-40 h-40 object-contain"
+                className="w-40 h-40 object-cover"
+                style={{ objectPosition: TMH_LOGO_OBJECT_POSITION }}
                 animate={reducedMotion ? undefined : { rotate: [0, 0.8, 0, -0.6, 0] }}
                 transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
               />
@@ -102,4 +104,3 @@ export default function Preloader({ visible, durationMs = 2400, onDone }: Preloa
     </AnimatePresence>
   );
 }
-

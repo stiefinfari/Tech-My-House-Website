@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Radio, Play, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { usePlayer } from '../context/PlayerContext';
 import { Link } from 'react-router-dom';
+import { getDominantColor } from '../utils/dominantColor';
 
 interface Episode {
   title: string;
@@ -11,6 +11,8 @@ interface Episode {
   audioUrl: string;
   coverUrl?: string;
 }
+
+type GlowStyle = CSSProperties & { ['--ep-glow']?: string };
 
 type RssItem = {
   title?: string;
@@ -32,6 +34,9 @@ export default function Podcast() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
   const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const glowRef = useRef<Record<string, string>>({});
+  const [glowByUrl, setGlowByUrl] = useState<Record<string, string>>({});
+  const fallbackGlow = '204 255 0';
 
   useEffect(() => {
     const fetchPodcast = async () => {
@@ -61,18 +66,64 @@ export default function Podcast() {
     fetchPodcast();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const urls = Array.from(new Set(episodes.map((e) => e.coverUrl).filter(Boolean) as string[]));
+
+    urls.forEach((url) => {
+      if (glowRef.current[url]) return;
+      getDominantColor(url).then((rgb) => {
+        if (cancelled) return;
+        const value = rgb ?? fallbackGlow;
+        setGlowByUrl((prev) => {
+          if (prev[url]) return prev;
+          const next = { ...prev, [url]: value };
+          glowRef.current = next;
+          return next;
+        });
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [episodes]);
+
+  const queue = episodes.map((e) => ({
+    title: e.title,
+    url: e.audioUrl,
+    artist: 'Tech My House',
+    coverUrl: e.coverUrl,
+  }));
+
+  const handlePlay = (ep: Episode) => {
+    if (ep.audioUrl) {
+      playTrack(
+        {
+          title: ep.title,
+          url: ep.audioUrl,
+          artist: 'Tech My House',
+          coverUrl: ep.coverUrl,
+        },
+        queue
+      );
+      return;
+    }
+    window.open(ep.link, '_blank');
+  };
+
   return (
-    <div>
-      <div className="mb-12 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
-        <div className="flex items-center gap-6">
-          <Radio size={48} className="text-neon animate-pulse" />
-          <h2 className="font-display text-4xl md:text-6xl font-extrabold uppercase leading-none">
-            Tech My House<br/><span className="text-neon">Radio Show</span>
+    <div className="space-y-8">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-white/10 pb-6 sm:flex-row sm:items-end">
+        <div className="flex items-center gap-4">
+          <Radio size={34} className="text-neon" />
+          <h2 className="font-display text-[clamp(2rem,6vw,4.2rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.06em]">
+            Tech My House Radio
           </h2>
         </div>
-        <Link 
-          to="/podcast" 
-          className="group flex items-center gap-2 font-sans text-xs md:text-sm uppercase tracking-widest text-white/70 hover:text-neon transition-colors"
+        <Link
+          to="/podcast"
+          className="group inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-white/70 transition-colors hover:text-neon"
         >
           View All Episodes
           <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -84,82 +135,128 @@ export default function Podcast() {
           <div className="w-12 h-12 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : (
-        <div className="overflow-x-auto snap-x flex gap-6 pb-8 hide-scrollbar">
-          {episodes.map((ep, i) => {
-            const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
-            
-            return (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, x: 50, scale: 0.95 }}
-                whileInView={{ opacity: 1, x: 0, scale: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.1, duration: 0.6, ease: "easeOut" }}
-                className="group relative flex flex-col snap-center min-w-[320px] max-w-[380px] shrink-0 p-5 md:p-8 bg-white/[0.02] backdrop-blur-md hover:bg-white/[0.05] transition-all border border-white/5 hover:border-neon/30 cursor-pointer rounded-2xl overflow-hidden"
-                onClick={() => {
-                  if (ep.audioUrl) {
-                    playTrack({
-                      title: ep.title,
-                      url: ep.audioUrl,
-                      artist: "Tech My House",
-                      coverUrl: ep.coverUrl
-                    }, episodes.map(e => ({
-                      title: e.title,
-                      url: e.audioUrl,
-                      artist: "Tech My House",
-                      coverUrl: e.coverUrl
-                    })));
-                  } else {
-                    window.open(ep.link, '_blank');
-                  }
-                }}
-              >
-                {/* Background Hover Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-neon/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+        <div className="space-y-6">
+          {episodes.length === 0 ? (
+            <div className="surface-panel px-6 py-10 text-center text-sm uppercase tracking-[0.22em] text-white/70">
+              No episodes found
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              {(() => {
+                const featured = episodes[0];
+                const featuredGlow = featured.coverUrl ? (glowByUrl[featured.coverUrl] ?? fallbackGlow) : fallbackGlow;
+                const isCurrentlyPlaying = currentTrack?.url === featured.audioUrl && isPlaying;
 
-                {/* Cover Art */}
-                <div className="relative w-full aspect-square shrink-0 rounded-xl overflow-hidden bg-dark shadow-2xl mb-6 border border-white/10 group-hover:border-neon/50 transition-colors duration-500">
-                  <img 
-                    src={ep.coverUrl} 
-                    alt={ep.title}
-                    className={`w-full h-full object-cover transition-all duration-700 ${isCurrentlyPlaying ? 'scale-110' : 'grayscale opacity-80 group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-110'}`}
-                  />
-                  <div className="absolute inset-0 bg-dark/40 group-hover:bg-dark/20 transition-colors duration-500 flex items-center justify-center">
-                    <div className={`w-20 h-20 rounded-full flex items-center justify-center backdrop-blur-xl border transition-all duration-500 ${isCurrentlyPlaying ? 'bg-neon text-dark border-neon shadow-[0_0_30px_rgba(204,255,0,0.5)] scale-110' : 'bg-white/5 text-white border-white/20 group-hover:bg-neon group-hover:text-dark group-hover:border-neon group-hover:scale-110 group-hover:shadow-[0_0_40px_rgba(204,255,0,0.4)]'}`}>
-                      {isCurrentlyPlaying ? (
-                        <div className="flex gap-[4px] items-end h-6">
-                          <span className="w-1.5 h-full bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
-                          <span className="w-1.5 h-2/3 bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '200ms' }} />
-                          <span className="w-1.5 h-4/5 bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '400ms' }} />
+                return (
+                  <button
+                    type="button"
+                    className="episode-glow group surface-panel relative flex w-full flex-col overflow-hidden text-left lg:col-span-7"
+                    style={{ '--ep-glow': featuredGlow } as GlowStyle}
+                    onClick={() => handlePlay(featured)}
+                  >
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
+                      <img
+                        src={featured.coverUrl}
+                        alt={featured.title}
+                        loading="lazy"
+                        className={`h-full w-full object-cover transition-[transform,filter] duration-700 ${
+                          isCurrentlyPlaying ? 'scale-[1.06]' : 'grayscale group-hover:scale-[1.04] group-hover:grayscale-0'
+                        }`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-85" />
+                      <div
+                        className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        style={{ backgroundColor: `rgb(${featuredGlow} / 0.14)` }}
+                      />
+
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div
+                          className={`inline-flex h-16 w-16 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                            isCurrentlyPlaying
+                              ? 'border-neon bg-neon text-black shadow-[0_0_26px_rgba(204,255,0,0.44)]'
+                              : 'border-white/25 bg-white/10 text-white group-hover:border-neon group-hover:bg-neon group-hover:text-black'
+                          }`}
+                        >
+                          <Play size={24} fill="currentColor" className="ml-0.5" />
                         </div>
-                      ) : (
-                        <Play size={28} fill="currentColor" className="ml-1" />
-                      )}
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Episode Info */}
-                <div className="flex-1 min-w-0 flex flex-col relative z-10">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="font-sans text-[10px] md:text-xs font-bold uppercase tracking-widest text-neon bg-neon/10 px-4 py-1.5 rounded-full border border-neon/20 shadow-[0_0_10px_rgba(204,255,0,0.1)]">
-                      {new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </span>
-                  </div>
-                  <h3 className="font-display text-2xl md:text-3xl font-black uppercase tracking-tighter text-white group-hover:text-neon transition-colors duration-300 line-clamp-2 leading-none mb-6">
-                    {ep.title}
-                  </h3>
-                  
-                  <div className="mt-auto pt-5 border-t border-white/10 group-hover:border-neon/30 transition-colors duration-500 flex justify-between items-center">
-                    <span className="font-sans text-xs uppercase tracking-[0.2em] text-white/50 group-hover:text-neon font-bold transition-colors">
-                      {isCurrentlyPlaying ? 'Playing Now' : 'Play Episode'}
-                    </span>
-                    <ArrowRight size={16} className="text-white/30 group-hover:text-neon transform group-hover:translate-x-2 transition-all duration-300" />
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+                    <div className="flex flex-1 flex-col gap-4 p-6">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <span className="inline-flex w-fit rounded-full border border-neon/25 bg-neon/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-neon sm:text-xs">
+                          Latest Episode
+                        </span>
+                        <span className="text-[10px] uppercase tracking-[0.24em] text-white/55 sm:text-xs">
+                          {new Date(featured.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+
+                      <h3 className="font-display text-[clamp(1.7rem,3.2vw,2.7rem)] font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-white">
+                        {featured.title}
+                      </h3>
+
+                      <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4 text-xs uppercase tracking-[0.2em] text-white/60">
+                        <span className="transition-colors duration-200 group-hover:text-white">
+                          {isCurrentlyPlaying ? 'Playing Now' : 'Play Episode'}
+                        </span>
+                        <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1 group-hover:text-white" />
+                      </div>
+                    </div>
+                  </button>
+                );
+              })()}
+
+              <div className="flex flex-col gap-3 lg:col-span-5">
+                {episodes.slice(1, 5).map((ep, i) => {
+                  const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
+                  const glow = ep.coverUrl ? (glowByUrl[ep.coverUrl] ?? fallbackGlow) : fallbackGlow;
+
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      className="episode-glow group surface-panel flex w-full items-center gap-4 overflow-hidden px-4 py-4 text-left transition-transform duration-300 hover:-translate-y-0.5"
+                      style={{ '--ep-glow': glow } as GlowStyle}
+                      onClick={() => handlePlay(ep)}
+                    >
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black">
+                        <img
+                          src={ep.coverUrl}
+                          alt={ep.title}
+                          loading="lazy"
+                          className={`h-full w-full object-cover transition-[transform,filter] duration-500 ${
+                            isCurrentlyPlaying ? 'scale-[1.06]' : 'grayscale group-hover:scale-[1.03] group-hover:grayscale-0'
+                          }`}
+                        />
+                        <div
+                          className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                          style={{ backgroundColor: `rgb(${glow} / 0.12)` }}
+                        />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="truncate text-xs uppercase tracking-[0.2em] text-white/85 group-hover:text-white">
+                            {ep.title}
+                          </span>
+                          <span className="shrink-0 text-[10px] uppercase tracking-[0.24em] text-white/45">
+                            {new Date(ep.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between border-t border-white/10 pt-3 text-[10px] uppercase tracking-[0.24em] text-white/55">
+                          <span className="transition-colors duration-200 group-hover:text-white">
+                            {isCurrentlyPlaying ? 'Playing Now' : 'Play Episode'}
+                          </span>
+                          <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1 group-hover:text-white" />
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

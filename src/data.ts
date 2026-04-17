@@ -36,7 +36,7 @@ export const releases = [
     id: "TMH003",
     title: "SYSTEM OVERLOAD",
     artist: "Lysa Chain",
-    coverUrl: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=glitch%20art%20distorted%20digital%20texture%20techno%20music%20album&image_size=square",
+    coverUrl: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=industrial%20digital%20texture%20dark%20neon%20techno%20album%20art&image_size=square",
     link: "#",
     date: "2026-01-10"
   },

@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Radio, Calendar } from 'lucide-react';
+import { Play, Calendar } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
+import { TMH_LOGO_OBJECT_POSITION, TMH_LOGO_SRC } from '../branding/logo';
 
 interface Episode {
   title: string;
@@ -104,44 +105,46 @@ export default function PodcastPage() {
   }, []);
 
   return (
-    <div className="min-h-screen pt-32 pb-48">
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-16">
-        <motion.div 
+    <div className="min-h-screen pb-24 pt-28 sm:pt-32">
+      <div className="container-shell mb-12 sm:mb-16">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center text-center max-w-3xl mx-auto"
+          className="mx-auto flex max-w-3xl flex-col items-center text-center"
         >
-          <div className="w-20 h-20 bg-neon/10 rounded-full flex items-center justify-center mb-6 border border-neon/20 shadow-[0_0_30px_rgba(204,255,0,0.15)]">
-            <Radio size={40} className="text-neon" />
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-neon/25 bg-neon/10 shadow-[0_0_24px_rgba(204,255,0,0.18)]">
+            <img
+              src={TMH_LOGO_SRC}
+              alt="Tech My House"
+              className="h-10 w-10 object-cover"
+              style={{ objectPosition: TMH_LOGO_OBJECT_POSITION }}
+            />
           </div>
-          <h1 className="font-display text-5xl md:text-7xl font-extrabold uppercase leading-none mb-6">
-            All <span className="text-neon">Episodes</span>
-          </h1>
-          <p className="font-sans text-white/70 text-lg md:text-xl leading-relaxed">
-            Dive into the underground sound. Listen to the latest sets, guest mixes, and exclusive tracks straight from the Tech My House radio show.
+          <h1 className="font-display text-[clamp(2.1rem,8vw,5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.07em]">ALL EPISODES</h1>
+          <p className="mt-5 text-balance text-base leading-relaxed text-white/72 sm:text-lg">
+            Dive into the underground sound with the latest sets, guest mixes, and exclusive tracks from the Tech My House radio show.
           </p>
         </motion.div>
       </div>
 
-      {/* Episodes Grid */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="container-shell">
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="w-16 h-16 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {episodes.map((ep, i) => {
               const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
               
               return (
-                <motion.div 
+                <motion.button
                   key={i}
+                  type="button"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group relative flex flex-col bg-zinc-900/40 hover:bg-zinc-900/80 transition-all border border-white/5 hover:border-neon/30 cursor-pointer rounded-2xl overflow-hidden"
+                  className="group surface-panel relative flex w-full cursor-pointer flex-col overflow-hidden text-left transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-neon/40"
                   onClick={() => {
                     if (ep.audioUrl) {
                       playTrack({
@@ -160,17 +163,17 @@ export default function PodcastPage() {
                     }
                   }}
                 >
-                  {/* Cover Art */}
-                  <div className="relative w-full aspect-square overflow-hidden bg-dark">
-                    <img 
-                      src={ep.coverUrl} 
+                  <div className="relative aspect-square w-full overflow-hidden bg-black">
+                    <img
+                      src={ep.coverUrl}
                       alt={ep.title}
-                      className={`w-full h-full object-cover transition-all duration-700 ${isCurrentlyPlaying ? 'scale-110' : 'grayscale group-hover:grayscale-0 group-hover:scale-105'}`}
+                      loading="lazy"
+                      className={`h-full w-full object-cover transition-[transform,filter] duration-500 ${isCurrentlyPlaying ? 'scale-[1.06]' : 'grayscale group-hover:scale-[1.04] group-hover:grayscale-0'}`}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80" />
                     
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-300 ${isCurrentlyPlaying ? 'bg-neon text-dark border-neon shadow-[0_0_20px_rgba(204,255,0,0.4)]' : 'bg-white/10 text-white border-white/20 group-hover:bg-neon group-hover:text-dark group-hover:border-neon group-hover:scale-110'}`}>
+                      <div className={`flex h-14 w-14 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'border-neon bg-neon text-dark shadow-[0_0_22px_rgba(204,255,0,0.44)]' : 'border-white/25 bg-white/10 text-white group-hover:border-neon group-hover:bg-neon group-hover:text-dark'}`}>
                         {isCurrentlyPlaying ? (
                           <div className="flex gap-[4px] items-end h-5">
                             <span className="w-1.5 h-full bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
@@ -184,23 +187,20 @@ export default function PodcastPage() {
                     </div>
                   </div>
 
-                  {/* Episode Info */}
-                  <div className="flex flex-col flex-1 p-6 relative">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon/0 via-neon/50 to-neon/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    
-                    <div className="flex items-center gap-2 mb-3 text-white/50 group-hover:text-neon/80 transition-colors">
+                  <div className="relative flex flex-1 flex-col p-5">
+                    <div className="mb-3 flex items-center gap-2 text-white/60 transition-colors group-hover:text-neon/80">
                       <Calendar size={14} />
-                      <span className="font-sans text-xs font-bold uppercase tracking-widest">
+                      <span className="text-[10px] uppercase tracking-[0.2em] sm:text-xs">
                         {new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                     
-                    <h3 className="font-display text-xl font-extrabold uppercase text-white group-hover:text-neon transition-colors line-clamp-2 leading-tight mb-4">
+                    <h3 className="mb-4 text-2xl font-display font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-white transition-colors group-hover:text-neon">
                       {ep.title}
                     </h3>
                     
-                    <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                      <span className="font-sans text-xs uppercase tracking-widest text-white/50 group-hover:text-white font-bold transition-colors">
+                    <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
+                      <span className="text-xs uppercase tracking-[0.2em] text-white/55 transition-colors group-hover:text-white">
                         {isCurrentlyPlaying ? 'Playing Now' : 'Play Episode'}
                       </span>
                       {isCurrentlyPlaying && (
@@ -208,7 +208,7 @@ export default function PodcastPage() {
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </motion.button>
               );
             })}
           </div>

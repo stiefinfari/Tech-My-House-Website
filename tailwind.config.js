@@ -19,22 +19,21 @@ export default {
       fontFamily: {
         sans: ['Space Mono', 'monospace'],
         display: ['Syne', 'sans-serif'],
-        marker: ['"Permanent Marker"', '"Comic Sans MS"', 'cursive'],
+        accent: ['MadeSoulmaze', '"Segoe Script"', '"Bradley Hand"', 'cursive'],
       },
       animation: {
         'marquee': 'marquee 25s linear infinite',
-        'glitch': 'glitch 1s linear infinite',
+        'glow-pulse': 'glowPulse 3.8s ease-in-out infinite',
       },
       keyframes: {
         marquee: {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-100%)' },
         },
-        glitch: {
-          '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
-          '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
-          '62%': { transform: 'translate(0,0) skew(5deg)' },
-        }
+        glowPulse: {
+          '0%, 100%': { textShadow: '0 0 10px rgba(204, 255, 0, 0.24), 0 0 24px rgba(204, 255, 0, 0.16)' },
+          '50%': { textShadow: '0 0 14px rgba(204, 255, 0, 0.38), 0 0 34px rgba(204, 255, 0, 0.22)' },
+        },
       }
     },
   },
