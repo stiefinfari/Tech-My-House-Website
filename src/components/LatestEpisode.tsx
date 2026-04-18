@@ -46,6 +46,19 @@ export default function LatestEpisode() {
   useEffect(() => {
     const fetchLatest = async () => {
       try {
+        const CACHE_KEY = 'tmh_latest_episode_v1';
+        const TTL = 10 * 60 * 1000; // 10 minutes
+        const cachedStr = sessionStorage.getItem(CACHE_KEY);
+        
+        if (cachedStr) {
+          const cached = JSON.parse(cachedStr);
+          if (Date.now() - cached.timestamp < TTL) {
+            setEpisode(cached.data);
+            setLoading(false);
+            return;
+          }
+        }
+
         const response = await fetch(`${RSS2JSON}?rss_url=${encodeURIComponent(RSS_URL)}`);
         const data = (await response.json()) as RssResponse;
         if (data.status !== 'ok') return;
@@ -58,7 +71,15 @@ export default function LatestEpisode() {
           audioUrl: item.enclosure?.link ?? '',
           coverUrl: item.thumbnail ?? item.enclosure?.thumbnail ?? FALLBACK_COVER,
         };
+        
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+          timestamp: Date.now(),
+          data: ep
+        }));
+        
         setEpisode(ep);
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -142,7 +163,7 @@ export default function LatestEpisode() {
 
             <div className="flex flex-col justify-between gap-6">
               <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4 text-[10px] uppercase tracking-[0.26em] text-white/55">
+                <div className="flex items-center justify-between gap-4 text-[10px] uppercase tracking-[0.26em] text-smoke text-shadow-sm">
                   <span>{dateLabel}</span>
                   <span>Latest episode</span>
                 </div>

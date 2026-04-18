@@ -12,14 +12,25 @@ export default {
         desktop: { min: '1025px' },
       },
       colors: {
+        acid: '#CCFF00',
+        'acid-deep': '#9CC200',
+        'acid-wash': '#E9FF66',
+        ink: '#0A0A0A',
+        'ink-raise': '#141414',
+        concrete: '#1E1E1E',
+        rust: '#FF4A1C',
+        bone: '#F2EEE5',
+        smoke: 'rgba(255,255,255,0.62)',
+        // @deprecated - retrocompatibilità
         neon: '#CCFF00',
-        cyber: '#FF003C',
+        // @deprecated - retrocompatibilità
         dark: '#0A0A0A',
       },
       fontFamily: {
         sans: ['Space Mono', 'monospace'],
         display: ['Syne', 'sans-serif'],
         accent: ['MadeSoulmaze', '"Segoe Script"', '"Bradley Hand"', 'cursive'],
+        grotesk: ['Space Grotesk', 'sans-serif'],
       },
       animation: {
         'marquee': 'marquee 25s linear infinite',

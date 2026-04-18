@@ -210,7 +210,7 @@ export default function AudioPlayer() {
                   <div className="truncate font-display text-sm font-extrabold uppercase tracking-[-0.04em] text-white/95">
                     {title}
                   </div>
-                  <div className="truncate font-sans text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+                  <div className="truncate font-sans text-[10px] font-bold uppercase tracking-[0.2em] text-smoke">
                     {artist}
                   </div>
                   <div className="mt-2 flex items-center gap-1.5">
@@ -246,7 +246,7 @@ export default function AudioPlayer() {
               </div>
 
               <div className="min-w-0">
-                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-smoke">
                   <span className="font-sans">{formatTime(shownTime)}</span>
                   <span className="font-sans">{formatTime(duration)}</span>
                 </div>

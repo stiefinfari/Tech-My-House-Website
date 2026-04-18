@@ -5,6 +5,8 @@ import { SITE } from '../seo/site';
 import HeroSection from '../sections/home/HeroSection';
 import RecordsSection from '../sections/home/RecordsSection';
 import PodcastSection from '../sections/home/PodcastSection';
+import ArtistsSection from '../sections/home/ArtistsSection';
+import Marquee from '../components/Marquee';
 
 export default function Home() {
   const location = useLocation();
@@ -34,8 +36,12 @@ export default function Home() {
   return (
     <div className="w-full">
       <HeroSection />
-      <RecordsSection />
-      <PodcastSection />
+      <Marquee />
+      <div className="relative z-10 space-y-24 pb-24 sm:space-y-32 sm:pb-32">
+        <PodcastSection />
+        <RecordsSection />
+        <ArtistsSection />
+      </div>
     </div>
   );
 }

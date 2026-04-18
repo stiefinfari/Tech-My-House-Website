@@ -7,6 +7,15 @@ import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 export default defineConfig({
   build: {
     sourcemap: 'hidden',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'framer-motion': ['framer-motion'],
+          'react-router-dom': ['react-router-dom'],
+          'vendor': ['react', 'react-dom', 'zustand']
+        }
+      }
+    }
   },
   plugins: [
     react({

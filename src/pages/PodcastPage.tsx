@@ -164,6 +164,7 @@ export default function PodcastPage() {
                 <motion.button
                   key={i}
                   type="button"
+                  aria-label={`Play ${ep.title}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
@@ -240,7 +241,7 @@ export default function PodcastPage() {
                     </h3>
                     
                     <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
-                      <span className="text-xs uppercase tracking-[0.2em] text-white/55 transition-colors group-hover:text-white">
+                      <span className="text-xs uppercase tracking-[0.2em] text-smoke transition-colors group-hover:text-white">
                         {isCurrentlyPlaying ? 'Playing Now' : 'Play Episode'}
                       </span>
                       {isCurrentlyPlaying && (
