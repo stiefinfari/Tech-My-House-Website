@@ -1,18 +1,14 @@
 import React, { useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Play } from 'lucide-react';
-import { artists, releases } from '../data';
+import { ArrowLeft, Facebook, Globe, Instagram, Youtube } from 'lucide-react';
+import { artists, type ArtistSocialKey } from '../data';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
 
 export default function Artist() {
   const { id } = useParams<{ id: string }>();
   const artist = artists.find(a => a.id === id);
-  const artistReleases = useMemo(() => {
-    if (!artist) return [];
-    return releases.filter(r => r.artist === artist.name);
-  }, [artist]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -42,21 +38,12 @@ export default function Artist() {
           '@type': 'Person',
           name: artist.name,
           description: artist.bio,
-          image: new URL(artist.imageUrl, SITE.url).toString(),
+          ...(artist.imageUrl ? { image: new URL(artist.imageUrl, SITE.url).toString() } : {}),
           url: pageUrl,
         },
-        ...artistReleases.map((r) => ({
-          '@type': 'MusicRecording',
-          name: r.title,
-          byArtist: { '@type': 'Person', name: r.artist },
-          datePublished: r.date,
-          url: r.link,
-          image: new URL(r.coverUrl, SITE.url).toString(),
-          publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
-        })),
       ],
     };
-  }, [artist, artistReleases]);
+  }, [artist]);
 
   useSeo({
     title: artist?.name ?? 'Artist',
@@ -73,10 +60,41 @@ export default function Artist() {
     );
   }
 
+  const iconByKey: Record<ArtistSocialKey, React.ComponentType<{ size?: string | number; className?: string }>> = {
+    instagram: Instagram,
+    soundcloud: Globe,
+    youtube: Youtube,
+    tiktok: Globe,
+    facebook: Facebook,
+    website: Globe,
+  };
+
+  const labelByKey: Record<ArtistSocialKey, string> = {
+    instagram: 'Instagram',
+    soundcloud: 'SoundCloud',
+    youtube: 'YouTube',
+    tiktok: 'TikTok',
+    facebook: 'Facebook',
+    website: 'Website',
+  };
+
+  const socials = (Object.keys(artist.socials) as ArtistSocialKey[])
+    .map((key) => ({ key, href: artist.socials[key] }))
+    .filter((item): item is { key: ArtistSocialKey; href: string } => Boolean(item.href));
+
+  const initials = artist.name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
   return (
     <div className="container-shell relative z-20 w-full pb-24 pt-28 sm:pt-32">
-      <Link to="/#artists" className="mb-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neon transition-colors hover:text-white sm:mb-12">
-        <ArrowLeft size={20} /> Back to Artists
+      <Link to="/" className="mb-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neon transition-colors hover:text-white sm:mb-12">
+        <ArrowLeft size={20} /> Back to Home
       </Link>
 
       <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-14">
@@ -86,7 +104,18 @@ export default function Artist() {
           transition={{ duration: 0.6 }}
           className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-black"
         >
-          <img src={artist.imageUrl} alt={artist.name} className="h-full w-full object-cover grayscale" />
+          {artist.imageUrl ? (
+            <img src={artist.imageUrl} alt={artist.name} className="h-full w-full object-cover grayscale" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_40%_30%,rgba(204,255,0,0.10),transparent_55%)]">
+              <div className="relative inline-flex h-40 w-40 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/[0.02]">
+                <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] border border-neon/35 mix-blend-screen" />
+                <span className="font-display text-6xl font-extrabold uppercase tracking-[-0.06em] text-white/90">
+                  {initials || 'TM'}
+                </span>
+              </div>
+            </div>
+          )}
           <div className="pointer-events-none absolute inset-0 border border-neon/40 mix-blend-screen" />
         </motion.div>
 
@@ -117,28 +146,28 @@ export default function Artist() {
             {artist.bio}
           </motion.div>
 
-          {artistReleases.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <h2 className="mb-6 border-b border-white/20 pb-3 font-display text-3xl font-extrabold uppercase tracking-[-0.04em]">Releases on TMH</h2>
-              <div className="flex flex-col gap-5">
-                {artistReleases.map(release => (
-                  <div key={release.id} className="group flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-3 sm:gap-5">
-                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-zinc-900 sm:h-24 sm:w-24">
-                      <img src={release.coverUrl} alt={release.title} loading="lazy" className="h-full w-full object-cover grayscale transition-[transform,filter] duration-300 group-hover:scale-105 group-hover:grayscale-0" />
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Play className="text-neon" size={24} />
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="font-display text-xl font-extrabold uppercase tracking-[-0.04em] transition-colors group-hover:text-neon">{release.title}</h3>
-                      <p className="text-xs uppercase tracking-[0.2em] text-white/60">{release.id} • {release.date}</p>
-                    </div>
-                  </div>
-                ))}
+          {socials.length > 0 && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+              <h2 className="mb-6 border-b border-white/20 pb-3 font-display text-3xl font-extrabold uppercase tracking-[-0.04em]">
+                Connect
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {socials.map(({ key, href }) => {
+                  const Icon = iconByKey[key];
+                  return (
+                    <a
+                      key={key}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-glow
+                      className="inline-flex h-12 items-center gap-3 rounded-full border border-white/15 bg-white/[0.02] px-5 text-xs font-bold uppercase tracking-[0.22em] text-white/75 transition-all duration-300 hover:border-neon/40 hover:bg-white/[0.06] hover:text-white"
+                    >
+                      <Icon size={18} />
+                      {labelByKey[key]}
+                    </a>
+                  );
+                })}
               </div>
             </motion.div>
           )}

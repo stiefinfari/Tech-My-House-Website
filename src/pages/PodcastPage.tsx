@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Calendar } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
-import { TMH_LOGO_OBJECT_POSITION, TMH_LOGO_SRC } from '../branding/logo';
+import { getDominantColor } from '../utils/dominantColor';
 
 interface Episode {
   title: string;
@@ -32,10 +32,15 @@ type RssResponse = {
   items?: RssItem[];
 };
 
+type GlowStyle = CSSProperties & { ['--ep-glow']?: string };
+
 export default function PodcastPage() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
   const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const glowRef = useRef<Record<string, string>>({});
+  const [glowByUrl, setGlowByUrl] = useState<Record<string, string>>({});
+  const fallbackGlow = '204 255 0';
 
   const jsonLd = useMemo(() => {
     const safeIso = (d: string) => {
@@ -71,7 +76,7 @@ export default function PodcastPage() {
     title: 'Podcast',
     path: '/podcast',
     description:
-      'Dive into the underground sound. Listen to the latest sets, guest mixes, and exclusive tracks from the Tech My House radio show.',
+      'Dive into the underground sound. Listen to the latest sets, curated mixes, and exclusive tracks from the Tech My House radio show.',
     jsonLd,
   });
 
@@ -104,6 +109,29 @@ export default function PodcastPage() {
     fetchPodcast();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const urls = Array.from(new Set(episodes.map((e) => e.coverUrl).filter(Boolean) as string[]));
+
+    urls.forEach((url) => {
+      if (glowRef.current[url]) return;
+      getDominantColor(url).then((rgb) => {
+        if (cancelled) return;
+        const value = rgb ?? fallbackGlow;
+        setGlowByUrl((prev) => {
+          if (prev[url]) return prev;
+          const next = { ...prev, [url]: value };
+          glowRef.current = next;
+          return next;
+        });
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [episodes]);
+
   return (
     <div className="min-h-screen pb-24 pt-28 sm:pt-32">
       <div className="container-shell mb-12 sm:mb-16">
@@ -112,17 +140,11 @@ export default function PodcastPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mx-auto flex max-w-3xl flex-col items-center text-center"
         >
-          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-neon/25 bg-neon/10 shadow-[0_0_24px_rgba(204,255,0,0.18)]">
-            <img
-              src={TMH_LOGO_SRC}
-              alt="Tech My House"
-              className="h-10 w-10 object-cover"
-              style={{ objectPosition: TMH_LOGO_OBJECT_POSITION }}
-            />
-          </div>
-          <h1 className="font-display text-[clamp(2.1rem,8vw,5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.07em]">ALL EPISODES</h1>
-          <p className="mt-5 text-balance text-base leading-relaxed text-white/72 sm:text-lg">
-            Dive into the underground sound with the latest sets, guest mixes, and exclusive tracks from the Tech My House radio show.
+          <h1 className="font-display text-[clamp(2.4rem,9vw,6rem)] font-extrabold uppercase leading-[0.86] tracking-[-0.09em] text-white">
+            TECH MY HOUSE
+          </h1>
+          <p className="accent-script mt-4 text-[clamp(1.4rem,5.5vw,3.2rem)] leading-[0.95] text-neon text-glow">
+            Radio Show
           </p>
         </motion.div>
       </div>
@@ -136,6 +158,7 @@ export default function PodcastPage() {
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {episodes.map((ep, i) => {
               const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
+              const glow = ep.coverUrl ? (glowByUrl[ep.coverUrl] ?? fallbackGlow) : fallbackGlow;
               
               return (
                 <motion.button
@@ -144,20 +167,24 @@ export default function PodcastPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group surface-panel relative flex w-full cursor-pointer flex-col overflow-hidden text-left transition-[transform,border-color] duration-300 hover:-translate-y-1 hover:border-neon/40"
+                  className="episode-glow group surface-panel relative flex w-full cursor-pointer flex-col overflow-hidden text-left transition-[transform,border-color] duration-300 hover:-translate-y-1"
+                  style={{ '--ep-glow': glow } as GlowStyle}
                   onClick={() => {
                     if (ep.audioUrl) {
+                      const playlist = episodes
+                        .filter((e) => Boolean(e.audioUrl))
+                        .map((e) => ({
+                          title: e.title,
+                          url: e.audioUrl,
+                          artist: 'Tech My House',
+                          coverUrl: e.coverUrl,
+                        }));
                       playTrack({
                         title: ep.title,
                         url: ep.audioUrl,
                         artist: "Tech My House",
                         coverUrl: ep.coverUrl
-                      }, episodes.map(e => ({
-                        title: e.title,
-                        url: e.audioUrl,
-                        artist: "Tech My House",
-                        coverUrl: e.coverUrl
-                      })));
+                      }, playlist);
                     } else {
                       window.open(ep.link, '_blank');
                     }
@@ -171,9 +198,22 @@ export default function PodcastPage() {
                       className={`h-full w-full object-cover transition-[transform,filter] duration-500 ${isCurrentlyPlaying ? 'scale-[1.06]' : 'grayscale group-hover:scale-[1.04] group-hover:grayscale-0'}`}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80" />
+                    <div
+                      className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      style={{ backgroundColor: `rgb(${glow} / 0.10)` }}
+                    />
                     
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className={`flex h-14 w-14 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-300 ${isCurrentlyPlaying ? 'border-neon bg-neon text-dark shadow-[0_0_22px_rgba(204,255,0,0.44)]' : 'border-white/25 bg-white/10 text-white group-hover:border-neon group-hover:bg-neon group-hover:text-dark'}`}>
+                      <div
+                        className={`flex h-14 w-14 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                          isCurrentlyPlaying ? 'text-black' : 'border-white/25 bg-white/10 text-white'
+                        }`}
+                        style={{
+                          borderColor: isCurrentlyPlaying ? `rgb(${glow} / 0.65)` : undefined,
+                          backgroundColor: isCurrentlyPlaying ? `rgb(${glow} / 0.92)` : undefined,
+                          boxShadow: isCurrentlyPlaying ? `0 0 0 1px rgb(${glow} / 0.18), 0 0 26px rgb(${glow} / 0.22)` : undefined,
+                        }}
+                      >
                         {isCurrentlyPlaying ? (
                           <div className="flex gap-[4px] items-end h-5">
                             <span className="w-1.5 h-full bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
@@ -188,14 +228,14 @@ export default function PodcastPage() {
                   </div>
 
                   <div className="relative flex flex-1 flex-col p-5">
-                    <div className="mb-3 flex items-center gap-2 text-white/60 transition-colors group-hover:text-neon/80">
+                    <div className="mb-3 flex items-center gap-2 text-white/60 transition-colors group-hover:text-white/80">
                       <Calendar size={14} />
                       <span className="text-[10px] uppercase tracking-[0.2em] sm:text-xs">
                         {new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                     
-                    <h3 className="mb-4 text-2xl font-display font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-white transition-colors group-hover:text-neon">
+                    <h3 className="mb-4 text-2xl font-display font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-white transition-colors group-hover:text-white">
                       {ep.title}
                     </h3>
                     

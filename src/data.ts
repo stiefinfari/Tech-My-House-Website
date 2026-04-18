@@ -1,51 +1,60 @@
-export const artists = [
-  {
-    id: "lysa-chain",
-    name: "Lysa Chain",
-    role: "DJ / Producer",
-    bio: "Lysa Chain is a driving force in the underground techno scene, delivering dark, driving beats with a signature industrial edge. Known for her high-energy sets and uncompromising sound, she has become a staple in the European clubbing landscape.",
-    imageUrl: "/assets/lysa-chain.png"
-  },
-  {
-    id: "phari",
-    name: "Phari",
-    role: "DJ / Producer",
-    bio: "Phari brings a deep, hypnotic groove to the tech house landscape, blending classic rhythms with modern underground textures. His sets are a journey through the evolution of house music, built for the darkest hours of the night.",
-    imageUrl: "/assets/phari.png"
-  }
-];
+export type ArtistSocialKey = 'instagram' | 'soundcloud' | 'youtube' | 'tiktok' | 'facebook' | 'website';
 
-export const releases = [
+export type Artist = {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  imageUrl?: string;
+  location?: string;
+  socials: Partial<Record<ArtistSocialKey, string>>;
+};
+
+export const artists: Artist[] = [
   {
-    id: "TMH001",
-    title: "UNDERGROUND ANTHEM",
-    artist: "Lysa Chain",
-    coverUrl: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=dark%20brutalist%20techno%20album%20cover%20acid%20green%20black%20white%20noise&image_size=square",
-    link: "#",
-    date: "2026-03-15"
+    id: 'phari',
+    name: 'Phari',
+    role: 'DJ / Host',
+    bio: 'Host of Tech My House Radio Show.',
+    socials: {
+      facebook: 'https://www.facebook.com/djphari',
+      website: 'https://linktr.ee/djphari',
+    },
   },
   {
-    id: "TMH002",
-    title: "UNITE",
-    artist: "Phari",
-    coverUrl: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=underground%20club%20concrete%20texture%20red%20neon%20techno%20cover&image_size=square",
-    link: "#",
-    date: "2026-02-28"
+    id: 'people',
+    name: 'People',
+    role: 'Project',
+    bio: 'Featured artists on Tech My House Radio Show.',
+    socials: {
+      facebook: 'https://www.facebook.com/Peopleev',
+    },
   },
   {
-    id: "TMH003",
-    title: "SYSTEM OVERLOAD",
-    artist: "Lysa Chain",
-    coverUrl: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=industrial%20digital%20texture%20dark%20neon%20techno%20album%20art&image_size=square",
-    link: "#",
-    date: "2026-01-10"
+    id: 'philip-stan',
+    name: 'Philip Stan',
+    role: 'DJ',
+    bio: 'Featured artist on Tech My House Radio Show.',
+    socials: {
+      facebook: 'https://www.facebook.com/filipposant99',
+    },
   },
   {
-    id: "TMH004",
-    title: "RAW ELEMENTS",
-    artist: "Phari",
-    coverUrl: "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=industrial%20steel%20monochrome%20album%20art%20minimalist&image_size=square",
-    link: "#",
-    date: "2025-12-05"
-  }
+    id: 'barbe',
+    name: 'Barbe',
+    role: 'DJ',
+    bio: 'Featured artist on Tech My House Radio Show.',
+    socials: {
+      facebook: 'https://www.facebook.com/mattia.barbon1',
+    },
+  },
+  {
+    id: 'be-a-son',
+    name: 'Be.A.Son',
+    role: 'DJ',
+    bio: 'Featured artist on Tech My House Radio Show.',
+    socials: {
+      facebook: 'https://www.facebook.com/simo.biason',
+    },
+  },
 ];
