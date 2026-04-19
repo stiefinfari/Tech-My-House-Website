@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import SocialLinks from './SocialLinks';
 import TopNav from './TopNav';
 import TMHLogoLiquid from './TMHLogoLiquid';
-import PillButton from './ui/PillButton';
 import CustomCursor from './CustomCursor';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 
@@ -21,14 +20,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <TopNav />
 
-      <main className="relative z-10 pt-[100px]" id="main">
+      <main className="relative z-10" id="main">
         {children}
       </main>
 
-      <footer id="footer" className="relative z-20 border-t border-acid/25 bg-black/35 pt-16 sm:pt-20">
+      <footer id="footer" className="relative z-20 border-t border-white/10 bg-ink/95">
         {!reducedMotion ? (
-          <div className="hidden lg:block border-b border-white/10 bg-ink">
-            <div className="relative h-32 overflow-hidden">
+          <div className="hidden border-b border-white/10 bg-black/40 lg:block">
+            <div className="relative h-28 overflow-hidden">
               <video
                 autoPlay
                 loop
@@ -36,7 +35,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 playsInline
                 preload="metadata"
                 aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover opacity-90 brightness-[0.95] contrast-[1.05]"
+                className="absolute inset-0 h-full w-full object-cover opacity-80 brightness-[0.9] contrast-[1.05]"
                 style={{
                   WebkitMaskImage: footerMask,
                   maskImage: footerMask,
@@ -54,64 +53,70 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         ) : null}
-        <div className="container-shell pb-10">
-          <div className="grid gap-12 border border-white/10 bg-ink/70 p-8 sm:p-10 lg:grid-cols-[1.2fr_1fr_1fr]">
-            <div>
-              <div className="flex items-center gap-3">
-                <TMHLogoLiquid size={46} className="h-[46px] w-[46px] shrink-0" />
-                <div className="font-display text-[13px] font-extrabold uppercase tracking-[0.24em] text-white">TECH MY HOUSE</div>
-              </div>
-              <h2 className="accent-script mt-6 text-[clamp(3rem,7.5vw,6rem)] text-white">
-                WHERE MUSIC
-                <br />
-                UNITES
-              </h2>
-              <p className="mt-4 max-w-md text-sm text-white/70">
-                Underground house, tech house and techno culture from Friuli, Italy.
-              </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <PillButton to="/contact" variant="primary" ariaLabel="Vai alla pagina contatti">
-                  GET IN TOUCH →
-                </PillButton>
-                <a
-                  href="mailto:info@techmyhouse.it"
-                  className="font-mono text-[11px] uppercase tracking-[0.24em] text-smoke transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-                >
-                  info@techmyhouse.it
-                </a>
-              </div>
-            </div>
 
-            <div className="space-y-5">
-              <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Navigate</div>
-              <div className="flex flex-col gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-smoke">
-                <Link to="/#records" className="transition-colors hover:text-white">Records</Link>
-                <Link to="/podcast" className="transition-colors hover:text-white">Radio</Link>
-                <Link to="/#artists" className="transition-colors hover:text-white">Artists</Link>
-                <Link to="/contact" className="transition-colors hover:text-white">Contact</Link>
-              </div>
-            </div>
+        <div className="container-shell py-12 sm:py-14">
+          <div className="mb-8 border-b border-white/10 pb-7">
+            <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">FOOTER NAVIGATION</div>
+            <h2 className="mt-3 font-display text-[clamp(1.8rem,5vw,3rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.05em] text-white">
+              STAY CONNECTED
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm text-white/70">
+              Underground house, tech house, and techno culture. Follow releases, radio shows, artists, and event updates.
+            </p>
+          </div>
 
-            <div className="space-y-5">
-              <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Social</div>
-              <SocialLinks />
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <section aria-labelledby="footer-brand" className="space-y-4">
+              <div id="footer-brand" className="flex items-center gap-3">
+                <TMHLogoLiquid size={42} className="h-[42px] w-[42px] shrink-0" />
+                <span className="font-display text-[13px] font-extrabold uppercase tracking-[0.24em] text-white">TECH MY HOUSE</span>
+              </div>
               <div className="font-mono text-[11px] uppercase tracking-[0.24em] text-smoke">
-                <div>Privacy</div>
-                <div className="mt-2">Cookies</div>
+                FRIULI, ITALY
               </div>
-            </div>
+              <a
+                href="mailto:info@techmyhouse.it"
+                className="inline-flex font-mono text-[11px] uppercase tracking-[0.24em] text-white/85 transition-colors hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+              >
+                info@techmyhouse.it
+              </a>
+            </section>
+
+            <nav aria-label="Footer primary links" className="space-y-4">
+              <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Explore</div>
+              <div className="flex flex-col gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-smoke">
+                <Link to="/#records" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Records</Link>
+                <Link to="/podcast" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Radio</Link>
+                <Link to="/#artists" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Artists</Link>
+                <Link to="/contact" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Contact</Link>
+              </div>
+            </nav>
+
+            <section aria-labelledby="footer-social" className="space-y-4">
+              <h3 id="footer-social" className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Community</h3>
+              <SocialLinks />
+            </section>
+
+            <section aria-labelledby="footer-legal" className="space-y-4">
+              <h3 id="footer-legal" className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Legal</h3>
+              <div className="flex flex-col gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-smoke">
+                <span>Privacy</span>
+                <span>Cookies</span>
+                <span>All rights reserved</span>
+              </div>
+            </section>
           </div>
         </div>
 
-        <div className="border-t border-white/10 bg-ink">
-          <div className="container-shell py-6 pb-[calc(1.5rem+112px+env(safe-area-inset-bottom))] font-mono text-[11px] uppercase tracking-[0.24em] text-smoke">
-            <span>MADE WITH ♥ BY </span>
+        <div className="border-t border-white/10 bg-black/35">
+          <div className="container-shell flex flex-col gap-4 py-6 pb-[calc(1.5rem+112px+env(safe-area-inset-bottom))] font-mono text-[11px] uppercase tracking-[0.24em] text-smoke sm:flex-row sm:items-center sm:justify-between">
+            <span>© {new Date().getFullYear()} TECH MY HOUSE</span>
             <a
-              href="https://www.gaicirclela.com"
+              href="https://www.gaiacirclelab.com"
               target="_blank"
               rel="noopener noreferrer external"
               className="inline-flex items-center gap-2 text-white/85 transition-colors hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-              aria-label="Gaia Circle Lab (apre in una nuova scheda)"
+              aria-label="Gaia Circle Lab (opens in a new tab)"
               title="Gaia Circle Lab"
             >
               <img

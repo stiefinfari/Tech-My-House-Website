@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Calendar } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
+import Marquee from '../components/Marquee';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
 
@@ -31,6 +32,8 @@ type RssResponse = {
   items?: RssItem[];
 };
 
+type EpisodeFilter = 'ALL' | 'HOUSE' | 'TECH HOUSE' | 'TECHNO' | 'HARD TECHNO';
+
 function normalizeSoundCloudCover(url: string, size: number) {
   const safe = url.trim();
   if (!safe) return safe;
@@ -41,7 +44,9 @@ function normalizeSoundCloudCover(url: string, size: number) {
 export default function PodcastPage() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<EpisodeFilter>('ALL');
   const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const filterOptions: EpisodeFilter[] = ['ALL', 'HOUSE', 'TECH HOUSE', 'TECHNO', 'HARD TECHNO'];
 
   const jsonLd = useMemo(() => {
     const safeIso = (d: string) => {
@@ -123,33 +128,62 @@ export default function PodcastPage() {
     fetchPodcast();
   }, []);
 
+  const filteredEpisodes = useMemo(() => {
+    if (filter === 'ALL') return episodes;
+    const lookup = filter.toLowerCase();
+    return episodes.filter((ep) => ep.title.toLowerCase().includes(lookup));
+  }, [episodes, filter]);
+
   return (
     <div className="min-h-screen pb-24 pt-28 sm:pt-32">
-      <div className="container-shell mb-12 sm:mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mx-auto flex max-w-3xl flex-col items-center text-center"
-        >
-          <h1 className="display-title text-[clamp(2.4rem,9vw,6rem)] text-white">
-            TECH MY HOUSE
-          </h1>
-          <div className="mt-6">
-            <span className="tape-strip text-[11px] tracking-[0.18em]">RADIO SHOW</span>
-          </div>
-        </motion.div>
+      <div className="container-shell mb-14 max-w-6xl">
+        <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">THE ARCHIVE</div>
+        <h1 className="display-title mt-4 text-[clamp(3rem,10vw,8rem)] leading-[0.9] text-white">RADIO SHOW</h1>
+        <p className="accent-script mt-4 -rotate-[1.5deg] text-[clamp(1.6rem,3.5vw,2.8rem)] text-acid">every episode, underground sound</p>
+        <div className="mt-5 font-mono text-[10px] uppercase tracking-widest text-smoke">
+          {episodes.length} EPISODES · UPDATED WEEKLY
+        </div>
       </div>
 
+      <Marquee text="RADIO SHOW · TECH MY HOUSE · RADIO SHOW · TECH MY HOUSE" className="bg-acid text-ink" size="sm" density="tight" />
+
       <div className="container-shell">
+        <div className="mb-5 flex flex-wrap gap-2">
+          {filterOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setFilter(option)}
+              className={`rounded-full border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors ${
+                filter === option ? 'border-acid bg-acid text-ink' : 'border-white/15 bg-ink text-white/80 hover:border-acid/60 hover:text-white'
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+
         {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="h-16 w-16 animate-spin rounded-full border-4 border-acid border-t-transparent" />
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="overflow-hidden border border-white/10 bg-ink">
+                <div className="aspect-square animate-pulse bg-white/10" />
+                <div className="space-y-3 p-4">
+                  <div className="h-2 w-20 animate-pulse bg-white/15" />
+                  <div className="h-5 w-11/12 animate-pulse bg-white/15" />
+                  <div className="h-5 w-8/12 animate-pulse bg-white/15" />
+                  <div className="h-2 w-24 animate-pulse bg-white/15" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {episodes.map((ep, i) => {
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+            {filteredEpisodes.map((ep, i) => {
               const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
-              
+              const isFeatured = i === 0;
+              const formattedDate = new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
               return (
                 <motion.button
                   key={i}
@@ -158,10 +192,10 @@ export default function PodcastPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group relative flex w-full cursor-pointer flex-col overflow-hidden border border-white/10 bg-black/20 text-left transition-transform duration-300 hover:-translate-y-1"
+                  className={`group relative flex w-full cursor-pointer flex-col overflow-hidden border border-white/10 bg-ink text-left transition-colors duration-300 hover:border-acid/60 ${isFeatured ? 'md:col-span-2 md:row-span-2' : ''}`}
                   onClick={() => {
                     if (ep.audioUrl) {
-                      const playlist = episodes
+                      const playlist = filteredEpisodes
                         .filter((e) => Boolean(e.audioUrl))
                         .map((e) => ({
                           title: e.title,
@@ -180,21 +214,16 @@ export default function PodcastPage() {
                     }
                   }}
                 >
-                  <div className="relative aspect-square w-full overflow-hidden bg-black">
+                  <div className={`relative w-full overflow-hidden bg-black ${isFeatured ? 'aspect-[4/5] md:h-[440px] md:aspect-auto' : 'aspect-square'}`}>
                     <img
                       src={ep.coverUrl}
                       alt={ep.title}
                       loading="lazy"
-                      className={`h-full w-full object-cover transition-[transform,filter] duration-500 ${isCurrentlyPlaying ? 'scale-[1.06]' : 'grayscale group-hover:scale-[1.04] group-hover:grayscale-0'}`}
+                      className={`h-full w-full object-cover transition-transform duration-500 ${isCurrentlyPlaying ? 'scale-[1.04]' : 'group-hover:scale-[1.03]'}`}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent opacity-85" />
-                    
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div
-                        className={`flex h-[52px] w-[52px] items-center justify-center rounded-none border transition-colors duration-300 ${
-                          isCurrentlyPlaying ? 'border-acid bg-acid text-ink' : 'border-white/25 bg-ink/60 text-white'
-                        }`}
-                      >
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent opacity-70" />
+                    <div className="absolute bottom-3 right-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-acid text-ink transition-transform duration-300 group-hover:scale-110">
                         {isCurrentlyPlaying ? (
                           <div className="flex gap-[4px] items-end h-5">
                             <span className="h-full w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
@@ -208,24 +237,15 @@ export default function PodcastPage() {
                     </div>
                   </div>
 
-                  <div className="relative flex flex-1 flex-col p-5">
-                    <div className="mb-3 flex items-center gap-2 text-white/60 transition-colors group-hover:text-white/80">
-                      <Calendar size={14} />
-                      <span className="font-mono text-[10px] uppercase tracking-[0.26em] sm:text-xs">
-                        {new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
-                      </span>
-                    </div>
-                    
-                    <h3 className="display-title mb-4 text-2xl text-white">
+                  <div className="flex flex-1 flex-col p-4">
+                    <div className="font-mono text-[9px] uppercase tracking-[0.26em] text-acid">EP.{Math.max(1, filteredEpisodes.length - i)}</div>
+                    <h3 className="mt-2 font-display text-lg font-extrabold uppercase leading-tight text-white line-clamp-2">
                       {ep.title}
                     </h3>
-                    
-                    <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
-                      <span className="font-display text-[11px] uppercase tracking-[0.18em] text-smoke transition-colors group-hover:text-white">
-                        {isCurrentlyPlaying ? 'Playing Now' : 'Play Episode'}
-                      </span>
+                    <div className="mt-auto flex items-center justify-between pt-4 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
+                      <span>{formattedDate}</span>
                       {isCurrentlyPlaying && (
-                        <div className="h-2 w-2 bg-acid" />
+                        <span className="text-acid">▶ PLAYING</span>
                       )}
                     </div>
                   </div>

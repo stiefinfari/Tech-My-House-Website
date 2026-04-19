@@ -33,14 +33,14 @@ export default function ContactForm() {
     const message = state.message.trim();
 
     if (state.company.trim()) return { ok: false, message: 'Spam detected.' };
-    if (!name) return { ok: false, message: 'Inserisci il nome.' };
-    if (name.length > 100) return { ok: false, message: 'Nome troppo lungo (max 100 caratteri).' };
-    if (!email) return { ok: false, message: 'Inserisci l’email.' };
-    if (email.length > 100) return { ok: false, message: 'Email troppo lunga (max 100 caratteri).' };
-    if (!isValidEmail(email)) return { ok: false, message: 'Email non valida.' };
-    if (subject.length > 150) return { ok: false, message: 'Oggetto troppo lungo (max 150 caratteri).' };
-    if (!message) return { ok: false, message: 'Inserisci il messaggio.' };
-    if (message.length > 5000) return { ok: false, message: 'Messaggio troppo lungo (max 5000 caratteri).' };
+    if (!name) return { ok: false, message: 'Enter your name.' };
+    if (name.length > 100) return { ok: false, message: 'Name is too long (max 100 characters).' };
+    if (!email) return { ok: false, message: 'Enter your email.' };
+    if (email.length > 100) return { ok: false, message: 'Email is too long (max 100 characters).' };
+    if (!isValidEmail(email)) return { ok: false, message: 'Invalid email address.' };
+    if (subject.length > 150) return { ok: false, message: 'Subject is too long (max 150 characters).' };
+    if (!message) return { ok: false, message: 'Enter your message.' };
+    if (message.length > 5000) return { ok: false, message: 'Message is too long (max 5000 characters).' };
     return { ok: true as const };
   }, [state]);
 
@@ -74,28 +74,28 @@ export default function ContactForm() {
 
       if (!res.ok) {
         if (res.status === 404 && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-          const subject = state.subject.trim() || 'Contatto dal sito Tech My House';
-          const body = `Nome: ${state.name.trim()}\nEmail: ${state.email.trim()}\n\n${state.message.trim()}`;
+          const subject = state.subject.trim() || 'Contact from Tech My House website';
+          const body = `Name: ${state.name.trim()}\nEmail: ${state.email.trim()}\n\n${state.message.trim()}`;
           window.location.href = `mailto:info@techmyhouse.it?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
           setSubmitState('success');
           setState({ name: '', email: '', subject: '', message: '', company: '' });
           return;
         }
         const data = (await res.json().catch(() => null)) as { message?: string } | null;
-        throw new Error(data?.message || 'Errore durante l’invio. Riprova.');
+        throw new Error(data?.message || 'Error while sending. Please try again.');
       }
 
       setSubmitState('success');
       setState({ name: '', email: '', subject: '', message: '', company: '' });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Errore durante l’invio. Riprova.';
+      const message = err instanceof Error ? err.message : 'Error while sending. Please try again.';
       setSubmitState('error');
       setErrorMessage(message);
     }
   };
 
   return (
-    <form onSubmit={onSubmit} className="mt-7 grid gap-3" aria-label="Contatta Tech My House">
+    <form onSubmit={onSubmit} className="mt-7 grid gap-3" aria-label="Contact Tech My House">
       <div className="sr-only" aria-hidden="true">
         <label htmlFor="company">Company</label>
         <input id="company" name="company" value={state.company} onChange={onChange} tabIndex={-1} autoComplete="off" />
@@ -103,14 +103,14 @@ export default function ContactForm() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">Nome</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">Name</span>
           <input
             name="name"
             value={state.name}
             onChange={onChange}
             required
             className="h-11 w-full rounded-none border border-white/10 bg-black/20 px-3 font-sans text-sm text-white placeholder:text-smoke/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-            placeholder="Il tuo nome"
+            placeholder="Your name"
           />
         </label>
         <label className="grid gap-2">
@@ -122,25 +122,25 @@ export default function ContactForm() {
             onChange={onChange}
             required
             className="h-11 w-full rounded-none border border-white/10 bg-black/20 px-3 font-sans text-sm text-white placeholder:text-smoke/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-            placeholder="tua@email.com"
+            placeholder="you@email.com"
             autoComplete="email"
           />
         </label>
       </div>
 
       <label className="grid gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">Oggetto (opzionale)</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">Subject (optional)</span>
         <input
           name="subject"
           value={state.subject}
           onChange={onChange}
           className="h-11 w-full rounded-none border border-white/10 bg-black/20 px-3 font-sans text-sm text-white placeholder:text-smoke/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-          placeholder="Booking / Radio / Records / Collaborazioni"
+          placeholder="Booking / Radio / Records / Collaborations"
         />
       </label>
 
       <label className="grid gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">Messaggio</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">Message</span>
         <textarea
           name="message"
           value={state.message}
@@ -148,12 +148,12 @@ export default function ContactForm() {
           required
           rows={4}
           className="w-full resize-none rounded-none border border-white/10 bg-black/20 px-3 py-3 font-sans text-sm text-white placeholder:text-smoke/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-          placeholder="Scrivi qui…"
+          placeholder="Write here..."
         />
       </label>
 
       {submitState === 'success' ? (
-        <div className="pt-1 font-display text-[11px] uppercase tracking-[0.18em] text-acid">Messaggio inviato — ti rispondiamo presto</div>
+        <div className="pt-1 font-display text-[11px] uppercase tracking-[0.18em] text-acid">Message sent — we will reply soon</div>
       ) : submitState === 'error' ? (
         <div className="pt-1 font-display text-[11px] uppercase tracking-[0.18em] text-white/80">{errorMessage}</div>
       ) : null}
@@ -163,9 +163,9 @@ export default function ContactForm() {
           type="submit"
           variant="primary"
           className="h-11 px-6 py-0"
-          ariaLabel="Invia messaggio"
+          ariaLabel="Send message"
         >
-          {submitState === 'submitting' ? 'INVIO…' : 'INVIA'}
+          {submitState === 'submitting' ? 'SENDING...' : 'SEND'}
         </PillButton>
       </div>
     </form>

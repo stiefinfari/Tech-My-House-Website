@@ -83,7 +83,7 @@ export default function Contact() {
 
   useSeo({
     title: 'Contact',
-    description: 'Info, booking e demo. Scrivici per collaborazioni, eventi e invio demo link privati.',
+    description: 'Info, booking, and demos. Contact us for collaborations, events, and private demo links.',
     path: '/contact',
   });
 
@@ -103,14 +103,14 @@ export default function Contact() {
       const subject = info.subject.trim();
       const message = info.message.trim();
       if (info.company.trim()) return { ok: false as const, message: 'Spam detected.' };
-      if (!name) return { ok: false as const, message: 'Inserisci il nome.' };
-      if (name.length > 100) return { ok: false as const, message: 'Nome troppo lungo (max 100 caratteri).' };
-      if (!email) return { ok: false as const, message: 'Inserisci l’email.' };
-      if (email.length > 100) return { ok: false as const, message: 'Email troppo lunga (max 100 caratteri).' };
-      if (!isValidEmail(email)) return { ok: false as const, message: 'Email non valida.' };
-      if (subject.length > 150) return { ok: false as const, message: 'Oggetto troppo lungo (max 150 caratteri).' };
-      if (!message) return { ok: false as const, message: 'Inserisci il messaggio.' };
-      if (message.length > 5000) return { ok: false as const, message: 'Messaggio troppo lungo (max 5000 caratteri).' };
+      if (!name) return { ok: false as const, message: 'Enter your name.' };
+      if (name.length > 100) return { ok: false as const, message: 'Name is too long (max 100 characters).' };
+      if (!email) return { ok: false as const, message: 'Enter your email.' };
+      if (email.length > 100) return { ok: false as const, message: 'Email is too long (max 100 characters).' };
+      if (!isValidEmail(email)) return { ok: false as const, message: 'Invalid email address.' };
+      if (subject.length > 150) return { ok: false as const, message: 'Subject is too long (max 150 characters).' };
+      if (!message) return { ok: false as const, message: 'Enter your message.' };
+      if (message.length > 5000) return { ok: false as const, message: 'Message is too long (max 5000 characters).' };
       return { ok: true as const };
     }
 
@@ -123,18 +123,18 @@ export default function Contact() {
       const fee = booking.fee.trim();
       const message = booking.message.trim();
       if (booking.company.trim()) return { ok: false as const, message: 'Spam detected.' };
-      if (!name) return { ok: false as const, message: 'Inserisci il nome.' };
-      if (name.length > 100) return { ok: false as const, message: 'Nome troppo lungo (max 100 caratteri).' };
-      if (!email) return { ok: false as const, message: 'Inserisci l’email.' };
-      if (email.length > 100) return { ok: false as const, message: 'Email troppo lunga (max 100 caratteri).' };
-      if (!isValidEmail(email)) return { ok: false as const, message: 'Email non valida.' };
-      if (agency.length > 120) return { ok: false as const, message: 'Agenzia troppo lunga (max 120 caratteri).' };
-      if (!eventDate) return { ok: false as const, message: 'Inserisci la data evento.' };
-      if (!cityVenue) return { ok: false as const, message: 'Inserisci città/venue.' };
-      if (cityVenue.length > 200) return { ok: false as const, message: 'Città/venue troppo lungo (max 200 caratteri).' };
-      if (fee.length > 80) return { ok: false as const, message: 'Fee troppo lungo (max 80 caratteri).' };
-      if (!message) return { ok: false as const, message: 'Inserisci il messaggio.' };
-      if (message.length > 5000) return { ok: false as const, message: 'Messaggio troppo lungo (max 5000 caratteri).' };
+      if (!name) return { ok: false as const, message: 'Enter your name.' };
+      if (name.length > 100) return { ok: false as const, message: 'Name is too long (max 100 characters).' };
+      if (!email) return { ok: false as const, message: 'Enter your email.' };
+      if (email.length > 100) return { ok: false as const, message: 'Email is too long (max 100 characters).' };
+      if (!isValidEmail(email)) return { ok: false as const, message: 'Invalid email address.' };
+      if (agency.length > 120) return { ok: false as const, message: 'Agency is too long (max 120 characters).' };
+      if (!eventDate) return { ok: false as const, message: 'Enter the event date.' };
+      if (!cityVenue) return { ok: false as const, message: 'Enter city/venue.' };
+      if (cityVenue.length > 200) return { ok: false as const, message: 'City/venue is too long (max 200 characters).' };
+      if (fee.length > 80) return { ok: false as const, message: 'Fee is too long (max 80 characters).' };
+      if (!message) return { ok: false as const, message: 'Enter your message.' };
+      if (message.length > 5000) return { ok: false as const, message: 'Message is too long (max 5000 characters).' };
       return { ok: true as const };
     }
 
@@ -143,14 +143,14 @@ export default function Contact() {
     const demoLink = demo.demoLink.trim();
     const note = demo.note.trim();
     if (demo.company.trim()) return { ok: false as const, message: 'Spam detected.' };
-    if (!artistName) return { ok: false as const, message: 'Inserisci il nome artista.' };
-    if (artistName.length > 120) return { ok: false as const, message: 'Nome artista troppo lungo (max 120 caratteri).' };
-    if (!email) return { ok: false as const, message: 'Inserisci l’email.' };
-    if (email.length > 100) return { ok: false as const, message: 'Email troppo lunga (max 100 caratteri).' };
-    if (!isValidEmail(email)) return { ok: false as const, message: 'Email non valida.' };
-    if (!demoLink) return { ok: false as const, message: 'Inserisci il link demo.' };
-    if (demoLink.length > 600) return { ok: false as const, message: 'Link troppo lungo (max 600 caratteri).' };
-    if (note.length > 5000) return { ok: false as const, message: 'Note troppo lunghe (max 5000 caratteri).' };
+    if (!artistName) return { ok: false as const, message: 'Enter the artist name.' };
+    if (artistName.length > 120) return { ok: false as const, message: 'Artist name is too long (max 120 characters).' };
+    if (!email) return { ok: false as const, message: 'Enter your email.' };
+    if (email.length > 100) return { ok: false as const, message: 'Email is too long (max 100 characters).' };
+    if (!isValidEmail(email)) return { ok: false as const, message: 'Invalid email address.' };
+    if (!demoLink) return { ok: false as const, message: 'Enter the demo link.' };
+    if (demoLink.length > 600) return { ok: false as const, message: 'Link is too long (max 600 characters).' };
+    if (note.length > 5000) return { ok: false as const, message: 'Notes are too long (max 5000 characters).' };
     return { ok: true as const };
   }, [
     booking.agency,
@@ -230,21 +230,21 @@ export default function Contact() {
         if (res.status === 404 && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
           const subjectFromForm =
             tab === 'info' ? info.subject.trim() : tab === 'booking' ? `DJ booking / live set` : 'Demo submission';
-          const subject = `${prefix} ${subjectFromForm || 'Contatto dal sito Tech My House'}`.trim();
+          const subject = `${prefix} ${subjectFromForm || 'Contact from Tech My House website'}`.trim();
 
           const body =
             tab === 'info'
-              ? `Nome: ${info.name.trim()}\nEmail: ${info.email.trim()}\nOggetto: ${info.subject.trim()}\n\n${info.message.trim()}`
+              ? `Name: ${info.name.trim()}\nEmail: ${info.email.trim()}\nSubject: ${info.subject.trim()}\n\n${info.message.trim()}`
               : tab === 'booking'
-                ? `Nome: ${booking.name.trim()}\nEmail/Agenzia: ${booking.email.trim()}${booking.agency.trim() ? ` (${booking.agency.trim()})` : ''}\nData evento: ${booking.eventDate.trim()}\nCittà/Venue: ${booking.cityVenue.trim()}\nFee proposta: ${booking.fee.trim()}\n\n${booking.message.trim()}`
-                : `Artista: ${demo.artistName.trim()}\nEmail: ${demo.email.trim()}\nLink demo: ${demo.demoLink.trim()}\nGenere: ${demo.genre}\n\n${demo.note.trim()}`;
+                ? `Name: ${booking.name.trim()}\nEmail/Agency: ${booking.email.trim()}${booking.agency.trim() ? ` (${booking.agency.trim()})` : ''}\nEvent date: ${booking.eventDate.trim()}\nCity/Venue: ${booking.cityVenue.trim()}\nProposed fee: ${booking.fee.trim()}\n\n${booking.message.trim()}`
+                : `Artist: ${demo.artistName.trim()}\nEmail: ${demo.email.trim()}\nDemo link: ${demo.demoLink.trim()}\nGenre: ${demo.genre}\n\n${demo.note.trim()}`;
 
           window.location.href = `mailto:info@techmyhouse.it?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
           setSubmitState('success');
           return;
         }
         const data = (await res.json().catch(() => null)) as { message?: string } | null;
-        throw new Error(data?.message || 'Errore durante l’invio. Riprova.');
+        throw new Error(data?.message || 'Error while sending. Please try again.');
       }
 
       setSubmitState('success');
@@ -263,7 +263,7 @@ export default function Contact() {
       }
       if (tab === 'demo') setDemo({ artistName: '', email: '', demoLink: '', genre: 'House', note: '', company: '' });
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Errore durante l’invio. Riprova.';
+      const message = err instanceof Error ? err.message : 'Error while sending. Please try again.';
       setSubmitState('error');
       setErrorMessage(message);
     }
@@ -273,7 +273,7 @@ export default function Contact() {
     'rounded-full border border-acid/40 px-5 py-2 font-display text-[11px] uppercase tracking-[0.18em] transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
 
   return (
-    <div className="container-shell pb-20 pt-10 sm:pt-14">
+    <div className="container-shell pb-20 pt-28 sm:pt-32">
       <div className="max-w-5xl">
         <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">GET IN TOUCH</div>
         <h1 className="mt-4 font-display font-extrabold uppercase leading-[0.92] tracking-[-0.07em] text-white text-[clamp(2.5rem,7vw,5rem)]">
@@ -320,10 +320,10 @@ export default function Contact() {
 
         <div className="mt-5 font-mono text-[11px] uppercase tracking-[0.24em] text-smoke">
           {tab === 'info'
-            ? 'Per info generali, collaborazioni, stampa'
+            ? 'For general info, collaborations, and press'
             : tab === 'booking'
-              ? 'Per DJ booking e live set. Indicaci data, location e contesto'
-              : 'No allegati. Solo link privati (SoundCloud private / Drive / Dropbox / WeTransfer)'}
+              ? 'For DJ booking and live sets. Include date, location, and event context'
+              : 'No attachments. Private links only (SoundCloud private / Drive / Dropbox / WeTransfer)'}
         </div>
       </div>
 
@@ -336,7 +336,7 @@ export default function Contact() {
             exit={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.28, ease: 'easeOut' }}
           >
-            <form onSubmit={onSubmit} className="grid gap-3" aria-label="Contatta Tech My House">
+            <form onSubmit={onSubmit} className="grid gap-3" aria-label="Contact Tech My House">
               <div className="sr-only" aria-hidden="true">
                 <label htmlFor={`${tab}-company`}>Company</label>
                 <input
@@ -358,14 +358,14 @@ export default function Contact() {
                 <>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="grid gap-2">
-                      <span className={labelKicker}>Nome</span>
+                      <span className={labelKicker}>Name</span>
                       <input
                         name="name"
                         value={info.name}
                         onChange={(e) => setInfo((prev) => ({ ...prev, name: e.target.value }))}
                         required
                         className={fieldBase}
-                        placeholder="Il tuo nome"
+                        placeholder="Your name"
                       />
                     </label>
                     <label className="grid gap-2">
@@ -377,25 +377,25 @@ export default function Contact() {
                         onChange={(e) => setInfo((prev) => ({ ...prev, email: e.target.value }))}
                         required
                         className={fieldBase}
-                        placeholder="tua@email.com"
+                        placeholder="you@email.com"
                         autoComplete="email"
                       />
                     </label>
                   </div>
 
                   <label className="grid gap-2">
-                    <span className={labelKicker}>Oggetto (opzionale)</span>
+                    <span className={labelKicker}>Subject (optional)</span>
                     <input
                       name="subject"
                       value={info.subject}
                       onChange={(e) => setInfo((prev) => ({ ...prev, subject: e.target.value }))}
                       className={fieldBase}
-                      placeholder="Booking / Radio / Records / Collaborazioni"
+                      placeholder="Booking / Radio / Records / Collaborations"
                     />
                   </label>
 
                   <label className="grid gap-2">
-                    <span className={labelKicker}>Messaggio</span>
+                    <span className={labelKicker}>Message</span>
                     <textarea
                       name="message"
                       value={info.message}
@@ -403,7 +403,7 @@ export default function Contact() {
                       required
                       rows={5}
                       className={textareaBase}
-                      placeholder="Scrivi qui…"
+                      placeholder="Write here..."
                     />
                   </label>
                 </>
@@ -411,18 +411,18 @@ export default function Contact() {
                 <>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="grid gap-2">
-                      <span className={labelKicker}>Nome</span>
+                      <span className={labelKicker}>Name</span>
                       <input
                         name="name"
                         value={booking.name}
                         onChange={(e) => setBooking((prev) => ({ ...prev, name: e.target.value }))}
                         required
                         className={fieldBase}
-                        placeholder="Il tuo nome"
+                        placeholder="Your name"
                       />
                     </label>
                     <label className="grid gap-2">
-                      <span className={labelKicker}>Email / Agenzia</span>
+                      <span className={labelKicker}>Email / Agency</span>
                       <input
                         name="email"
                         type="email"
@@ -437,19 +437,19 @@ export default function Contact() {
                   </div>
 
                   <label className="grid gap-2">
-                    <span className={labelKicker}>Agenzia (opzionale)</span>
+                    <span className={labelKicker}>Agency (optional)</span>
                     <input
                       name="agency"
                       value={booking.agency}
                       onChange={(e) => setBooking((prev) => ({ ...prev, agency: e.target.value }))}
                       className={fieldBase}
-                      placeholder="Nome agenzia / promoter"
+                      placeholder="Agency / promoter name"
                     />
                   </label>
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="grid gap-2">
-                      <span className={labelKicker}>Data evento</span>
+                      <span className={labelKicker}>Event date</span>
                       <input
                         name="eventDate"
                         type="date"
@@ -460,31 +460,31 @@ export default function Contact() {
                       />
                     </label>
                     <label className="grid gap-2">
-                      <span className={labelKicker}>Fee proposta (opzionale)</span>
+                      <span className={labelKicker}>Proposed fee (optional)</span>
                       <input
                         name="fee"
                         value={booking.fee}
                         onChange={(e) => setBooking((prev) => ({ ...prev, fee: e.target.value }))}
                         className={fieldBase}
-                        placeholder="€ / condizioni"
+                      placeholder="€ / terms"
                       />
                     </label>
                   </div>
 
                   <label className="grid gap-2">
-                    <span className={labelKicker}>Città / Venue</span>
+                    <span className={labelKicker}>City / Venue</span>
                     <input
                       name="cityVenue"
                       value={booking.cityVenue}
                       onChange={(e) => setBooking((prev) => ({ ...prev, cityVenue: e.target.value }))}
                       required
                       className={fieldBase}
-                      placeholder="Città, locale, evento"
+                      placeholder="City, club, event"
                     />
                   </label>
 
                   <label className="grid gap-2">
-                    <span className={labelKicker}>Messaggio</span>
+                    <span className={labelKicker}>Message</span>
                     <textarea
                       name="message"
                       value={booking.message}
@@ -492,7 +492,7 @@ export default function Contact() {
                       required
                       rows={5}
                       className={textareaBase}
-                      placeholder="Contesto, orari, line-up, esigenze tecniche…"
+                      placeholder="Context, schedule, line-up, technical needs..."
                     />
                   </label>
                 </>
@@ -500,14 +500,14 @@ export default function Contact() {
                 <>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="grid gap-2">
-                      <span className={labelKicker}>Nome artista</span>
+                      <span className={labelKicker}>Artist name</span>
                       <input
                         name="artistName"
                         value={demo.artistName}
                         onChange={(e) => setDemo((prev) => ({ ...prev, artistName: e.target.value }))}
                         required
                         className={fieldBase}
-                        placeholder="Nome progetto / artista"
+                        placeholder="Project / artist name"
                       />
                     </label>
                     <label className="grid gap-2">
@@ -519,7 +519,7 @@ export default function Contact() {
                         onChange={(e) => setDemo((prev) => ({ ...prev, email: e.target.value }))}
                         required
                         className={fieldBase}
-                        placeholder="tua@email.com"
+                        placeholder="you@email.com"
                         autoComplete="email"
                       />
                     </label>
@@ -536,14 +536,14 @@ export default function Contact() {
                       placeholder="https://soundcloud.com/... private link, Google Drive, Dropbox, WeTransfer..."
                       inputMode="url"
                     />
-                    <div className="accent-script -rotate-[1deg] text-acid text-lg">non importa dove carichi — noi ascoltiamo ovunque</div>
+                    <div className="accent-script -rotate-[1deg] text-acid text-lg">doesn&apos;t matter where you upload — we listen everywhere</div>
                     <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
-                      No allegati. Solo link privati (SoundCloud private / Drive / Dropbox / WeTransfer)
+                      No attachments. Private links only (SoundCloud private / Drive / Dropbox / WeTransfer)
                     </div>
                   </label>
 
                   <label className="grid gap-2">
-                    <span className={labelKicker}>Genere</span>
+                    <span className={labelKicker}>Genre</span>
                     <select
                       name="genre"
                       value={demo.genre}
@@ -559,14 +559,14 @@ export default function Contact() {
                   </label>
 
                   <label className="grid gap-2">
-                    <span className={labelKicker}>Note (opzionale)</span>
+                    <span className={labelKicker}>Notes (optional)</span>
                     <textarea
                       name="note"
                       value={demo.note}
                       onChange={(e) => setDemo((prev) => ({ ...prev, note: e.target.value }))}
                       rows={5}
                       className={textareaBase}
-                      placeholder="Due righe su di te, release, obiettivo…"
+                      placeholder="A couple of lines about you, releases, goals..."
                     />
                   </label>
                 </>
@@ -574,18 +574,18 @@ export default function Contact() {
 
               {submitState === 'success' ? (
                 <div className="pt-1 font-display text-[11px] uppercase tracking-[0.18em] text-acid">
-                  Messaggio inviato — ti rispondiamo presto
+                  Message sent — we will reply soon
                 </div>
               ) : submitState === 'error' ? (
                 <div className="pt-1 font-display text-[11px] uppercase tracking-[0.18em] text-white/80">{errorMessage}</div>
               ) : null}
 
               <div className="pt-2 flex items-center gap-3">
-                <PillButton type="submit" variant="primary" className="h-11 px-6 py-0" ariaLabel="Invia messaggio">
-                  {submitState === 'submitting' ? 'INVIO…' : 'INVIA'}
+                <PillButton type="submit" variant="primary" className="h-11 px-6 py-0" ariaLabel="Send message">
+                  {submitState === 'submitting' ? 'SENDING...' : 'SEND'}
                 </PillButton>
                 <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
-                  oppure scrivi a{' '}
+                  or write to{' '}
                   <a
                     href="mailto:info@techmyhouse.it"
                     className="text-white/85 transition-colors hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
@@ -601,4 +601,3 @@ export default function Contact() {
     </div>
   );
 }
-

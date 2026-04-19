@@ -105,7 +105,7 @@ export default function Artist() {
           className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-black"
         >
           {artist.imageUrl ? (
-            <img src={artist.imageUrl} alt={artist.name} className="h-full w-full object-cover grayscale" />
+            <img src={artist.imageUrl} alt={artist.name} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_40%_30%,rgba(204,255,0,0.10),transparent_55%)]">
               <div className="relative inline-flex h-40 w-40 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/[0.02]">

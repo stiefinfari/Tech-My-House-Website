@@ -4,6 +4,7 @@ import { ChevronUp, Music, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX,
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../context/PlayerContext';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
+import useCoverTone from '../hooks/useCoverTone';
 import { generateWaveformPeaks } from '../utils/waveform';
 import TMHWallpaper from './TMHWallpaper';
 
@@ -27,7 +28,9 @@ export default function AudioPlayer() {
   const waveformCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const desktopWaveformWrapRef = useRef<HTMLDivElement | null>(null);
   const desktopWaveformCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const acidRgb = '204 255 0';
+  const tone = useCoverTone(track?.coverUrl);
+  const accentRgb = tone?.rgb ?? '204 255 0';
+  const onAccentColor = tone?.onTone === 'light' ? '#fff' : '#0A0A0A';
 
   useEffect(() => {
     const onResize = () => {
@@ -66,6 +69,23 @@ export default function AudioPlayer() {
     if (!audioRef.current) return;
     audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
+
+  useEffect(() => {
+    if (!isExpanded) return;
+    document.body.dataset.playerExpanded = 'true';
+    return () => {
+      delete document.body.dataset.playerExpanded;
+    };
+  }, [isExpanded]);
+
+  useEffect(() => {
+    if (!isExpanded) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsExpanded(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isExpanded]);
 
   const title = track?.title ?? '';
   const artist = track?.artist ?? '';
@@ -175,7 +195,7 @@ export default function AudioPlayer() {
       ctx.rect(startX, 0, Math.max(0, progressX - startX), height);
       ctx.clip();
 
-      ctx.fillStyle = `rgb(${acidRgb} / ${activeAlpha})`;
+      ctx.fillStyle = `rgb(${accentRgb} / ${activeAlpha})`;
       for (let i = 0; i < barCount; i++) {
         const x = startX + i * (barW + gap);
         const v = waveformPeaks[i] ?? 0.2;
@@ -190,7 +210,7 @@ export default function AudioPlayer() {
     ro.observe(wrap);
     draw();
     return () => ro.disconnect();
-  }, [acidRgb, duration, progress, waveformPeaks]);
+  }, [accentRgb, duration, progress, waveformPeaks]);
 
   useEffect(
     () => drawWaveform(waveformWrapRef.current, waveformCanvasRef.current, compactMode ? 0.82 : 0.88),
@@ -206,6 +226,8 @@ export default function AudioPlayer() {
 
   const baseButtonClass =
     'inline-flex items-center justify-center rounded-full p-2 text-smoke transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
+  const expandedGhostButtonClass =
+    'inline-flex h-11 w-11 items-center justify-center border border-white/20 bg-black/40 text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
 
   const renderScrubber = (
     heightClass: string,
@@ -216,8 +238,12 @@ export default function AudioPlayer() {
       <canvas ref={canvasRef} className="absolute inset-0" />
       {isSeeking && seekPreview != null && (
         <div
-          className="pointer-events-none absolute -top-9 -translate-x-1/2 border border-acid bg-ink px-2 py-1 font-mono text-[10px] uppercase tracking-[0.26em] text-acid"
-          style={{ left: `${seekPercent}%` }}
+          className="pointer-events-none absolute -top-9 -translate-x-1/2 border bg-ink px-2 py-1 font-mono text-[10px] uppercase tracking-[0.26em]"
+          style={{
+            borderColor: `rgb(${accentRgb})`,
+            color: `rgb(${accentRgb})`,
+            left: `${seekPercent}%`,
+          }}
         >
           {formatTime(seekPreview)}
         </div>
@@ -257,7 +283,10 @@ export default function AudioPlayer() {
     <>
       {!isDismissed && (
         <div className="fixed inset-x-0 bottom-0 z-[120]" role="region" aria-label="Audio player">
-          <div className="border-t border-acid/30 bg-ink/90 backdrop-blur-xl">
+          <div
+            className="border-t bg-ink/90 backdrop-blur-xl"
+            style={{ borderTopColor: `rgb(${accentRgb} / 0.45)` }}
+          >
             <div className="mx-auto hidden h-20 w-full max-w-7xl items-center px-4 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-4">
               <button
                 type="button"
@@ -273,7 +302,6 @@ export default function AudioPlayer() {
                       <Music className="h-5 w-5 text-acid" />
                     </div>
                   )}
-                  <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(204,255,0,0.2)_0,rgba(204,255,0,0.2)_6px,rgba(0,0,0,0)_6px,rgba(0,0,0,0)_12px)]" />
                 </div>
                 <div className="min-w-0">
                   <div className="truncate font-display text-[14px] font-extrabold uppercase tracking-[-0.01em] text-white">
@@ -301,9 +329,12 @@ export default function AudioPlayer() {
                           : { scale: 1 }
                     }
                     transition={shouldReduceMotion ? { duration: 0 } : { duration: isPlaying ? 1.2 : 0.18, repeat: isPlaying ? Infinity : 0, ease: 'easeInOut' }}
-                    className={`inline-flex h-11 w-11 items-center justify-center rounded-full bg-acid text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
-                      isPlaying ? 'ring-2 ring-acid/50 ring-offset-2 ring-offset-ink' : ''
-                    }`}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                    style={{
+                      backgroundColor: `rgb(${accentRgb})`,
+                      color: onAccentColor,
+                      boxShadow: isPlaying ? `0 0 0 2px rgb(${accentRgb} / 0.5)` : 'none',
+                    }}
                   >
                     {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
                   </motion.button>
@@ -326,7 +357,13 @@ export default function AudioPlayer() {
                   {isMuted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
                 <div className="relative h-2 w-28 overflow-hidden rounded-full bg-white/15">
-                  <div className="h-full bg-acid" style={{ width: `${isMuted ? 0 : volume * 100}%` }} />
+                  <div
+                    className="h-full"
+                    style={{
+                      width: `${isMuted ? 0 : volume * 100}%`,
+                      backgroundColor: `rgb(${accentRgb})`,
+                    }}
+                  />
                   <input
                     type="range"
                     min={0}
@@ -378,7 +415,6 @@ export default function AudioPlayer() {
                     <Music className="h-4 w-4 text-acid" />
                   </div>
                 )}
-                <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(204,255,0,0.2)_0,rgba(204,255,0,0.2)_6px,rgba(0,0,0,0)_6px,rgba(0,0,0,0)_12px)]" />
               </button>
 
               <button
@@ -407,9 +443,12 @@ export default function AudioPlayer() {
                         : { scale: 1 }
                   }
                   transition={shouldReduceMotion ? { duration: 0 } : { duration: isPlaying ? 1.2 : 0.18, repeat: isPlaying ? Infinity : 0, ease: 'easeInOut' }}
-                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full bg-acid text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
-                    isPlaying ? 'ring-2 ring-acid/50 ring-offset-2 ring-offset-ink' : ''
-                  }`}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                  style={{
+                    backgroundColor: `rgb(${accentRgb})`,
+                    color: onAccentColor,
+                    boxShadow: isPlaying ? `0 0 0 2px rgb(${accentRgb} / 0.5)` : 'none',
+                  }}
                 >
                   {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
                 </motion.button>
@@ -446,13 +485,18 @@ export default function AudioPlayer() {
                 <div className="font-display text-[11px] font-extrabold uppercase tracking-[0.18em] text-acid">
                   Now Playing
                 </div>
-                <button type="button" onClick={() => setIsExpanded(false)} aria-label="Close expanded player" className={baseButtonClass}>
-                  <X size={20} />
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(false)}
+                  aria-label="Close expanded player"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-white/20 bg-black/40 text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                >
+                  <X size={18} />
                 </button>
               </div>
 
               <div className="flex flex-1 flex-col items-center justify-center">
-                <div className="relative h-[280px] w-[280px] overflow-hidden rounded-sm border border-white/10 bg-black">
+                <div className="relative aspect-square h-[min(60vh,460px)] w-[min(60vh,460px)] overflow-hidden bg-black shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
                   {coverUrl ? (
                     <img src={coverUrl} alt={title} className="h-full w-full object-cover" />
                   ) : (
@@ -460,7 +504,6 @@ export default function AudioPlayer() {
                       <Music className="h-10 w-10 text-acid" />
                     </div>
                   )}
-                  <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(204,255,0,0.2)_0,rgba(204,255,0,0.2)_7px,rgba(0,0,0,0)_7px,rgba(0,0,0,0)_14px)]" />
                 </div>
 
                 <div className="mt-8 w-full max-w-3xl text-center">
@@ -479,7 +522,7 @@ export default function AudioPlayer() {
                 </div>
 
                 <div className="mt-8 flex items-center gap-3">
-                  <button type="button" onClick={playPrevious} aria-label="Previous track" className={baseButtonClass}>
+                  <button type="button" onClick={playPrevious} aria-label="Previous track" className={expandedGhostButtonClass}>
                     <SkipBack size={22} />
                   </button>
                   <motion.button
@@ -495,13 +538,16 @@ export default function AudioPlayer() {
                           : { scale: 1 }
                     }
                     transition={shouldReduceMotion ? { duration: 0 } : { duration: isPlaying ? 1.2 : 0.18, repeat: isPlaying ? Infinity : 0, ease: 'easeInOut' }}
-                    className={`inline-flex h-16 w-16 items-center justify-center rounded-full bg-acid text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
-                      isPlaying ? 'ring-2 ring-acid/50 ring-offset-2 ring-offset-ink' : ''
-                    }`}
+                    className="inline-flex h-16 w-16 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                    style={{
+                      backgroundColor: `rgb(${accentRgb})`,
+                      color: onAccentColor,
+                      boxShadow: isPlaying ? `0 0 0 2px rgb(${accentRgb} / 0.5)` : 'none',
+                    }}
                   >
                     {isPlaying ? <Pause size={26} /> : <Play size={26} className="ml-0.5" />}
                   </motion.button>
-                  <button type="button" onClick={playNext} aria-label="Next track" className={baseButtonClass}>
+                  <button type="button" onClick={playNext} aria-label="Next track" className={expandedGhostButtonClass}>
                     <SkipForward size={22} />
                   </button>
                 </div>
@@ -512,10 +558,12 @@ export default function AudioPlayer() {
                   type="button"
                   onClick={() => navigate('/podcast')}
                   aria-label="Open podcast page"
-                  className="rounded-full border border-acid/40 bg-black/20 px-4 py-2 font-display text-[11px] font-extrabold uppercase tracking-[0.18em] text-acid transition-colors hover:bg-acid hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-                >
-                  PODCAST ↗
-                </button>
+                  className="rounded-full border bg-black/20 px-4 py-2 font-display text-[11px] font-extrabold uppercase tracking-[0.18em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                  style={{
+                    borderColor: `rgb(${accentRgb} / 0.45)`,
+                    color: `rgb(${accentRgb})`,
+                  }}
+                >PODCAST ↗</button>
 
                 <div className="flex items-center gap-3">
                   <button
@@ -527,7 +575,13 @@ export default function AudioPlayer() {
                     {isMuted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
                   </button>
                   <div className="relative h-2 w-40 overflow-hidden rounded-full bg-white/15">
-                    <div className="h-full bg-acid" style={{ width: `${isMuted ? 0 : volume * 100}%` }} />
+                    <div
+                      className="h-full"
+                      style={{
+                        width: `${isMuted ? 0 : volume * 100}%`,
+                        backgroundColor: `rgb(${accentRgb})`,
+                      }}
+                    />
                     <input
                       type="range"
                       min={0}

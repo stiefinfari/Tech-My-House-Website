@@ -47,14 +47,12 @@ export default function ArtistsSection() {
             >
               <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-ink">
                 {artist.imageUrl ? (
-                  <div className="duotone-acid h-full w-full">
-                    <img
-                      src={artist.imageUrl}
-                      alt={artist.name}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
+                  <img
+                    src={artist.imageUrl}
+                    alt={artist.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
                 ) : (
                   <div className="cement-texture relative flex h-full w-full items-center justify-center">
                     <TopoBlob
@@ -67,7 +65,7 @@ export default function ArtistsSection() {
                     </span>
                   </div>
                 )}
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/80 to-transparent" />
                 <div className="pointer-events-none absolute bottom-3 right-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                   <span className="rounded-full bg-acid px-3 py-1 font-display text-[11px] font-extrabold uppercase tracking-[0.18em] text-ink">
                     VIEW →

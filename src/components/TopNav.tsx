@@ -19,6 +19,7 @@ export default function TopNav() {
   const location = useLocation();
   const shouldReduceMotion = useReducedMotionPreference();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 40);
@@ -27,13 +28,21 @@ export default function TopNav() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    const check = () => setIsPlayerExpanded(document.body.dataset.playerExpanded === 'true');
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-player-expanded'] });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <motion.header
         initial={shouldReduceMotion ? { y: 0, opacity: 1 } : { y: -16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, ease: 'easeOut' }}
-        className="fixed top-4 left-0 right-0 z-50 px-4 pt-[env(safe-area-inset-top)]"
+        className={`fixed left-0 right-0 top-4 z-50 px-4 pt-[env(safe-area-inset-top)] ${isPlayerExpanded ? 'hidden' : ''}`}
       >
         <motion.div
           className="mx-auto flex items-center justify-between rounded-full border border-acid/40 bg-ink/70 backdrop-blur-xl px-3 pl-4 pr-2 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"

@@ -14,7 +14,7 @@ export default function HeroSection() {
     <section
       ref={ref}
       id="hero"
-      className="relative isolate flex h-[100svh] min-h-[720px] w-full items-start overflow-hidden bg-ink"
+      className="relative isolate flex h-[100svh] min-h-[640px] w-full items-center overflow-hidden bg-ink"
     >
       {!shouldReduceMotion ? (
         <motion.video
@@ -51,7 +51,7 @@ export default function HeroSection() {
         <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-b from-transparent via-transparent to-ink" />
       </div>
       <div className="relative z-40 w-full">
-        <div className="max-w-5xl pl-8 pr-8 pt-36 lg:pl-16 lg:pr-16">
+        <div className="max-w-5xl pl-8 pr-8 pt-32 lg:pl-16 lg:pr-16">
           <div className="inline-flex -rotate-[2deg] items-center bg-acid px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink">
             EST. 2021 — FRIULI · IT
           </div>

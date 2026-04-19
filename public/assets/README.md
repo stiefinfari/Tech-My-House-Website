@@ -1,3 +1,3 @@
-## TODO
+## Asset Notes
 
-- Sostituire foto artisti con ritratti 800x1000 webp <= 60KB, b/n, contrasto alto, crop stretto sul volto.
+- Use 800x1000 WebP artist portraits under 60KB, high-contrast black and white, tight face crop.
