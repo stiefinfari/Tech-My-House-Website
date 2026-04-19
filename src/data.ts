@@ -16,7 +16,7 @@ export const artists: Artist[] = [
     id: 'lysa-chain',
     name: 'Lysa Chain',
     role: 'DJ / Producer',
-    bio: 'Techno and Tech House DJ and Producer.',
+    bio: 'Techno, hard techno e melodic techno.',
     imageUrl: '/assets/lysa-chain.png',
     socials: {
       instagram: 'https://instagram.com/lysachain',
@@ -27,7 +27,7 @@ export const artists: Artist[] = [
     id: 'phari',
     name: 'Phari',
     role: 'DJ / Host',
-    bio: 'Host of Tech My House Radio Show.',
+    bio: 'Tech house e host.',
     imageUrl: '/assets/phari.png',
     latestMix: '/podcast',
     socials: {

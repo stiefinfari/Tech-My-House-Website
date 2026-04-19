@@ -25,11 +25,10 @@ export default {
         smoke: 'rgba(255,255,255,0.62)',
       },
       fontFamily: {
-        sans: ['Syne', 'system-ui', 'sans-serif'],
         display: ['Syne', 'system-ui', 'sans-serif'],
-        accent: ['MadeSoulmaze', '"Segoe Script"', '"Bradley Hand"', 'cursive'],
-        grotesk: ['Syne', 'system-ui', 'sans-serif'],
-        mono: ['Space Mono', 'monospace'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        mono: ['Space Mono', 'ui-monospace', 'monospace'],
+        accent: ['MadeSoulmaze', 'Caveat', 'cursive'],
       },
       animation: {
         'marquee': 'marquee 25s linear infinite',

@@ -11,27 +11,21 @@ export default function Marquee({
   className = 'bg-acid text-ink',
 }: MarqueeProps) {
   const shouldReduceMotion = useReducedMotionPreference();
+  const repeats = shouldReduceMotion ? 2 : 3;
 
   return (
     <div className={`w-full overflow-hidden py-3 sm:py-4 select-none flex ${className}`} aria-hidden="true">
-      <div 
+      <div
         className={`flex whitespace-nowrap font-display text-2xl sm:text-4xl uppercase tracking-[0.18em] ${
           !shouldReduceMotion ? 'animate-marquee' : ''
-        }`}
+        } font-extrabold`}
       >
-        <span className="mx-4">{text}</span>
-        <span className="mx-4">{text}</span>
-        <span className="mx-4">{text}</span>
-        <span className="mx-4">{text}</span>
+        {Array.from({ length: repeats }, (_, i) => (
+          <span key={i} className="mx-6">
+            {text}
+          </span>
+        ))}
       </div>
-      {!shouldReduceMotion && (
-        <div className="flex whitespace-nowrap font-display text-2xl sm:text-4xl uppercase tracking-[0.18em] animate-marquee" aria-hidden="true">
-          <span className="mx-4">{text}</span>
-          <span className="mx-4">{text}</span>
-          <span className="mx-4">{text}</span>
-          <span className="mx-4">{text}</span>
-        </div>
-      )}
     </div>
   );
 }
