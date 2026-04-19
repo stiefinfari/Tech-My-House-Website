@@ -1,29 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import SocialLinks from './SocialLinks';
 import TopNav from './TopNav';
+import TMHWallpaper from './TMHWallpaper';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [overlaysReady, setOverlaysReady] = useState(false);
-
-  useEffect(() => {
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(() => setOverlaysReady(true));
-    } else {
-      setTimeout(() => setOverlaysReady(true), 200);
-    }
-  }, []);
-
   return (
-    <div className="relative w-full min-h-screen bg-dark text-white font-sans overflow-x-hidden selection:bg-neon selection:text-black">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-ink font-sans text-white selection:bg-acid selection:text-ink">
       <div className="warehouse-backdrop" />
-      {overlaysReady && (
-        <>
-          <div className="warehouse-scanlines" />
-          <div className="warehouse-vignette" />
-          <div className="noise-bg pointer-events-none" />
-        </>
-      )}
 
       <TopNav />
 
@@ -31,45 +15,65 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
       </main>
 
-      <footer id="footer" className="relative z-20 overflow-hidden bg-dark pt-16 sm:pt-20">
-        <div className="container-shell flex flex-col gap-12 md:flex-row md:items-start md:justify-between pb-12">
-          <div className="max-w-xl space-y-6">
-            <h2 className="font-display text-[clamp(2rem,6vw,4.8rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.08em] text-white">
-              Tech My House
-            </h2>
-            <p className="accent-script text-lg uppercase tracking-[0.12em] text-acid text-glow">
-              Where music unites
-            </p>
-            <div>
+      <footer id="footer" className="cement-texture relative isolate z-20 overflow-hidden pt-20 sm:pt-24">
+        <div className="text-cement-light">
+          <TMHWallpaper mode="mixed" opacity={0.15} />
+        </div>
+
+        <div className="container-shell relative z-10 pb-12 sm:pb-16">
+          <h2 className="display-title text-[clamp(3.5rem,10vw,9rem)] leading-[0.86] text-white">
+            WHERE MUSIC
+            <br />
+            UNITES
+          </h2>
+
+          <div className="mt-10 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-4">
+              <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Sitemap</div>
+              <div className="flex flex-col gap-3 font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
+                <Link to="/#records" className="transition-colors hover:text-white">Records</Link>
+                <Link to="/podcast" className="transition-colors hover:text-white">Radio</Link>
+                <Link to="/#artists" className="transition-colors hover:text-white">Artists</Link>
+                <Link to="/#events" className="transition-colors hover:text-white">Events</Link>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Socials</div>
               <SocialLinks />
             </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-12 sm:gap-24">
-            <div className="flex flex-col gap-4 text-sm uppercase tracking-[0.2em] text-smoke">
-              <span className="text-xs text-acid font-bold">Sitemap</span>
-              <Link to="/#records" className="hover:text-acid transition-colors">Records</Link>
-              <Link to="/podcast" className="hover:text-acid transition-colors">Radio</Link>
-              <Link to="/#artists" className="hover:text-acid transition-colors">Artists</Link>
-              <Link to="/#events" className="hover:text-acid transition-colors">Events</Link>
-            </div>
-            
-            <div className="flex flex-col gap-4 text-sm uppercase tracking-[0.2em] text-smoke">
-              <span className="text-xs text-acid font-bold">Booking & Demo</span>
-              <a href="mailto:info@techmyhouse.it" className="text-base lowercase tracking-normal text-white transition-colors hover:text-acid sm:text-xl">
+
+            <div className="space-y-4">
+              <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Booking</div>
+              <a
+                href="mailto:info@techmyhouse.it"
+                className="font-mono text-[11px] uppercase tracking-[0.26em] text-white transition-colors hover:text-acid"
+              >
                 info@techmyhouse.it
               </a>
+            </div>
+
+            <div className="space-y-4">
+              <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Legal</div>
+              <div className="flex flex-col gap-3 font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
+                <span>Privacy</span>
+                <span>Cookies</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="warning-stripes h-2 w-full opacity-80" />
-
-        <div className="bg-ink-raise">
-          <div className="container-shell flex flex-col items-start justify-between gap-3 py-6 text-xs uppercase tracking-[0.2em] text-smoke sm:flex-row sm:items-center">
-            <p>© 2026 TMH</p>
-            <a href="https://www.gaiacirclelab.com" target="_blank" rel="noopener noreferrer" className="hover:text-acid transition-colors outline-none focus-visible:text-acid focus-visible:underline">
-              Made by Gaia Circle Lab
+        <div className="h-[6px] w-full bg-acid" />
+        <div className="bg-ink">
+          <div className="container-shell pt-6 pb-[calc(1.5rem+112px+env(safe-area-inset-bottom))] font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
+            <span>made in friuli by </span>
+            <a
+              href="https://www.gaicirclela.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/85 transition-colors hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            >
+              gaia Circle Lab
             </a>
           </div>
         </div>

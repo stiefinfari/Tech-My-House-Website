@@ -1,78 +1,79 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
-import { TMH_LOGO_SRC, TMH_LOGO_OBJECT_POSITION } from '../branding/logo';
 import MobileDrawer from './MobileDrawer';
+import { TMH_LOGO_OBJECT_POSITION, TMH_LOGO_SRC } from '../branding/logo';
 
 const NAV_LINKS = [
   { label: 'Records', href: '/#records' },
   { label: 'Radio', href: '/podcast' },
   { label: 'Artists', href: '/#artists' },
   { label: 'Events', href: '/#events' },
-  { label: 'Contact', href: '#footer' },
+  { label: 'Contact', href: '/#footer' },
 ];
 
 export default function TopNav() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
-  // Scroll to section if hash is present
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith('/#') && location.pathname === '/') {
-      e.preventDefault();
-      const id = href.replace('/#', '');
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
-
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 pt-[env(safe-area-inset-top)] px-4 sm:px-6 lg:px-10 py-4 glass-panel border-b border-white/5">
-        <div className="container-shell !px-0 flex items-center justify-between">
+      <header className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-ink/80 px-4 py-4 pt-[env(safe-area-inset-top)] backdrop-blur sm:px-6 lg:px-10">
+        <div className="container-shell !px-0 grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
+          <nav className="hidden lg:flex items-center gap-8">
+            {NAV_LINKS.map((link) => {
+              const active =
+                link.href === '/podcast'
+                  ? location.pathname.startsWith('/podcast')
+                  : link.href.startsWith('/#')
+                    ? location.pathname === '/' && location.hash === link.href.replace('/#', '#')
+                    : false;
+
+              return (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  className={`font-display text-[11px] uppercase tracking-[0.18em] text-white/70 transition-colors hover:text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
+                    active ? 'text-white underline decoration-acid decoration-2 underline-offset-[10px]' : ''
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
           <Link
             to="/"
-            className="flex items-center gap-2 group outline-none focus-visible:ring-2 focus-visible:ring-acid focus-visible:ring-offset-4 focus-visible:ring-offset-dark rounded-sm"
+            className="mx-auto flex items-center gap-3 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
             aria-label="Home"
           >
-            <img
-              src={TMH_LOGO_SRC}
-              alt="Tech My House"
-              className="h-8 w-8 object-contain opacity-90 transition-transform group-hover:scale-105"
-              style={{ objectPosition: TMH_LOGO_OBJECT_POSITION }}
-            />
-            <span className="font-display text-sm font-extrabold uppercase tracking-[0.15em] hidden sm:block">
+            <span className="relative h-9 w-9 shrink-0">
+              <img
+                src={TMH_LOGO_SRC}
+                alt=""
+                aria-hidden="true"
+                width={36}
+                height={36}
+                className="h-full w-full object-contain"
+                style={{ objectPosition: TMH_LOGO_OBJECT_POSITION, transformOrigin: '50% 50%' }}
+              />
+            </span>
+            <span className="hidden font-display text-[11px] uppercase tracking-[0.22em] text-white sm:block">
               Tech My House
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                to={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                className="text-sm font-sans uppercase tracking-[0.1em] text-white/70 hover:text-acid transition-colors outline-none focus-visible:text-acid focus-visible:underline"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-end gap-3">
             <a
-              href="https://techmyhouse.it/listen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-acid px-5 py-2 text-xs font-bold uppercase tracking-wider text-ink transition-all hover:bg-acid-deep hover:border-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+              href="mailto:info@techmyhouse.it?subject=Send%20Your%20Demo"
+              className="hidden sm:inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-acid px-5 py-2 font-display text-xs uppercase tracking-[0.15em] text-ink transition-colors hover:bg-acid-deep hover:border-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
             >
-              Listen Live
+              Send Your Demo
             </a>
 
             <button
-              className="lg:hidden p-2 text-white/80 hover:text-acid transition-colors outline-none focus-visible:ring-2 focus-visible:ring-acid focus-visible:ring-offset-4 focus-visible:ring-offset-dark rounded-sm"
+              className="lg:hidden p-2 text-white/80 transition-colors hover:text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
               onClick={() => setIsOpen(true)}
               aria-label="Open Menu"
             >
@@ -82,7 +83,7 @@ export default function TopNav() {
         </div>
       </header>
 
-      <MobileDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} links={NAV_LINKS} onLinkClick={handleNavClick} />
+      <MobileDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} links={NAV_LINKS} />
     </>
   );
 }

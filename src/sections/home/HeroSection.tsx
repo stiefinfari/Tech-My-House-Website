@@ -2,14 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
+import TMHWallpaper from '../../components/TMHWallpaper';
+import TopoBlob from '../../components/TopoBlob';
 
 export default function HeroSection() {
   const shouldReduceMotion = useReducedMotionPreference();
 
   return (
-    <section id="hero" className="relative flex min-h-[100svh] w-full items-center justify-center overflow-hidden grain-heavy">
-      <h1 className="sr-only">Tech My House - Where music unites</h1>
-      
+    <section id="hero" className="cement-texture relative isolate flex h-[100svh] min-h-[720px] w-full items-center overflow-hidden">
       {!shouldReduceMotion ? (
         <video
           autoPlay
@@ -19,58 +19,68 @@ export default function HeroSection() {
           poster="/assets/hero-poster.jpg"
           preload="metadata"
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover brightness-[0.72] contrast-[1.12] saturate-[0.9]"
+          className="absolute inset-0 z-0 h-full w-full object-cover opacity-20 grayscale contrast-[1.05]"
         >
           <source src="/assets/hero-video.webm" type="video/webm" />
           <source src="/assets/hero-video.mp4" type="video/mp4" />
         </video>
       ) : (
-        <img 
-          src="/assets/hero-poster.jpg" 
-          alt="Warehouse flyer background" 
+        <img
+          src="/assets/hero-poster.jpg"
+          alt=""
           aria-hidden="true"
           loading="eager"
           fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover brightness-[0.72] contrast-[1.12] saturate-[0.9]"
+          className="absolute inset-0 z-0 h-full w-full object-cover opacity-20 grayscale contrast-[1.05]"
         />
       )}
-      
-      <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-dark/70 to-black/90" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(204,255,0,0.10),transparent_52%)]" />
+
+      <div className="text-cement-light">
+        <TMHWallpaper mode="mixed" opacity={0.12} />
+      </div>
+
+      <TopoBlob
+        seed={132}
+        size={400}
+        className="pointer-events-none absolute bottom-[-120px] right-[-120px] z-0 text-acid/25"
+      />
 
       <motion.div
         initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: 'easeOut' }}
-        className="container-shell relative z-10 flex flex-col items-center text-center mt-16"
+        className="container-shell relative z-10 flex flex-col items-center pt-16 text-center"
       >
-        <div 
-          aria-hidden="true" 
-          className="mx-auto max-w-[92vw] font-display text-[clamp(3.5rem,10vw,8rem)] font-extrabold uppercase leading-[0.86] tracking-[-0.07em] text-bone stencil"
-        >
+        <div className="tape-strip text-[11px] tracking-[0.18em]">EST. 2021 — FRIULI, IT</div>
+
+        <h1 className="display-title mt-8 text-balance text-[clamp(3.4rem,10vw,9.2rem)] leading-[0.88] text-white">
           Tech My House
-        </div>
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-[38%] h-[30vh] w-[60vw] -translate-x-1/2 -translate-y-1/2 mix-blend-multiply"
-          style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 72%)' }}
-        />
-        <p className="accent-script mt-6 text-[clamp(1.2rem,4vw,2.5rem)] text-acid text-glow" aria-hidden="true">
-          where music unites
+        </h1>
+
+        <p className="mt-6 max-w-[38ch] font-sans text-[clamp(1.05rem,2.2vw,1.65rem)] font-semibold tracking-[-0.01em] text-white/90">
+          Discover your underground mood
         </p>
 
-        <div className="mt-12 flex flex-col sm:flex-row gap-6 sm:gap-8 items-center justify-center w-full max-w-md mx-auto">
+        <ul className="mt-7 flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.26em] text-smoke sm:gap-3">
+          {['House', 'Tech House', 'Techno', 'Hard Techno'].map((g) => (
+            <li key={g} className="border border-white/10 bg-white/[0.03] px-3 py-2">
+              {g}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-10 flex w-full max-w-lg flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
           <Link
-            to="/podcast"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-acid px-8 py-4 text-sm font-bold uppercase tracking-widest text-ink transition-all hover:bg-acid-deep hover:border-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            to="/#podcast"
+            className="inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-acid px-6 py-[14px] font-display text-xs uppercase tracking-[0.15em] text-ink transition-colors hover:bg-acid-deep hover:border-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
           >
-            ▶ Play Latest Show
+            ▶ LATEST EPISODE
           </Link>
           <a
             href="mailto:info@techmyhouse.it"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-none border border-white/20 bg-transparent px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-white/5 hover:border-white/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            className="inline-flex items-center justify-center gap-2 rounded-none border border-white bg-transparent px-6 py-[14px] font-display text-xs uppercase tracking-[0.15em] text-white transition-colors hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
           >
-            Booking & Demo ↗
+            BOOKING ↗
           </a>
         </div>
       </motion.div>

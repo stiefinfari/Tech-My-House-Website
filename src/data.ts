@@ -35,40 +35,4 @@ export const artists: Artist[] = [
       website: 'https://linktr.ee/djphari',
     },
   },
-  {
-    id: 'people',
-    name: 'People',
-    role: 'Project',
-    bio: 'Featured artists on Tech My House Radio Show.',
-    socials: {
-      facebook: 'https://www.facebook.com/Peopleev',
-    },
-  },
-  {
-    id: 'philip-stan',
-    name: 'Philip Stan',
-    role: 'DJ',
-    bio: 'Featured artist on Tech My House Radio Show.',
-    socials: {
-      facebook: 'https://www.facebook.com/filipposant99',
-    },
-  },
-  {
-    id: 'barbe',
-    name: 'Barbe',
-    role: 'DJ',
-    bio: 'Featured artist on Tech My House Radio Show.',
-    socials: {
-      facebook: 'https://www.facebook.com/mattia.barbon1',
-    },
-  },
-  {
-    id: 'be-a-son',
-    name: 'Be.A.Son',
-    role: 'DJ',
-    bio: 'Featured artist on Tech My House Radio Show.',
-    socials: {
-      facebook: 'https://www.facebook.com/simo.biason',
-    },
-  },
 ];

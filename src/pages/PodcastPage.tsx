@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Calendar } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
-import { getDominantColor } from '../utils/dominantColor';
 
 interface Episode {
   title: string;
@@ -32,15 +31,17 @@ type RssResponse = {
   items?: RssItem[];
 };
 
-type GlowStyle = CSSProperties & { ['--ep-glow']?: string };
+function normalizeSoundCloudCover(url: string, size: number) {
+  const safe = url.trim();
+  if (!safe) return safe;
+  const s = Math.max(100, Math.min(3000, Math.floor(size)));
+  return safe.replace(/-t\d+x\d+(?=\.)/i, `-t${s}x${s}`);
+}
 
 export default function PodcastPage() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(true);
   const { playTrack, currentTrack, isPlaying } = usePlayer();
-  const glowRef = useRef<Record<string, string>>({});
-  const [glowByUrl, setGlowByUrl] = useState<Record<string, string>>({});
-  const fallbackGlow = '204 255 0';
 
   const jsonLd = useMemo(() => {
     const safeIso = (d: string) => {
@@ -87,17 +88,30 @@ export default function PodcastPage() {
         const data = (await response.json()) as RssResponse;
         if (data.status === 'ok') {
           const items = Array.isArray(data.items) ? data.items : [];
-          const parsedEpisodes = items.slice(0, 20).map((item) => ({
-            title: item.title ?? 'Unknown Episode',
-            link: item.link ?? '#',
-            pubDate: item.pubDate ?? '',
-            audioUrl: item.enclosure?.link ?? '',
-            coverUrl:
+          const parsedEpisodes = items.slice(0, 20).map((item) => {
+            const coverRaw =
               item.thumbnail ??
               item.enclosure?.thumbnail ??
-              'https://i1.sndcdn.com/avatars-siKAkzoJZjIx8IDn-zpkRzw-original.jpg',
-            description: item.description ?? '',
-          }));
+              'https://i1.sndcdn.com/avatars-siKAkzoJZjIx8IDn-zpkRzw-original.jpg';
+
+            return {
+              title: item.title ?? 'Unknown Episode',
+              link: item.link ?? '#',
+              pubDate: item.pubDate ?? '',
+              audioUrl: item.enclosure?.link ?? '',
+              coverUrl: normalizeSoundCloudCover(coverRaw, 800),
+              description: item.description ?? '',
+            };
+          });
+
+          parsedEpisodes.sort((a, b) => {
+            const ad = new Date(a.pubDate).getTime();
+            const bd = new Date(b.pubDate).getTime();
+            if (Number.isNaN(ad) && Number.isNaN(bd)) return 0;
+            if (Number.isNaN(ad)) return 1;
+            if (Number.isNaN(bd)) return -1;
+            return bd - ad;
+          });
           setEpisodes(parsedEpisodes);
         }
       } catch (error) {
@@ -109,29 +123,6 @@ export default function PodcastPage() {
     fetchPodcast();
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    const urls = Array.from(new Set(episodes.map((e) => e.coverUrl).filter(Boolean) as string[]));
-
-    urls.forEach((url) => {
-      if (glowRef.current[url]) return;
-      getDominantColor(url).then((rgb) => {
-        if (cancelled) return;
-        const value = rgb ?? fallbackGlow;
-        setGlowByUrl((prev) => {
-          if (prev[url]) return prev;
-          const next = { ...prev, [url]: value };
-          glowRef.current = next;
-          return next;
-        });
-      });
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [episodes]);
-
   return (
     <div className="min-h-screen pb-24 pt-28 sm:pt-32">
       <div className="container-shell mb-12 sm:mb-16">
@@ -140,25 +131,24 @@ export default function PodcastPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mx-auto flex max-w-3xl flex-col items-center text-center"
         >
-          <h1 className="font-display text-[clamp(2.4rem,9vw,6rem)] font-extrabold uppercase leading-[0.86] tracking-[-0.09em] text-white">
+          <h1 className="display-title text-[clamp(2.4rem,9vw,6rem)] text-white">
             TECH MY HOUSE
           </h1>
-          <p className="accent-script mt-4 text-[clamp(1.4rem,5.5vw,3.2rem)] leading-[0.95] text-neon text-glow">
-            Radio Show
-          </p>
+          <div className="mt-6">
+            <span className="tape-strip text-[11px] tracking-[0.18em]">RADIO SHOW</span>
+          </div>
         </motion.div>
       </div>
 
       <div className="container-shell">
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-16 h-16 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
+            <div className="h-16 w-16 animate-spin rounded-full border-4 border-acid border-t-transparent" />
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {episodes.map((ep, i) => {
               const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
-              const glow = ep.coverUrl ? (glowByUrl[ep.coverUrl] ?? fallbackGlow) : fallbackGlow;
               
               return (
                 <motion.button
@@ -168,8 +158,7 @@ export default function PodcastPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="episode-glow group surface-panel relative flex w-full cursor-pointer flex-col overflow-hidden text-left transition-[transform,border-color] duration-300 hover:-translate-y-1"
-                  style={{ '--ep-glow': glow } as GlowStyle}
+                  className="group relative flex w-full cursor-pointer flex-col overflow-hidden border border-white/10 bg-black/20 text-left transition-transform duration-300 hover:-translate-y-1"
                   onClick={() => {
                     if (ep.audioUrl) {
                       const playlist = episodes
@@ -198,28 +187,19 @@ export default function PodcastPage() {
                       loading="lazy"
                       className={`h-full w-full object-cover transition-[transform,filter] duration-500 ${isCurrentlyPlaying ? 'scale-[1.06]' : 'grayscale group-hover:scale-[1.04] group-hover:grayscale-0'}`}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/20 to-transparent opacity-80" />
-                    <div
-                      className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                      style={{ backgroundColor: `rgb(${glow} / 0.10)` }}
-                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent opacity-85" />
                     
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div
-                        className={`flex h-14 w-14 items-center justify-center rounded-full border backdrop-blur-sm transition-all duration-300 ${
-                          isCurrentlyPlaying ? 'text-black' : 'border-white/25 bg-white/10 text-white'
+                        className={`flex h-[52px] w-[52px] items-center justify-center rounded-none border transition-colors duration-300 ${
+                          isCurrentlyPlaying ? 'border-acid bg-acid text-ink' : 'border-white/25 bg-ink/60 text-white'
                         }`}
-                        style={{
-                          borderColor: isCurrentlyPlaying ? `rgb(${glow} / 0.65)` : undefined,
-                          backgroundColor: isCurrentlyPlaying ? `rgb(${glow} / 0.92)` : undefined,
-                          boxShadow: isCurrentlyPlaying ? `0 0 0 1px rgb(${glow} / 0.18), 0 0 26px rgb(${glow} / 0.22)` : undefined,
-                        }}
                       >
                         {isCurrentlyPlaying ? (
                           <div className="flex gap-[4px] items-end h-5">
-                            <span className="w-1.5 h-full bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
-                            <span className="w-1.5 h-2/3 bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '200ms' }} />
-                            <span className="w-1.5 h-4/5 bg-dark animate-[bounce_1s_infinite]" style={{ animationDelay: '400ms' }} />
+                            <span className="h-full w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
+                            <span className="h-2/3 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '200ms' }} />
+                            <span className="h-4/5 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '400ms' }} />
                           </div>
                         ) : (
                           <Play size={24} fill="currentColor" className="ml-1" />
@@ -231,21 +211,21 @@ export default function PodcastPage() {
                   <div className="relative flex flex-1 flex-col p-5">
                     <div className="mb-3 flex items-center gap-2 text-white/60 transition-colors group-hover:text-white/80">
                       <Calendar size={14} />
-                      <span className="text-[10px] uppercase tracking-[0.2em] sm:text-xs">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.26em] sm:text-xs">
                         {new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                       </span>
                     </div>
                     
-                    <h3 className="mb-4 text-2xl font-display font-extrabold uppercase leading-[0.92] tracking-[-0.05em] text-white transition-colors group-hover:text-white">
+                    <h3 className="display-title mb-4 text-2xl text-white">
                       {ep.title}
                     </h3>
                     
                     <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4">
-                      <span className="text-xs uppercase tracking-[0.2em] text-smoke transition-colors group-hover:text-white">
+                      <span className="font-display text-[11px] uppercase tracking-[0.18em] text-smoke transition-colors group-hover:text-white">
                         {isCurrentlyPlaying ? 'Playing Now' : 'Play Episode'}
                       </span>
                       {isCurrentlyPlaying && (
-                        <div className="w-2 h-2 rounded-full bg-neon shadow-[0_0_8px_#CCFF00] animate-pulse" />
+                        <div className="h-2 w-2 bg-acid" />
                       )}
                     </div>
                   </div>

@@ -8,25 +8,24 @@ type MarqueeProps = {
 
 export default function Marquee({
   text = 'HOUSE • TECH HOUSE • TECHNO • UNRELEASED • RAW • EST. 2021 • ',
-  className = 'warning-stripes',
+  className = 'bg-acid text-ink',
 }: MarqueeProps) {
   const shouldReduceMotion = useReducedMotionPreference();
 
   return (
     <div className={`w-full overflow-hidden py-3 sm:py-4 select-none flex ${className}`} aria-hidden="true">
       <div 
-        className={`flex whitespace-nowrap font-display text-2xl sm:text-4xl font-extrabold tracking-widest stencil ${
+        className={`flex whitespace-nowrap font-display text-2xl sm:text-4xl uppercase tracking-[0.18em] ${
           !shouldReduceMotion ? 'animate-marquee' : ''
         }`}
       >
-        {/* Repeat enough times to fill ultra-wide screens */}
         <span className="mx-4">{text}</span>
         <span className="mx-4">{text}</span>
         <span className="mx-4">{text}</span>
         <span className="mx-4">{text}</span>
       </div>
       {!shouldReduceMotion && (
-        <div className="flex whitespace-nowrap font-display text-2xl sm:text-4xl font-extrabold tracking-widest stencil animate-marquee" aria-hidden="true">
+        <div className="flex whitespace-nowrap font-display text-2xl sm:text-4xl uppercase tracking-[0.18em] animate-marquee" aria-hidden="true">
           <span className="mx-4">{text}</span>
           <span className="mx-4">{text}</span>
           <span className="mx-4">{text}</span>

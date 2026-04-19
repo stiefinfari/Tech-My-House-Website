@@ -93,7 +93,7 @@ export default function Artist() {
 
   return (
     <div className="container-shell relative z-20 w-full pb-24 pt-28 sm:pt-32">
-      <Link to="/" className="mb-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neon transition-colors hover:text-white sm:mb-12">
+      <Link to="/" className="mb-10 inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-acid transition-colors hover:text-white sm:mb-12">
         <ArrowLeft size={20} /> Back to Home
       </Link>
 
@@ -109,14 +109,14 @@ export default function Artist() {
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_40%_30%,rgba(204,255,0,0.10),transparent_55%)]">
               <div className="relative inline-flex h-40 w-40 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/[0.02]">
-                <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] border border-neon/35 mix-blend-screen" />
+                <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] border border-acid/35 mix-blend-screen" />
                 <span className="font-display text-6xl font-extrabold uppercase tracking-[-0.06em] text-white/90">
                   {initials || 'TM'}
                 </span>
               </div>
             </div>
           )}
-          <div className="pointer-events-none absolute inset-0 border border-neon/40 mix-blend-screen" />
+          <div className="pointer-events-none absolute inset-0 border border-acid/25 mix-blend-screen" />
         </motion.div>
 
         <div className="flex flex-col">
@@ -132,7 +132,7 @@ export default function Artist() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mb-8 text-sm uppercase tracking-[0.24em] text-neon sm:text-base"
+            className="mb-8 text-sm uppercase tracking-[0.24em] text-acid sm:text-base"
           >
             {artist.role}
           </motion.div>
@@ -160,8 +160,7 @@ export default function Artist() {
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      data-glow
-                      className="inline-flex h-12 items-center gap-3 rounded-full border border-white/15 bg-white/[0.02] px-5 text-xs font-bold uppercase tracking-[0.22em] text-white/75 transition-all duration-300 hover:border-neon/40 hover:bg-white/[0.06] hover:text-white"
+                      className="inline-flex h-12 items-center gap-3 rounded-full border border-white/15 bg-white/[0.02] px-5 text-xs font-bold uppercase tracking-[0.22em] text-white/75 transition-all duration-300 hover:border-acid/40 hover:bg-white/[0.06] hover:text-white"
                     >
                       <Icon size={18} />
                       {labelByKey[key]}

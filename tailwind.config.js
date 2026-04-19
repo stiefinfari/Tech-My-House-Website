@@ -18,32 +18,26 @@ export default {
         ink: '#0A0A0A',
         'ink-raise': '#141414',
         concrete: '#1E1E1E',
-        rust: '#FF4A1C',
-        bone: '#F2EEE5',
+        cement: '#2A2A2A',
+        'cement-light': '#6B6B6B',
+        plaster: '#E8E6E1',
+        teal: '#7FE8D5',
         smoke: 'rgba(255,255,255,0.62)',
-        // @deprecated - retrocompatibilità
-        neon: '#CCFF00',
-        // @deprecated - retrocompatibilità
-        dark: '#0A0A0A',
       },
       fontFamily: {
-        sans: ['Space Mono', 'monospace'],
-        display: ['Syne', 'sans-serif'],
+        sans: ['Syne', 'system-ui', 'sans-serif'],
+        display: ['Syne', 'system-ui', 'sans-serif'],
         accent: ['MadeSoulmaze', '"Segoe Script"', '"Bradley Hand"', 'cursive'],
-        grotesk: ['Space Grotesk', 'sans-serif'],
+        grotesk: ['Syne', 'system-ui', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
       },
       animation: {
         'marquee': 'marquee 25s linear infinite',
-        'glow-pulse': 'glowPulse 3.8s ease-in-out infinite',
       },
       keyframes: {
         marquee: {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-100%)' },
-        },
-        glowPulse: {
-          '0%, 100%': { textShadow: '0 0 10px rgba(204, 255, 0, 0.24), 0 0 24px rgba(204, 255, 0, 0.16)' },
-          '50%': { textShadow: '0 0 14px rgba(204, 255, 0, 0.38), 0 0 34px rgba(204, 255, 0, 0.22)' },
         },
       }
     },

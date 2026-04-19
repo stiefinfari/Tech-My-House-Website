@@ -36,8 +36,14 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     if (len === 0) return -1;
 
     const safeStart = startIndex >= -1 && startIndex < len ? startIndex : -1;
-    for (let i = 1; i <= len; i++) {
-      const idx = (safeStart + step * i + len) % len;
+    if (step === 1) {
+      for (let idx = safeStart + 1; idx < len; idx++) {
+        if (isPlayableTrack(playlist[idx])) return idx;
+      }
+      return -1;
+    }
+
+    for (let idx = safeStart - 1; idx >= 0; idx--) {
       if (isPlayableTrack(playlist[idx])) return idx;
     }
     return -1;

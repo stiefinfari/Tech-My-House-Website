@@ -142,8 +142,8 @@ export default function AudioPlayer() {
       ctx.clearRect(0, 0, width, height);
 
       const barCount = waveformPeaks.length;
-      const gap = 1;
-      const barW = 1;
+      const gap = 2;
+      const barW = 2;
       const usableW = barCount * barW + (barCount - 1) * gap;
       const startX = Math.floor((width - usableW) / 2);
       const centerY = height / 2;
@@ -152,10 +152,10 @@ export default function AudioPlayer() {
       const progressRatio = duration > 0 ? Math.max(0, Math.min(1, progress / duration)) : 0;
       const progressX = startX + usableW * progressRatio;
       const idle = duration <= 0;
-      const baseAlpha = idle ? 0.12 : 0.15;
-      const activeAlpha = idle ? 0.4 : 0.95;
+      const baseAlpha = idle ? 0.35 : 0.85;
+      const activeAlpha = idle ? 0.65 : 1;
 
-      ctx.fillStyle = `rgb(255 255 255 / ${baseAlpha})`;
+      ctx.fillStyle = `rgb(107 107 107 / ${baseAlpha})`;
       for (let i = 0; i < barCount; i++) {
         const x = startX + i * (barW + gap);
         const v = waveformPeaks[i] ?? 0.2;
@@ -169,10 +169,7 @@ export default function AudioPlayer() {
       ctx.rect(startX, 0, Math.max(0, progressX - startX), height);
       ctx.clip();
 
-      const grad = ctx.createLinearGradient(startX, 0, startX + usableW, 0);
-      grad.addColorStop(0, `rgb(${acidRgb} / ${activeAlpha})`);
-      grad.addColorStop(1, `rgb(${acidRgb} / ${Math.min(1, activeAlpha * 0.72)})`);
-      ctx.fillStyle = grad;
+      ctx.fillStyle = `rgb(${acidRgb} / ${activeAlpha})`;
       for (let i = 0; i < barCount; i++) {
         const x = startX + i * (barW + gap);
         const v = waveformPeaks[i] ?? 0.2;
@@ -183,7 +180,7 @@ export default function AudioPlayer() {
       ctx.restore();
 
       if (!idle) {
-        ctx.fillStyle = `rgb(${acidRgb} / 0.7)`;
+        ctx.fillStyle = `rgb(${acidRgb} / 0.8)`;
         ctx.fillRect(progressX - 1, 0, 2, height);
       }
     };
@@ -207,7 +204,7 @@ export default function AudioPlayer() {
   if (!track) return null;
 
   const baseButtonClass =
-    'inline-flex items-center justify-center p-[10px] text-smoke transition-colors hover:text-bone focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
+    'inline-flex items-center justify-center p-[10px] text-smoke transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
 
   const renderScrubber = (
     heightClass: string,
@@ -218,8 +215,8 @@ export default function AudioPlayer() {
       <canvas ref={canvasRef} className="absolute inset-0" />
       {isSeeking && seekPreview != null && (
         <div
-          className="pointer-events-none absolute -top-9 -translate-x-1/2 border border-acid px-2 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-acid backdrop-blur"
-          style={{ left: `${seekPercent}%`, backgroundColor: 'rgb(204 255 0 / 0.10)' }}
+          className="pointer-events-none absolute -top-9 -translate-x-1/2 border border-acid bg-ink px-2 py-1 font-mono text-[10px] uppercase tracking-[0.26em] text-acid"
+          style={{ left: `${seekPercent}%` }}
         >
           {formatTime(seekPreview)}
         </div>
@@ -270,10 +267,9 @@ export default function AudioPlayer() {
           }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.35, ease: 'easeInOut' }}
           animate={{ height: isMobile ? 56 : isExpanded ? 112 : 56 }}
-          className="relative overflow-hidden bg-ink/92 backdrop-blur-[24px]"
+          className="photocopy-grain relative overflow-hidden bg-ink"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-acid/90 via-acid/50 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 top-[2px] h-[3px] opacity-40 warning-stripes" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-acid" />
           <div className="mx-auto flex h-full w-full max-w-7xl items-center gap-3 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 sm:px-4">
             <button
               type="button"
@@ -300,8 +296,8 @@ export default function AudioPlayer() {
               aria-label="Open podcast page"
               className="min-w-0 flex-1 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
             >
-              <div className="truncate font-display text-[12px] font-semibold uppercase tracking-tight text-white/95">{title}</div>
-              <div className="truncate font-sans text-[10px] uppercase tracking-[0.2em] text-smoke">{artist}</div>
+              <div className="truncate font-display text-[13px] uppercase tracking-normal text-white/95">{title}</div>
+              <div className="truncate font-mono text-[10px] uppercase tracking-[0.26em] text-smoke">{artist}</div>
               <div className="mt-1">{renderScrubber(isMobile ? 'h-3' : 'h-[18px]', waveformWrapRef, waveformCanvasRef)}</div>
             </button>
 
@@ -311,35 +307,54 @@ export default function AudioPlayer() {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={togglePlay}
-              aria-label={isPlaying ? 'Pause' : 'Play'}
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-acid text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-              style={{
-                boxShadow: isPlaying
-                  ? '0 0 0 1px rgb(204 255 0 / 0.3), 0 0 32px rgb(204 255 0 / 0.35)'
-                  : '0 0 0 1px rgb(204 255 0 / 0.3), 0 0 22px rgb(204 255 0 / 0.25)',
-                animation: isPlaying && !shouldReduceMotion ? 'playerPulse 2.4s ease-in-out infinite' : undefined,
-              }}
-            >
-              <motion.span
-                animate={{ rotate: isPlaying ? 0 : -90 }}
-                transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
-                className="inline-flex"
+            {!isMobile ? (
+              <div className="flex shrink-0 items-center gap-1">
+                <button type="button" onClick={playPrevious} aria-label="Previous track" className={baseButtonClass}>
+                  <SkipBack size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={togglePlay}
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                  className="inline-flex h-[52px] w-[52px] items-center justify-center rounded-none border border-acid bg-acid text-ink shadow-[1px_1px_0_rgba(0,0,0,0.6)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                >
+                  <motion.span
+                    animate={{ rotate: isPlaying ? 0 : -90 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
+                    className="inline-flex"
+                  >
+                    {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
+                  </motion.span>
+                </button>
+                <button type="button" onClick={playNext} aria-label="Next track" className={baseButtonClass}>
+                  <SkipForward size={18} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={togglePlay}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+                className="inline-flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-none border border-acid bg-acid text-ink shadow-[1px_1px_0_rgba(0,0,0,0.6)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
               >
-                {isPlaying ? <Pause size={19} /> : <Play size={19} className="ml-0.5" />}
-              </motion.span>
-            </button>
+                <motion.span
+                  animate={{ rotate: isPlaying ? 0 : -90 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
+                  className="inline-flex"
+                >
+                  {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
+                </motion.span>
+              </button>
+            )}
 
             {!isMobile && (
               <button
                 type="button"
                 onClick={() => setIsExpanded((prev) => !prev)}
                 aria-label={isExpanded ? 'Collapse player' : 'Expand player'}
-                className={`${baseButtonClass} ${isExpanded ? 'text-bone' : ''}`}
+                className={`${baseButtonClass} font-mono text-[10px] uppercase tracking-[0.26em] ${isExpanded ? 'text-white' : ''}`}
               >
-                <ChevronUp size={18} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                {isExpanded ? '▼ COLLAPSE' : '▲ EXPAND'}
               </button>
             )}
           </div>
@@ -366,7 +381,7 @@ export default function AudioPlayer() {
 
                   <div className="min-w-0">
                     {renderScrubber('h-11', desktopWaveformWrapRef, desktopWaveformCanvasRef)}
-                    <div className="mt-1 flex items-center justify-between font-sans text-[10px] uppercase tracking-[0.2em] text-smoke">
+                    <div className="mt-1 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.26em] text-smoke">
                       <span>{formatTime(shownTime)}</span>
                       <span>{formatTime(duration)}</span>
                     </div>
@@ -454,12 +469,12 @@ export default function AudioPlayer() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate font-display text-[12px] font-semibold uppercase tracking-tight text-white/95">{title}</div>
-                  <div className="truncate font-sans text-[10px] uppercase tracking-[0.2em] text-smoke">{artist}</div>
+                  <div className="truncate font-display text-[13px] uppercase tracking-normal text-white/95">{title}</div>
+                  <div className="truncate font-mono text-[10px] uppercase tracking-[0.26em] text-smoke">{artist}</div>
                 </div>
               </div>
               <div className="mb-2">{renderScrubber('h-11', desktopWaveformWrapRef, desktopWaveformCanvasRef)}</div>
-              <div className="mb-3 flex items-center justify-between font-sans text-[10px] uppercase tracking-[0.2em] text-smoke">
+              <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.26em] text-smoke">
                 <span>{formatTime(shownTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -472,9 +487,9 @@ export default function AudioPlayer() {
                     type="button"
                     onClick={togglePlay}
                     aria-label={isPlaying ? 'Pause' : 'Play'}
-                    className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-acid text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                    className="inline-flex h-[52px] w-[52px] items-center justify-center rounded-none border border-acid bg-acid text-ink shadow-[1px_1px_0_rgba(0,0,0,0.6)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
                   >
-                    {isPlaying ? <Pause size={19} /> : <Play size={19} className="ml-0.5" />}
+                    {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
                   </button>
                   <button type="button" onClick={playNext} aria-label="Next track" className={baseButtonClass}>
                     <SkipForward size={18} />

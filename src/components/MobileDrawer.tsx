@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
+import { TMH_LOGO_SRC } from '../branding/logo';
 
 interface NavLink {
   label: string;
@@ -13,10 +14,9 @@ interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   links: NavLink[];
-  onLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
 }
 
-export default function MobileDrawer({ isOpen, onClose, links, onLinkClick }: MobileDrawerProps) {
+export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerProps) {
   const shouldReduceMotion = useReducedMotionPreference();
 
   useEffect(() => {
@@ -58,16 +58,16 @@ export default function MobileDrawer({ isOpen, onClose, links, onLinkClick }: Mo
             </button>
           </div>
 
-          <div className="container-shell flex flex-col h-full mt-24 space-y-12">
+          <div className="container-shell flex h-full flex-col mt-20 space-y-12">
+            <div className="flex items-center justify-center">
+              <img src={TMH_LOGO_SRC} alt="" aria-hidden="true" width={56} height={56} className="h-14 w-14 object-contain" />
+            </div>
             <nav className="flex flex-col gap-6">
               {links.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
-                  onClick={(e) => {
-                    onLinkClick(e, link.href);
-                    onClose();
-                  }}
+                  onClick={onClose}
                   className="font-display text-5xl sm:text-7xl font-extrabold uppercase tracking-tight text-white transition-colors hover:text-acid focus-visible:text-acid outline-none focus-visible:underline"
                 >
                   {link.label}
@@ -76,16 +76,12 @@ export default function MobileDrawer({ isOpen, onClose, links, onLinkClick }: Mo
             </nav>
 
             <div className="mt-auto">
-              <p className="accent-script text-2xl uppercase tracking-[0.12em] text-acid">
-                Where music unites
-              </p>
+              <p className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Where music unites</p>
               <a
-                href="https://techmyhouse.it/listen"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-acid px-6 py-4 text-sm font-bold uppercase tracking-widest text-ink transition-all hover:bg-acid-deep hover:border-acid-deep w-full sm:w-auto"
+                href="mailto:info@techmyhouse.it?subject=Send%20Your%20Demo"
+                className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-none border border-acid bg-acid px-6 py-4 font-display text-xs uppercase tracking-[0.15em] text-ink transition-colors hover:bg-acid-deep hover:border-acid-deep sm:w-auto"
               >
-                Listen Live
+                Send Your Demo
               </a>
             </div>
           </div>

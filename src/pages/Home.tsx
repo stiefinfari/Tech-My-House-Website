@@ -36,9 +36,9 @@ export default function Home() {
   return (
     <div className="w-full">
       <HeroSection />
-      <Marquee />
       <div className="relative z-10 space-y-24 pb-24 sm:space-y-32 sm:pb-32">
         <PodcastSection />
+        <Marquee />
         <RecordsSection />
         <ArtistsSection />
       </div>
