@@ -50,6 +50,11 @@ export default function HeroSection() {
         >
           Tech My House
         </div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-[38%] h-[30vh] w-[60vw] -translate-x-1/2 -translate-y-1/2 mix-blend-multiply"
+          style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 72%)' }}
+        />
         <p className="accent-script mt-6 text-[clamp(1.2rem,4vw,2.5rem)] text-acid text-glow" aria-hidden="true">
           where music unites
         </p>

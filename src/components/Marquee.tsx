@@ -1,12 +1,19 @@
 import React from 'react';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 
-export default function Marquee() {
+type MarqueeProps = {
+  text?: string;
+  className?: string;
+};
+
+export default function Marquee({
+  text = 'HOUSE • TECH HOUSE • TECHNO • UNRELEASED • RAW • EST. 2021 • ',
+  className = 'warning-stripes',
+}: MarqueeProps) {
   const shouldReduceMotion = useReducedMotionPreference();
-  const text = 'HOUSE • TECH HOUSE • TECHNO • UNRELEASED • RAW • EST. 2021 • ';
 
   return (
-    <div className="w-full overflow-hidden warning-stripes py-3 sm:py-4 select-none flex" aria-hidden="true">
+    <div className={`w-full overflow-hidden py-3 sm:py-4 select-none flex ${className}`} aria-hidden="true">
       <div 
         className={`flex whitespace-nowrap font-display text-2xl sm:text-4xl font-extrabold tracking-widest stencil ${
           !shouldReduceMotion ? 'animate-marquee' : ''

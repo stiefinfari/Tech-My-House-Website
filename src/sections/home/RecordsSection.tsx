@@ -1,70 +1,65 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
-import { releases } from '../../data';
+import Marquee from '../../components/Marquee';
 
 export default function RecordsSection() {
-  const reducedMotion = useReducedMotionPreference();
+  const [submitted, setSubmitted] = React.useState(false);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitted(true);
+  };
 
   return (
-    <section id="records" className="py-20 sm:py-24 lg:py-28 relative">
-      <div className="container-shell relative z-10">
-        <div className="mb-12 flex flex-col gap-4">
-          <div className="section-tag">New releases</div>
-          <h2 className="section-title">TMH Records</h2>
-        </div>
+    <section id="records" className="relative py-20 sm:py-24 lg:py-28">
+      <div className="container-shell">
+        <div className="warehouse-plate relative z-10 flex min-h-[60svh] flex-col justify-center border border-white/10 bg-ink-raise/30 px-5 py-10 sm:px-8 sm:py-14 lg:px-10 lg:py-16">
+          <div className="mb-8 sm:mb-10">
+            <div className="section-tag">Imprint</div>
+            <h2 className="mt-3 font-display text-[clamp(3.5rem,12vw,9rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.08em] stencil">TMH RECORDS</h2>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {releases.map((release) => (
-            <motion.article 
-              key={release.id}
-              initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: reducedMotion ? 0 : 0.5 }}
-              className="group flex flex-col bg-ink-raise border border-white/5 hover:border-acid/30 transition-colors p-4 rounded-xl relative overflow-hidden"
+          <div className="mb-8 sm:mb-10">
+            <Marquee text="COMING SOON • TMH001 • TMH002 • TMH003 • EST. 2026 • " className="warning-stripes" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-14">
+            <p className="max-w-[48ch] font-sans text-sm leading-relaxed text-smoke">
+              TMH Records is where the radio show becomes vinyl. Underground house, tech house and techno from the
+              roster. First catalogue drops in 2026. No hype, no deadlines we don&apos;t keep.
+            </p>
+
+            <form
+              onSubmit={handleSubmit}
+              aria-label="Notify me when TMH Records launches"
+              className="flex w-full flex-col justify-start gap-3"
             >
-              <div className="relative aspect-square overflow-hidden rounded-lg bg-dark mb-5">
-                <img 
-                  src={release.coverUrl} 
-                  alt={`${release.artist} - ${release.title}`}
-                  loading="lazy"
-                  className="w-full h-full object-cover transition-all duration-500 grayscale group-hover:grayscale-0 group-hover:scale-105 mix-blend-luminosity group-hover:mix-blend-normal opacity-60 group-hover:opacity-100"
+              <div className="flex items-end gap-3">
+                <input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  placeholder="your@email.here"
+                  className="w-full border-0 border-b border-acid bg-transparent px-0 py-2 font-sans text-sm text-white placeholder:text-smoke/70 focus-visible:outline-none"
                 />
-                <div className="absolute inset-0 bg-acid/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mix-blend-overlay" />
+                <button
+                  type="submit"
+                  className="shrink-0 border border-acid bg-acid px-4 py-2 font-display text-xs font-extrabold uppercase tracking-widest text-ink transition-colors hover:bg-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                >
+                  SUBMIT ↗
+                </button>
               </div>
-              
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-sans font-bold text-acid text-xs tracking-widest">{release.catNum}</span>
-                  <span className="font-sans text-smoke text-xs tracking-widest">{release.date}</span>
-                </div>
-                <h3 className="font-display text-2xl font-extrabold uppercase leading-none tracking-tight text-white mb-1">{release.title}</h3>
-                <p className="font-sans text-smoke text-sm uppercase tracking-widest mb-6">{release.artist}</p>
-                
-                <div className="mt-auto pt-4 border-t border-white/5">
-                  {release.link ? (
-                    <a 
-                      href={release.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${release.status} ${release.title} by ${release.artist}`}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-transparent px-4 py-3 text-xs font-bold uppercase tracking-widest text-acid transition-all hover:bg-acid hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-                    >
-                      {release.status}
-                    </a>
-                  ) : (
-                    <span 
-                      aria-label={`${release.status} ${release.title} by ${release.artist}`}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-none border border-white/10 bg-transparent px-4 py-3 text-xs font-bold uppercase tracking-widest text-smoke cursor-not-allowed"
-                    >
-                      {release.status}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </motion.article>
-          ))}
+              {submitted && (
+                <p className="pt-1 font-sans text-[10px] font-bold uppercase tracking-widest text-acid">
+                  THANKS, YOU&apos;RE ON THE LIST
+                </p>
+              )}
+            </form>
+          </div>
+
+          <p className="mt-10 font-sans text-[10px] uppercase tracking-widest text-smoke">
+            CAT # TMH0xx · FORMAT 12&quot; VINYL + DIGITAL · DISTRIBUTION TBA
+          </p>
         </div>
       </div>
     </section>

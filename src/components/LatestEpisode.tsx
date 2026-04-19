@@ -40,12 +40,24 @@ export default function LatestEpisode() {
   const { playTrack } = usePlayer();
   const [episode, setEpisode] = useState<Episode | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [glow, setGlow] = useState<string>('204 255 0');
   const uiAccent = '204 255 0';
 
   useEffect(() => {
+    if (!loading) {
+      setShowSkeleton(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setShowSkeleton(true), 3500);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
+
+  useEffect(() => {
     const fetchLatest = async () => {
       try {
+        setHasError(false);
         const CACHE_KEY = 'tmh_latest_episode_v1';
         const TTL = 10 * 60 * 1000; // 10 minutes
         const cachedStr = sessionStorage.getItem(CACHE_KEY);
@@ -61,9 +73,15 @@ export default function LatestEpisode() {
 
         const response = await fetch(`${RSS2JSON}?rss_url=${encodeURIComponent(RSS_URL)}`);
         const data = (await response.json()) as RssResponse;
-        if (data.status !== 'ok') return;
+        if (data.status !== 'ok') {
+          setHasError(true);
+          return;
+        }
         const item = Array.isArray(data.items) ? data.items[0] : undefined;
-        if (!item) return;
+        if (!item) {
+          setHasError(true);
+          return;
+        }
         const ep: Episode = {
           title: item.title ?? 'Unknown Episode',
           link: item.link ?? '#',
@@ -80,6 +98,7 @@ export default function LatestEpisode() {
         setEpisode(ep);
       } catch (e) {
         console.error(e);
+        setHasError(true);
       } finally {
         setLoading(false);
       }
@@ -133,12 +152,33 @@ export default function LatestEpisode() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-neon border-t-transparent" />
-        </div>
-      ) : !episode ? (
-        <div className="surface-panel px-6 py-10 text-center text-sm uppercase tracking-[0.22em] text-white/70">
-          No episodes found
+        showSkeleton ? (
+          <div className="surface-panel grid grid-cols-[112px_1fr] gap-5 p-5 sm:grid-cols-[148px_1fr] sm:p-6">
+            <div className="aspect-square shimmer-block" />
+            <div className="flex flex-col justify-center gap-3">
+              <div className="h-4 w-3/4 shimmer-block" />
+              <div className="h-3 w-1/2 shimmer-block" />
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center py-12">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-neon border-t-transparent" />
+          </div>
+        )
+      ) : hasError || !episode ? (
+        <div className="surface-panel px-6 py-8 sm:px-8 sm:py-10">
+          <div className="mb-4 font-display text-2xl font-extrabold uppercase tracking-tight text-white">Feed unavailable</div>
+          <p className="mb-6 max-w-[56ch] font-sans text-sm text-smoke">
+            Latest episode feed is temporarily unavailable. You can still listen to the full archive directly on SoundCloud.
+          </p>
+          <a
+            href="https://soundcloud.com/techmyhouse,"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-11 items-center justify-center border border-acid bg-acid px-5 font-display text-xs font-extrabold uppercase tracking-[0.18em] text-ink transition-colors hover:bg-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+          >
+            Listen on SoundCloud ↗
+          </a>
         </div>
       ) : (
         <motion.div

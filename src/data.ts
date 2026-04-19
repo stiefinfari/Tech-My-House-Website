@@ -6,51 +6,10 @@ export type Artist = {
   role: string;
   bio: string;
   imageUrl?: string;
+  latestMix?: string;
   location?: string;
   socials: Partial<Record<ArtistSocialKey, string>>;
 };
-
-export type Release = {
-  id: string;
-  catNum: string;
-  artist: string;
-  title: string;
-  date: string;
-  coverUrl: string;
-  status: 'PRE-SAVE' | 'OUT SOON' | 'OUT NOW';
-  link?: string;
-};
-
-export const releases: Release[] = [
-  {
-    id: 'tmh-001',
-    catNum: 'TMH001',
-    artist: 'Lysa Chain',
-    title: 'Warehouse Protocol',
-    date: '2026-06-12',
-    coverUrl: '/assets/placeholder-cover-1.jpg',
-    status: 'PRE-SAVE',
-    link: '#',
-  },
-  {
-    id: 'tmh-002',
-    catNum: 'TMH002',
-    artist: 'Phari',
-    title: 'Acid Baseline',
-    date: '2026-07-24',
-    coverUrl: '/assets/placeholder-cover-2.jpg',
-    status: 'OUT SOON',
-  },
-  {
-    id: 'tmh-003',
-    catNum: 'TMH003',
-    artist: 'Various Artists',
-    title: 'Tech My House Vol. 1',
-    date: '2026-09-10',
-    coverUrl: '/assets/placeholder-cover-3.jpg',
-    status: 'OUT SOON',
-  },
-];
 
 export const artists: Artist[] = [
   {
@@ -70,6 +29,7 @@ export const artists: Artist[] = [
     role: 'DJ / Host',
     bio: 'Host of Tech My House Radio Show.',
     imageUrl: '/assets/phari.png',
+    latestMix: '/podcast',
     socials: {
       facebook: 'https://www.facebook.com/djphari',
       website: 'https://linktr.ee/djphari',

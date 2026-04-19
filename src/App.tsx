@@ -20,9 +20,9 @@ function App() {
               <Route path="/podcast" element={<PodcastPage />} />
             </Routes>
           </Suspense>
+          <AudioPlayer />
         </Layout>
       </Router>
-      <AudioPlayer />
     </PlayerProvider>
   );
 }
