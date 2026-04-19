@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import MobileDrawer from './MobileDrawer';
 import { TMHLogoLiquid } from '../branding/logo';
+import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 
 const NAV_LINKS = [
   { label: 'Records', href: '/#records' },
@@ -15,61 +16,84 @@ const NAV_LINKS = [
 export default function TopNav() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const shouldReduceMotion = useReducedMotionPreference();
 
   return (
     <>
-      <header className="fixed left-0 top-0 z-50 w-full border-b border-white/10 bg-ink/80 px-4 py-4 pt-[env(safe-area-inset-top)] backdrop-blur sm:px-6 lg:px-10">
-        <div className="container-shell !px-0 grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
-          <nav className="hidden lg:flex items-center gap-8">
-            {NAV_LINKS.map((link) => {
-              const active =
-                link.href === '/podcast'
-                  ? location.pathname.startsWith('/podcast')
-                  : link.href.startsWith('/#')
-                    ? location.pathname === '/' && location.hash === link.href.replace('/#', '#')
-                    : false;
+      <header
+        role="banner"
+        className="fixed left-0 top-0 right-0 z-50 h-[60px] bg-ink/85 pt-[env(safe-area-inset-top)] backdrop-blur-md lg:h-[72px]"
+        style={
+          shouldReduceMotion
+            ? undefined
+            : {
+                animation: 'tmh-nav-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both',
+              }
+        }
+      >
+        <div className="absolute inset-x-0 bottom-0 h-[2px] bg-acid" />
+        <div className="container-shell grid h-full items-center gap-4 lg:grid-cols-[auto_1fr_auto] lg:gap-8">
+          <div className="hidden lg:flex items-center gap-5">
+            <Link
+              to="/podcast"
+              className="group inline-flex items-center gap-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+              aria-label="Open podcast page"
+            >
+              <span className={`h-2 w-2 rounded-full bg-acid ${shouldReduceMotion ? '' : 'animate-pulse'}`} style={shouldReduceMotion ? undefined : { animationDuration: '2.4s' }} />
+              <span className="font-sans text-[10px] font-bold uppercase tracking-[0.24em] text-white">ON AIR</span>
+            </Link>
+            <span className="h-5 w-px bg-acid/30" aria-hidden="true" />
+            <nav className="flex items-center gap-5">
+              {NAV_LINKS.map((link) => {
+                const active =
+                  link.href === '/podcast'
+                    ? location.pathname.startsWith('/podcast')
+                    : link.href.startsWith('/#')
+                      ? location.pathname === '/' && location.hash === link.href.replace('/#', '#')
+                      : false;
 
-              return (
-                <Link
-                  key={link.label}
-                  to={link.href}
-                  className={`font-display text-[11px] uppercase tracking-[0.18em] text-white/70 transition-colors hover:text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
-                    active ? 'text-white underline decoration-acid decoration-2 underline-offset-[10px]' : ''
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
+                return (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    className={`relative pb-1 font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-white/75 transition-colors outline-none after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:origin-left after:bg-acid after:transition-transform after:duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
+                      active
+                        ? 'text-white after:scale-x-100'
+                        : 'hover:text-acid after:scale-x-0 hover:after:scale-x-100'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
           <Link
             to="/"
-            className="mx-auto flex items-center gap-3 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-            aria-label="Home"
+            className="mx-auto flex items-center gap-3 text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            aria-label="Tech My House home"
           >
-            <span className="relative h-9 w-9 shrink-0 text-white">
-              <TMHLogoLiquid size={36} className="h-full w-full" title="Tech My House" />
-            </span>
-            <span className="hidden font-display text-[11px] uppercase tracking-[0.22em] text-white sm:block">
-              Tech My House
+            <TMHLogoLiquid size={44} className="h-11 w-11" title="Tech My House" />
+            <span className="hidden font-display text-[12px] uppercase tracking-[0.22em] text-white lg:block">
+              TECH MY HOUSE
             </span>
           </Link>
 
           <div className="flex items-center justify-end gap-3">
             <a
               href="mailto:info@techmyhouse.it?subject=Send%20Your%20Demo"
-              className="hidden sm:inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-acid px-5 py-2 font-display text-xs uppercase tracking-[0.15em] text-ink transition-colors hover:bg-acid-deep hover:border-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+              className="hidden items-center justify-center rounded-none border border-acid bg-acid px-[18px] py-[10px] font-display text-[11px] uppercase tracking-[0.16em] text-ink transition hover:border-acid-deep hover:bg-acid-deep hover:-translate-x-[1px] hover:-translate-y-[1px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid lg:inline-flex"
             >
-              Send Your Demo
+              SEND YOUR DEMO →
             </a>
 
             <button
-              className="lg:hidden p-2 text-white/80 transition-colors hover:text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+              className="p-2 text-white/80 transition-colors hover:text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid lg:hidden"
               onClick={() => setIsOpen(true)}
-              aria-label="Open Menu"
+              aria-label="Open menu"
             >
-              <Menu size={28} />
+              <Menu size={26} />
             </button>
           </div>
         </div>

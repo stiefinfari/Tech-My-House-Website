@@ -298,6 +298,17 @@
   100% { background-position: -200% 0; }
 }
 
+@keyframes tmh-nav-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .shimmer-block {
   background: linear-gradient(90deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.08));
   background-size: 200% 100%;
