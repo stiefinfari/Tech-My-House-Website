@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
-import { TMH_LOGO_SRC } from '../branding/logo';
+import { TMHLogoLiquid } from '../branding/logo';
 
 interface NavLink {
   label: string;
@@ -60,7 +60,7 @@ export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerPro
 
           <div className="container-shell flex h-full flex-col mt-20 space-y-12">
             <div className="flex items-center justify-center">
-              <img src={TMH_LOGO_SRC} alt="" aria-hidden="true" width={56} height={56} className="h-14 w-14 object-contain" />
+              <TMHLogoLiquid size={56} className="h-14 w-14 text-white" title="Tech My House" />
             </div>
             <nav className="flex flex-col gap-6">
               {links.map((link) => (

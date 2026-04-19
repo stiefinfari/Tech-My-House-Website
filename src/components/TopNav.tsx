@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import MobileDrawer from './MobileDrawer';
-import { TMH_LOGO_OBJECT_POSITION, TMH_LOGO_SRC } from '../branding/logo';
+import { TMHLogoLiquid } from '../branding/logo';
 
 const NAV_LINKS = [
   { label: 'Records', href: '/#records' },
@@ -48,16 +48,8 @@ export default function TopNav() {
             className="mx-auto flex items-center gap-3 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
             aria-label="Home"
           >
-            <span className="relative h-9 w-9 shrink-0">
-              <img
-                src={TMH_LOGO_SRC}
-                alt=""
-                aria-hidden="true"
-                width={36}
-                height={36}
-                className="h-full w-full object-contain"
-                style={{ objectPosition: TMH_LOGO_OBJECT_POSITION, transformOrigin: '50% 50%' }}
-              />
+            <span className="relative h-9 w-9 shrink-0 text-white">
+              <TMHLogoLiquid size={36} className="h-full w-full" title="Tech My House" />
             </span>
             <span className="hidden font-display text-[11px] uppercase tracking-[0.22em] text-white sm:block">
               Tech My House
