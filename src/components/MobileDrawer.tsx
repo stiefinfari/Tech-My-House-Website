@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
-import { TMH_LOGO_SRC } from '../branding/logo';
+import TMHWallpaper from './TMHWallpaper';
+import TMHLogoLiquid from './TMHLogoLiquid';
+import PillButton from './ui/PillButton';
 
 interface NavLink {
   label: string;
@@ -44,10 +46,17 @@ export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerPro
       {isOpen && (
         <motion.div
           {...animationProps}
-          className="fixed inset-0 z-[100] flex flex-col bg-ink pb-20 pt-10"
+          className="fixed inset-0 z-[100] flex flex-col bg-ink pb-16 pt-10"
           aria-modal="true"
           role="dialog"
         >
+          <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+            <div className="text-acid">
+              <TMHWallpaper mode="mixed" opacity={0.08} />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/70 to-ink" />
+          </div>
+
           <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
             <button
               onClick={onClose}
@@ -58,31 +67,39 @@ export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerPro
             </button>
           </div>
 
-          <div className="container-shell flex h-full flex-col mt-20 space-y-12">
+          <div className="container-shell relative z-10 flex h-full flex-col mt-20">
             <div className="flex items-center justify-center">
-              <img src={TMH_LOGO_SRC} alt="" aria-hidden="true" width={56} height={56} className="h-14 w-14 object-contain" />
+              <TMHLogoLiquid size={56} className="text-white" />
             </div>
-            <nav className="flex flex-col gap-6">
+
+            <nav className="mt-12 flex flex-col gap-7">
               {links.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
                   onClick={onClose}
-                  className="font-display text-5xl sm:text-7xl font-extrabold uppercase tracking-tight text-white transition-colors hover:text-acid focus-visible:text-acid outline-none focus-visible:underline"
+                  className="font-display text-5xl font-extrabold uppercase leading-[0.95] tracking-tight text-white transition-colors hover:text-acid focus-visible:text-acid outline-none focus-visible:underline"
                 >
                   {link.label}
                 </Link>
               ))}
             </nav>
 
-            <div className="mt-auto">
-              <p className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Where music unites</p>
-              <a
-                href="mailto:info@techmyhouse.it?subject=Send%20Your%20Demo"
-                className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-none border border-acid bg-acid px-6 py-4 font-display text-xs uppercase tracking-[0.15em] text-ink transition-colors hover:bg-acid-deep hover:border-acid-deep sm:w-auto"
-              >
-                Send Your Demo
-              </a>
+            <div className="mt-auto pt-12">
+              <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-smoke">
+                Discover your underground mood
+              </div>
+              <div className="mt-6">
+                <PillButton
+                  to="/podcast"
+                  variant="primary"
+                  className="w-full justify-center py-4"
+                  ariaLabel="Listen live"
+                  onClick={onClose}
+                >
+                  LISTEN LIVE
+                </PillButton>
+              </div>
             </div>
           </div>
         </motion.div>
