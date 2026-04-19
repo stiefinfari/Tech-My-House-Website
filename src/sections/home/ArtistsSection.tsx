@@ -15,7 +15,14 @@ export default function ArtistsSection() {
   const reducedMotion = useReducedMotionPreference();
 
   return (
-    <section id="artists" className="py-20 sm:py-24 lg:py-28 relative border-t border-white/5">
+    <motion.section
+      id="artists"
+      className="py-20 sm:py-24 lg:py-28 relative border-t border-white/5"
+      initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
+    >
       <div className="container-shell relative z-10">
         <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -35,6 +42,7 @@ export default function ArtistsSection() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: reducedMotion ? 0 : 0.5 }}
+              whileHover={reducedMotion ? undefined : { scale: 1.02, rotate: -0.5 }}
               className="group border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-acid/45"
             >
               <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-ink">
@@ -60,6 +68,11 @@ export default function ArtistsSection() {
                   </div>
                 )}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                <div className="pointer-events-none absolute bottom-3 right-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                  <span className="rounded-full bg-acid px-3 py-1 font-display text-[11px] font-extrabold uppercase tracking-[0.18em] text-ink">
+                    VIEW →
+                  </span>
+                </div>
               </div>
 
               <div className="mt-4">
@@ -77,6 +90,6 @@ export default function ArtistsSection() {
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

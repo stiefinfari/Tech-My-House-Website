@@ -36,7 +36,7 @@ const upsertLink = (rel: string, href: string) => {
 
 export function useSeo(options: SeoOptions) {
   const full = useMemo(() => {
-    const title = options.title ? `${options.title} • ${SITE.name}` : SITE.defaultTitle;
+    const title = options.title ? `${options.title} — ${SITE.name}` : SITE.defaultTitle;
     const description = options.description ?? SITE.defaultDescription;
     const keywords = options.keywords ?? SITE.defaultKeywords;
     const url = new URL(options.path ?? '/', SITE.url).toString();
@@ -76,4 +76,3 @@ export function useSeo(options: SeoOptions) {
     }
   }, [full.description, full.keywords, full.ogImage, full.title, full.url, options.jsonLd]);
 }
-

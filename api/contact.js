@@ -42,19 +42,43 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: 'Invalid request body' });
   }
 
+  const rawType = typeof req.body.type === 'string' ? req.body.type.trim() : '';
+  const type = rawType === 'booking' || rawType === 'demo' || rawType === 'info' ? rawType : 'info';
+
   const rawName = typeof req.body.name === 'string' ? req.body.name.trim() : '';
   const rawEmail = typeof req.body.email === 'string' ? req.body.email.trim() : '';
   const rawSubject = typeof req.body.subject === 'string' ? req.body.subject.trim() : '';
   const rawMessage = typeof req.body.message === 'string' ? req.body.message.trim() : '';
 
-  if (!rawName || !rawEmail || !rawMessage) {
+  const rawAgency = typeof req.body.agency === 'string' ? req.body.agency.trim() : '';
+  const rawEventDate = typeof req.body.eventDate === 'string' ? req.body.eventDate.trim() : '';
+  const rawCityVenue = typeof req.body.cityVenue === 'string' ? req.body.cityVenue.trim() : '';
+  const rawFee = typeof req.body.fee === 'string' ? req.body.fee.trim() : '';
+  const rawDemoLink = typeof req.body.demoLink === 'string' ? req.body.demoLink.trim() : '';
+  const rawGenre = typeof req.body.genre === 'string' ? req.body.genre.trim() : '';
+  const rawNote = typeof req.body.note === 'string' ? req.body.note.trim() : '';
+
+  if (!rawName || !rawEmail) {
     return res.status(400).json({ message: 'Campi obbligatori mancanti.' });
+  }
+  if (type !== 'demo' && !rawMessage) return res.status(400).json({ message: 'Campi obbligatori mancanti.' });
+  if (type === 'booking') {
+    if (!rawEventDate || !rawCityVenue || !rawMessage) return res.status(400).json({ message: 'Campi obbligatori mancanti.' });
+  }
+  if (type === 'demo') {
+    if (!rawDemoLink) return res.status(400).json({ message: 'Campi obbligatori mancanti.' });
   }
 
   if (rawName.length > 100) return res.status(400).json({ message: 'Nome troppo lungo (max 100 caratteri).' });
   if (rawEmail.length > 100) return res.status(400).json({ message: 'Email troppo lunga (max 100 caratteri).' });
   if (rawSubject.length > 150) return res.status(400).json({ message: 'Oggetto troppo lungo (max 150 caratteri).' });
   if (rawMessage.length > 5000) return res.status(400).json({ message: 'Messaggio troppo lungo (max 5000 caratteri).' });
+  if (rawAgency.length > 120) return res.status(400).json({ message: 'Agenzia troppo lunga (max 120 caratteri).' });
+  if (rawCityVenue.length > 200) return res.status(400).json({ message: 'Città/venue troppo lungo (max 200 caratteri).' });
+  if (rawFee.length > 80) return res.status(400).json({ message: 'Fee troppo lungo (max 80 caratteri).' });
+  if (rawDemoLink.length > 600) return res.status(400).json({ message: 'Link troppo lungo (max 600 caratteri).' });
+  if (rawGenre.length > 80) return res.status(400).json({ message: 'Genere troppo lungo (max 80 caratteri).' });
+  if (rawNote.length > 5000) return res.status(400).json({ message: 'Note troppo lunghe (max 5000 caratteri).' });
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(rawEmail)) return res.status(400).json({ message: 'Email non valida.' });
@@ -62,8 +86,13 @@ export default async function handler(req, res) {
   const headerName = rawName.replace(/[\r\n"]/g, ' ').trim();
   const safeName = he.escape(rawName);
   const safeEmail = he.escape(rawEmail);
-  const safeMessage = he.escape(rawMessage).replace(/\n/g, '<br>');
-  const safeSubject = rawSubject ? he.escape(rawSubject) : `Nuovo messaggio da ${safeName} - Tech My House`;
+  const safeMessage = he.escape(rawMessage || rawNote).replace(/\n/g, '<br>');
+  const prefix = type === 'booking' ? '[BOOKING]' : type === 'demo' ? '[DEMO]' : '[INFO]';
+  const derivedSubject =
+    rawSubject ||
+    (type === 'booking' ? 'DJ booking / live set' : type === 'demo' ? 'Demo submission' : `Nuovo messaggio da ${rawName} - Tech My House`);
+  const fullSubject = `${prefix} ${derivedSubject}`.replace(/[\r\n]+/g, ' ').trim();
+  const safeSubject = he.escape(fullSubject);
 
   const to = process.env.CONTACT_TO || 'info@techmyhouse.it';
 
@@ -77,12 +106,33 @@ export default async function handler(req, res) {
       from: `"${headerName}" <${process.env.SMTP_USER}>`,
       to,
       replyTo: rawEmail,
-      subject: safeSubject,
-      text: `Nome: ${rawName}\nEmail: ${rawEmail}\n\nMessaggio:\n${rawMessage}`,
+      subject: fullSubject,
+      text:
+        type === 'booking'
+          ? `Tipo: BOOKING\nNome: ${rawName}\nEmail: ${rawEmail}\nAgenzia: ${rawAgency}\nData evento: ${rawEventDate}\nCittà/Venue: ${rawCityVenue}\nFee proposta: ${rawFee}\n\nMessaggio:\n${rawMessage}`
+          : type === 'demo'
+            ? `Tipo: DEMO\nArtista: ${rawName}\nEmail: ${rawEmail}\nLink demo: ${rawDemoLink}\nGenere: ${rawGenre}\n\nNote:\n${rawNote || rawMessage}`
+            : `Tipo: INFO\nNome: ${rawName}\nEmail: ${rawEmail}\n\nMessaggio:\n${rawMessage}`,
       html: `
         <h3>Nuovo messaggio dal sito Tech My House</h3>
+        <p><strong>Tipo:</strong> ${he.escape(type.toUpperCase())}</p>
         <p><strong>Nome:</strong> ${safeName}</p>
         <p><strong>Email:</strong> ${safeEmail}</p>
+        ${
+          type === 'booking'
+            ? `
+              <p><strong>Agenzia:</strong> ${he.escape(rawAgency)}</p>
+              <p><strong>Data evento:</strong> ${he.escape(rawEventDate)}</p>
+              <p><strong>Città/Venue:</strong> ${he.escape(rawCityVenue)}</p>
+              <p><strong>Fee proposta:</strong> ${he.escape(rawFee)}</p>
+            `
+            : type === 'demo'
+              ? `
+                <p><strong>Link demo:</strong> ${he.escape(rawDemoLink)}</p>
+                <p><strong>Genere:</strong> ${he.escape(rawGenre)}</p>
+              `
+              : ''
+        }
         <p><strong>Oggetto:</strong> ${safeSubject}</p>
         <p><strong>Messaggio:</strong></p>
         <div style="padding: 12px; border-left: 4px solid #eee; background-color: #f9f9f9;">
@@ -96,4 +146,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ message: 'Errore durante l’invio. Riprova.' });
   }
 }
-

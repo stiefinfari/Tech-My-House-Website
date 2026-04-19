@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Play } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
 import PillButton from '../../components/ui/PillButton';
 
 export default function HeroSection() {
   const shouldReduceMotion = useReducedMotionPreference();
+  const ref = useRef<HTMLElement | null>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
+  const videoY = useTransform(scrollYProgress, [0, 1], [0, 60]);
 
   return (
-    <section id="hero" className="relative isolate flex h-[100svh] min-h-[720px] w-full items-start overflow-hidden bg-ink">
+    <section
+      ref={ref}
+      id="hero"
+      className="relative isolate flex h-[100svh] min-h-[720px] w-full items-start overflow-hidden bg-ink"
+    >
       {!shouldReduceMotion ? (
-        <video
+        <motion.video
           autoPlay
           loop
           muted
@@ -18,18 +26,20 @@ export default function HeroSection() {
           preload="metadata"
           aria-hidden="true"
           className="absolute inset-0 z-0 h-full w-full object-cover opacity-50 brightness-[0.85] contrast-[1.08]"
+          style={{ y: videoY }}
         >
           <source src="/assets/hero-video.webm" type="video/webm" />
           <source src="/assets/hero-video.mp4" type="video/mp4" />
-        </video>
+        </motion.video>
       ) : (
-        <img
+        <motion.img
           src="/assets/hero-poster.jpg"
           alt=""
           aria-hidden="true"
           loading="eager"
           fetchPriority="high"
           className="absolute inset-0 z-0 h-full w-full object-cover opacity-50 brightness-[0.85] contrast-[1.08]"
+          style={{ y: 0 }}
         />
       )}
 
@@ -50,11 +60,32 @@ export default function HeroSection() {
             className="display-title mt-8 text-[clamp(3.5rem,11vw,9rem)] text-white"
             style={{ textShadow: '0 2px 16px rgba(0,0,0,0.4)' }}
           >
-            <span className="hero-glow-word hero-glow-word--stroke">TECH</span>
+            <motion.span
+              className="hero-glow-word"
+              initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut', delay: 0 }}
+            >
+              TECH
+            </motion.span>
             <br />
-            <span className="hero-glow-word hero-glow-word--delay-1">MY</span>
+            <motion.span
+              className="hero-glow-word hero-glow-word--delay-1"
+              initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut', delay: 0.12 }}
+            >
+              MY
+            </motion.span>
             <br />
-            <span className="hero-glow-word hero-glow-word--stroke hero-glow-word--delay-2">HOUSE</span>
+            <motion.span
+              className="hero-glow-word hero-glow-word--delay-2"
+              initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut', delay: 0.24 }}
+            >
+              HOUSE
+            </motion.span>
           </h1>
 
           <p className="accent-script mt-6 -rotate-[1.5deg] text-[clamp(1.8rem,4vw,3rem)] text-acid">

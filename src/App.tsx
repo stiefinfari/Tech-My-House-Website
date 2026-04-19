@@ -7,6 +7,7 @@ import AudioPlayer from './components/AudioPlayer';
 const Home = lazy(() => import('./pages/Home'));
 const Artist = lazy(() => import('./pages/Artist'));
 const PodcastPage = lazy(() => import('./pages/PodcastPage'));
+const Contact = lazy(() => import('./pages/Contact'));
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/artist/:id" element={<Artist />} />
               <Route path="/podcast" element={<PodcastPage />} />
+              <Route path="/contact" element={<Contact />} />
             </Routes>
           </Suspense>
           <AudioPlayer />

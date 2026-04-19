@@ -1,5 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import LatestEpisode from '../../components/LatestEpisode';
+import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
 
 class RadioShowErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -34,13 +36,21 @@ class RadioShowErrorBoundary extends React.Component<
 }
 
 export default function RadioShowSection() {
+  const reducedMotion = useReducedMotionPreference();
   return (
-    <section id="podcast" className="py-20 sm:py-24 lg:py-28">
+    <motion.section
+      id="podcast"
+      className="py-20 sm:py-24 lg:py-28"
+      initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
+    >
       <div className="container-shell">
         <RadioShowErrorBoundary>
           <LatestEpisode />
         </RadioShowErrorBoundary>
       </div>
-    </section>
+    </motion.section>
   );
 }

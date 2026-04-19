@@ -39,6 +39,13 @@ export default function Home() {
       <div className="relative z-10 space-y-24 pb-24 sm:space-y-32 sm:pb-32">
         <RadioShowSection />
         <Marquee />
+        <Marquee
+          reverse
+          size="sm"
+          density="tight"
+          className="bg-ink text-white border-y border-white/10 grain-light"
+          text="TECH MY HOUSE • RADIO SHOW • UNDERGROUND • FRIULI • IT • "
+        />
         <RecordsSection />
         <ArtistsSection />
       </div>
