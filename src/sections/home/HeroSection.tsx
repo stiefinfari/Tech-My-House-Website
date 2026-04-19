@@ -1,16 +1,30 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import { Play } from 'lucide-react';
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
 import TMHWallpaper from '../../components/TMHWallpaper';
-import TopoBlob from '../../components/TopoBlob';
 import PillButton from '../../components/ui/PillButton';
 
 export default function HeroSection() {
   const shouldReduceMotion = useReducedMotionPreference();
+  const [episodeNumber, setEpisodeNumber] = useState<number | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem('tmh_latest_episodes_v2');
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { items?: Array<{ title?: string }> };
+      const title = parsed.items?.[0]?.title ?? '';
+      const match = title.match(/episode\s*(\d+)/i) ?? title.match(/\bep\s*(\d+)/i);
+      if (!match?.[1]) return;
+      const n = Number(match[1]);
+      if (Number.isFinite(n)) setEpisodeNumber(n);
+    } catch {
+      return;
+    }
+  }, []);
 
   return (
-    <section id="hero" className="cement-texture relative isolate flex h-[100svh] min-h-[720px] w-full items-center overflow-hidden">
+    <section id="hero" className="relative isolate flex h-[100svh] min-h-[720px] w-full items-start overflow-hidden bg-ink">
       {!shouldReduceMotion ? (
         <video
           autoPlay
@@ -20,7 +34,7 @@ export default function HeroSection() {
           poster="/assets/hero-poster.jpg"
           preload="metadata"
           aria-hidden="true"
-          className="absolute inset-0 z-0 h-full w-full object-cover opacity-20 grayscale contrast-[1.05]"
+          className="absolute inset-0 z-0 h-full w-full object-cover opacity-50 brightness-[0.85] contrast-[1.08]"
         >
           <source src="/assets/hero-video.webm" type="video/webm" />
           <source src="/assets/hero-video.mp4" type="video/mp4" />
@@ -32,62 +46,68 @@ export default function HeroSection() {
           aria-hidden="true"
           loading="eager"
           fetchPriority="high"
-          className="absolute inset-0 z-0 h-full w-full object-cover opacity-20 grayscale contrast-[1.05]"
+          className="absolute inset-0 z-0 h-full w-full object-cover opacity-50 brightness-[0.85] contrast-[1.08]"
         />
       )}
 
-      <div className="text-cement-light">
-        <TMHWallpaper mode="mixed" opacity={0.12} />
+      <div
+        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_30%_50%,transparent_0%,rgba(10,10,10,0.55)_60%,rgba(10,10,10,0.95)_100%)]"
+        aria-hidden="true"
+      />
+      <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-b from-transparent via-transparent to-ink" />
+      </div>
+      <div className="pointer-events-none absolute inset-0 z-30 text-acid" aria-hidden="true">
+        <TMHWallpaper mode="mixed" opacity={0.05} />
       </div>
 
-      <TopoBlob
-        seed={132}
-        size={400}
-        className="pointer-events-none absolute bottom-[-120px] right-[-120px] z-0 text-acid/25"
-      />
+      <div className="relative z-40 w-full">
+        <div className="max-w-5xl pl-8 pr-8 pt-36 lg:pl-16 lg:pr-16">
+          <div className="inline-flex -rotate-[2deg] items-center bg-acid px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink">
+            EST. 2021 — FRIULI · IT
+          </div>
 
-      <motion.div
-        initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: 'easeOut' }}
-        className="container-shell relative z-10 flex flex-col items-center pt-16 text-center"
-      >
-        <div className="tape-strip text-[11px] tracking-[0.18em]">EST. 2021 — FRIULI, IT</div>
-
-        <h1 className="display-title mt-8 text-balance text-[clamp(3.4rem,10vw,9.2rem)] leading-[0.88] text-white">
-          Tech My House
-        </h1>
-
-        <p className="mt-6 max-w-[38ch] font-sans text-[clamp(1.05rem,2.2vw,1.65rem)] font-semibold tracking-[-0.01em] text-white/90">
-          Discover your underground mood
-        </p>
-
-        <ul className="mt-7 flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.26em] text-smoke sm:gap-3">
-          {['House', 'Tech House', 'Techno', 'Hard Techno'].map((g) => (
-            <li key={g} className="border border-white/10 bg-white/[0.03] px-3 py-2">
-              {g}
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-10 flex w-full max-w-lg flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
-          <PillButton
-            to="/#podcast"
-            variant="primary"
-            icon={<Play size={18} />}
-            ariaLabel="Latest episode"
+          <h1
+            className="display-title mt-8 text-[clamp(3.5rem,11vw,9rem)] text-white"
+            style={{ textShadow: '0 2px 16px rgba(0,0,0,0.4)' }}
           >
-            LATEST EPISODE
-          </PillButton>
-          <PillButton
-            href="mailto:info@techmyhouse.it"
-            variant="ghost"
-            ariaLabel="Booking"
-          >
-            BOOKING ↗
-          </PillButton>
+            TECH
+            <br />
+            MY
+            <br />
+            HOUSE
+          </h1>
+
+          <p className="accent-script mt-6 -rotate-[1.5deg] text-[clamp(1.8rem,4vw,3rem)] text-acid">
+            Discover your underground mood.
+          </p>
+
+          <div className="mt-6 font-mono text-[10px] uppercase tracking-widest text-smoke">
+            HOUSE · TECH HOUSE · TECHNO · HARD TECHNO
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <PillButton to="/#podcast" variant="primary" icon={<Play size={18} />} ariaLabel="Latest episode">
+              LATEST EPISODE
+            </PillButton>
+            <PillButton href="mailto:info@techmyhouse.it" variant="ghost" ariaLabel="Booking">
+              BOOKING ↗
+            </PillButton>
+          </div>
         </div>
-      </motion.div>
+
+        <div className="absolute bottom-8 left-0 right-0 px-8 lg:px-16">
+          <div className="flex items-center justify-between">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-smoke motion-reduce:animate-none animate-bounce">
+              ↓ SCROLL
+            </div>
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-smoke">
+              <span className="h-1.5 w-1.5 rounded-full bg-acid animate-pulse" aria-hidden="true" />
+              ON AIR · EP {episodeNumber ?? 132}
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
