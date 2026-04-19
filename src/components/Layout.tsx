@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import SocialLinks from './SocialLinks';
 import TopNav from './TopNav';
 import TMHWallpaper from './TMHWallpaper';
+import { TMHLogoLiquid } from '../branding/logo';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,6 +22,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="container-shell relative z-10 pb-12 sm:pb-16">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-3 text-acid outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            aria-label="Tech My House home"
+          >
+            <TMHLogoLiquid size={44} className="h-11 w-11" title="Tech My House" />
+            <span className="font-display text-[11px] uppercase tracking-[0.22em] text-acid">Tech My House</span>
+          </Link>
+
           <h2 className="display-title text-[clamp(3.5rem,10vw,9rem)] leading-[0.86] text-white">
             WHERE MUSIC
             <br />
