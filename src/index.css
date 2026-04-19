@@ -49,6 +49,29 @@
     @apply rounded-2xl border border-white/10 bg-white/[0.02];
     box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.06), 0 18px 45px rgba(0, 0, 0, 0.55);
   }
+
+  @keyframes recordsSheen {
+    0% { background-position: 0% 50%; opacity: 0.06; }
+    50% { background-position: 100% 50%; opacity: 0.12; }
+    100% { background-position: 0% 50%; opacity: 0.06; }
+  }
+
+  .records-panel {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .records-panel::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgb(204 255 0 / 0.0), rgb(204 255 0 / 0.12), rgb(204 255 0 / 0.0));
+    background-size: 240% 100%;
+    animation: recordsSheen 7.5s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
   .accent-script {
     font-family: 'MadeSoulmaze', 'Caveat', cursive;
     font-weight: 400;
@@ -303,6 +326,49 @@
   background: linear-gradient(90deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.08));
   background-size: 200% 100%;
   animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes heroWordGlow {
+  0%, 100% {
+    opacity: 0.88;
+    text-shadow: 0 2px 16px rgb(0 0 0 / 0.4), 0 0 0 rgb(204 255 0 / 0);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 2px 20px rgb(0 0 0 / 0.46), 0 0 16px rgb(204 255 0 / 0.22);
+  }
+}
+
+@keyframes heroWordStroke {
+  0%, 100% {
+    opacity: 0.92;
+    color: transparent;
+    -webkit-text-stroke: 1.25px rgb(204 255 0 / 0.55);
+    text-shadow: 0 0 0 rgb(204 255 0 / 0);
+  }
+  50% {
+    opacity: 1;
+    color: rgba(255, 255, 255, 0.08);
+    -webkit-text-stroke: 1.25px rgb(204 255 0 / 0.92);
+    text-shadow: 0 0 18px rgb(204 255 0 / 0.18);
+  }
+}
+
+.hero-glow-word {
+  display: inline-block;
+  animation: heroWordGlow 2.8s ease-in-out infinite;
+}
+
+.hero-glow-word--stroke {
+  animation-name: heroWordStroke;
+}
+
+.hero-glow-word--delay-1 {
+  animation-delay: 0.35s;
+}
+
+.hero-glow-word--delay-2 {
+  animation-delay: 0.7s;
 }
 
 @media (prefers-reduced-motion: reduce) {

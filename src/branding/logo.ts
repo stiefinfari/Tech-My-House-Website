@@ -1,4 +1,4 @@
-export const TMH_LOGO_SRC = '/assets/tmh-logo-small.png';
+export const TMH_LOGO_SRC = '/assets/tmh-logo-white.png';
 
 export const TMH_LOGO_SIZE_PX = { width: 96, height: 96 } as const;
 

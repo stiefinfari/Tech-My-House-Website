@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Play } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
-import TMHWallpaper from './TMHWallpaper';
 import TopoBlob from './TopoBlob';
 import PillButton from './ui/PillButton';
 import { type Episode, fetchRadioShow } from '../lib/rssCache';
@@ -145,24 +144,11 @@ export default function LatestEpisode() {
             />
           ) : (
             <div className="cement-texture absolute inset-0">
-              <div className="absolute inset-0 text-acid/30">
-                <TMHWallpaper mode="mixed" opacity={0.12} />
-              </div>
               <TopoBlob seed={132} size={260} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-acid/35" />
             </div>
           )}
 
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/55" />
-
-          <div className="absolute left-4 top-4 right-4">
-            <div className="display-title text-[clamp(1.8rem,4vw,3rem)] text-white">{artistName}</div>
-          </div>
-
-          <div className="absolute left-4 bottom-4">
-            <div className="inline-flex -rotate-[1deg] items-center bg-acid px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink">
-              EPISODE {episodeNumber ?? 132}
-            </div>
-          </div>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/50" />
 
           <button
             type="button"
@@ -177,7 +163,10 @@ export default function LatestEpisode() {
 
       <div className="w-full">
         <div className="font-mono text-[10px] uppercase tracking-widest text-acid">LATEST BROADCAST</div>
-        <h2 className="display-title mt-4 text-[clamp(2rem,4vw,3.2rem)] text-white line-clamp-2">{latest.title}</h2>
+        <h2 className="display-title mt-4 text-[clamp(2rem,4vw,3.25rem)] leading-[0.92] text-white [text-wrap:balance]">
+          {latest.title}
+        </h2>
+        <div className="mt-2 font-display text-[12px] font-extrabold uppercase tracking-[0.2em] text-white/70">{artistName}</div>
 
         <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-widest text-smoke">
           <span>{dateText}</span>
@@ -200,6 +189,14 @@ export default function LatestEpisode() {
               PLAY EPISODE
             </PillButton>
           )}
+          <PillButton
+            href="https://soundcloud.com/techmyhouse"
+            target="_blank"
+            variant="ghost"
+            ariaLabel="All episodes"
+          >
+            ALL EPISODES ↗
+          </PillButton>
         </div>
 
         <div className="mt-10 border-t border-acid/30 pt-8">
@@ -221,7 +218,7 @@ export default function LatestEpisode() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-sans text-sm font-semibold text-white/90">{ep.title}</div>
+                  <div className="truncate font-display text-[17px] font-extrabold text-white/95">{ep.title}</div>
                   <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-smoke">{formatDate(ep.pubDate)}</div>
                 </div>
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-acid/40 text-acid/80 transition-colors group-hover:border-acid/80 group-hover:text-acid">

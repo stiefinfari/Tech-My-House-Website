@@ -6,5 +6,5 @@ export const SITE = {
   defaultKeywords:
     'tech my house, house music, tech house, techno, underground, dj set, radio show, podcast, events, electronic music, TMH records',
   url: (import.meta.env.VITE_SITE_URL as string | undefined) ?? 'https://techmyhouse.it',
-  ogImagePath: '/assets/tmh-logo-small.png',
+  ogImagePath: '/assets/tmh-logo-white.png',
 };

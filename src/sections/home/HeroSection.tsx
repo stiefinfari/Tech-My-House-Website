@@ -1,27 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Play } from 'lucide-react';
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
-import TMHWallpaper from '../../components/TMHWallpaper';
 import PillButton from '../../components/ui/PillButton';
 
 export default function HeroSection() {
   const shouldReduceMotion = useReducedMotionPreference();
-  const [episodeNumber, setEpisodeNumber] = useState<number | null>(null);
-
-  useEffect(() => {
-    try {
-      const raw = window.sessionStorage.getItem('tmh_latest_episodes_v2');
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as { items?: Array<{ title?: string }> };
-      const title = parsed.items?.[0]?.title ?? '';
-      const match = title.match(/episode\s*(\d+)/i) ?? title.match(/\bep\s*(\d+)/i);
-      if (!match?.[1]) return;
-      const n = Number(match[1]);
-      if (Number.isFinite(n)) setEpisodeNumber(n);
-    } catch {
-      return;
-    }
-  }, []);
 
   return (
     <section id="hero" className="relative isolate flex h-[100svh] min-h-[720px] w-full items-start overflow-hidden bg-ink">
@@ -57,10 +40,6 @@ export default function HeroSection() {
       <div className="pointer-events-none absolute inset-0 z-20">
         <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-b from-transparent via-transparent to-ink" />
       </div>
-      <div className="pointer-events-none absolute inset-0 z-30 text-acid" aria-hidden="true">
-        <TMHWallpaper mode="mixed" opacity={0.05} />
-      </div>
-
       <div className="relative z-40 w-full">
         <div className="max-w-5xl pl-8 pr-8 pt-36 lg:pl-16 lg:pr-16">
           <div className="inline-flex -rotate-[2deg] items-center bg-acid px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest text-ink">
@@ -71,11 +50,11 @@ export default function HeroSection() {
             className="display-title mt-8 text-[clamp(3.5rem,11vw,9rem)] text-white"
             style={{ textShadow: '0 2px 16px rgba(0,0,0,0.4)' }}
           >
-            TECH
+            <span className="hero-glow-word hero-glow-word--stroke">TECH</span>
             <br />
-            MY
+            <span className="hero-glow-word hero-glow-word--delay-1">MY</span>
             <br />
-            HOUSE
+            <span className="hero-glow-word hero-glow-word--stroke hero-glow-word--delay-2">HOUSE</span>
           </h1>
 
           <p className="accent-script mt-6 -rotate-[1.5deg] text-[clamp(1.8rem,4vw,3rem)] text-acid">
@@ -97,14 +76,8 @@ export default function HeroSection() {
         </div>
 
         <div className="absolute bottom-8 left-0 right-0 px-8 lg:px-16">
-          <div className="flex items-center justify-between">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-smoke motion-reduce:animate-none animate-bounce">
-              ↓ SCROLL
-            </div>
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-smoke">
-              <span className="h-1.5 w-1.5 rounded-full bg-acid animate-pulse" aria-hidden="true" />
-              ON AIR · EP {episodeNumber ?? 132}
-            </div>
+          <div className="flex items-center justify-end">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-smoke motion-reduce:animate-none animate-bounce">↓ SCROLL</div>
           </div>
         </div>
       </div>

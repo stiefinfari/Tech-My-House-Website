@@ -12,7 +12,6 @@ const NAV_LINKS = [
   { label: 'Records', href: '/#records' },
   { label: 'Radio', href: '/podcast' },
   { label: 'Artists', href: '/#artists' },
-  { label: 'Events', href: '/#events' },
   { label: 'Contact', href: '/#footer' },
 ];
 
@@ -47,7 +46,7 @@ export default function TopNav() {
               className="flex items-center gap-3 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
               aria-label="Home"
             >
-              <TMHLogoLiquid size={38} className="text-white" />
+              <TMHLogoLiquid size={38} className="h-[38px] w-[38px] shrink-0" />
               <span className="hidden font-display text-[13px] font-extrabold uppercase tracking-[0.24em] text-white lg:block">
                 TECH MY HOUSE
               </span>
@@ -67,10 +66,11 @@ export default function TopNav() {
                     key={link.label}
                     to={link.href}
                     className={cn(
-                      'relative font-display text-[11px] font-bold uppercase tracking-[0.2em] text-white/70 transition-colors hover:text-acid outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid',
+                      'relative font-display text-[11px] font-bold uppercase tracking-[0.2em] text-white/70 transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid',
                       'after:absolute after:left-0 after:-bottom-2 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-acid after:transition-transform after:duration-200',
-                      'hover:after:scale-x-100',
-                      active ? 'text-white after:scale-x-100' : null,
+                      'before:absolute before:-left-3 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-acid before:opacity-0 before:transition-opacity before:duration-200',
+                      'hover:text-acid hover:after:scale-x-100 hover:before:opacity-80',
+                      active ? 'text-white after:scale-x-100 before:opacity-80' : null,
                     )}
                   >
                     {link.label}
@@ -81,15 +81,10 @@ export default function TopNav() {
 
             <div className="flex items-center justify-end gap-3">
               <div className="hidden lg:flex items-center gap-3">
-                <span className="h-1.5 w-1.5 rounded-full bg-acid animate-pulse" aria-hidden="true" />
-                <PillButton to="/podcast" variant="primary" ariaLabel="Listen live">
-                  LISTEN LIVE
+                <PillButton to="/#footer" variant="primary" ariaLabel="Contact">
+                  CONTACT
                 </PillButton>
               </div>
-
-              <span className="font-display text-[11px] font-extrabold uppercase tracking-[0.24em] text-white lg:hidden">
-                TECH MY HOUSE
-              </span>
 
               <button
                 className="lg:hidden p-2 text-white/80 transition-colors hover:text-white outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"

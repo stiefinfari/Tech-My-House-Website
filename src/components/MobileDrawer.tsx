@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
-import TMHWallpaper from './TMHWallpaper';
 import TMHLogoLiquid from './TMHLogoLiquid';
 import PillButton from './ui/PillButton';
 
@@ -51,10 +50,7 @@ export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerPro
           role="dialog"
         >
           <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div className="text-acid">
-              <TMHWallpaper mode="mixed" opacity={0.08} />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/70 to-ink" />
+            <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink to-black" />
           </div>
 
           <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
@@ -69,7 +65,7 @@ export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerPro
 
           <div className="container-shell relative z-10 flex h-full flex-col mt-20">
             <div className="flex items-center justify-center">
-              <TMHLogoLiquid size={56} className="text-white" />
+              <TMHLogoLiquid size={120} className="h-[120px] w-[120px]" />
             </div>
 
             <nav className="mt-12 flex flex-col gap-7">
