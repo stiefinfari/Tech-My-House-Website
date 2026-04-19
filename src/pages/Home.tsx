@@ -4,7 +4,7 @@ import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
 import HeroSection from '../sections/home/HeroSection';
 import RecordsSection from '../sections/home/RecordsSection';
-import PodcastSection from '../sections/home/PodcastSection';
+import RadioShowSection from '../sections/home/RadioShowSection';
 import ArtistsSection from '../sections/home/ArtistsSection';
 import Marquee from '../components/Marquee';
 
@@ -37,7 +37,7 @@ export default function Home() {
     <div className="w-full">
       <HeroSection />
       <div className="relative z-10 space-y-24 pb-24 sm:space-y-32 sm:pb-32">
-        <PodcastSection />
+        <RadioShowSection />
         <Marquee />
         <RecordsSection />
         <ArtistsSection />
