@@ -50,9 +50,10 @@
     box-shadow: 0 0 0 1px rgba(204, 255, 0, 0.06), 0 18px 45px rgba(0, 0, 0, 0.55);
   }
   .accent-script {
-    font-family: Syne, system-ui, sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    font-family: 'MadeSoulmaze', 'Caveat', cursive;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.1;
   }
   .section-title {
     @apply font-display text-[clamp(2.1rem,6vw,4.2rem)] font-normal uppercase leading-[0.92] tracking-[-0.07em] text-white;
@@ -226,10 +227,10 @@
   }
 
   .display-title {
-    font-family: Syne, system-ui, sans-serif;
+    font-family: 'Syne', sans-serif;
     font-weight: 800;
-    letter-spacing: -0.035em;
-    line-height: 0.88;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
     text-transform: uppercase;
   }
 

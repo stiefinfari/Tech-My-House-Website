@@ -1,5 +1,6 @@
 import React from 'react';
 import TMHWallpaper from '../../components/TMHWallpaper';
+import PillButton from '../../components/ui/PillButton';
 
 export default function RecordsSection() {
   const [submitted, setSubmitted] = React.useState(false);
@@ -32,7 +33,7 @@ export default function RecordsSection() {
               </span>
             </div>
 
-            <p className="mt-7 max-w-[56ch] font-grotesk text-base font-medium leading-relaxed text-white/80">
+            <p className="mt-7 max-w-[56ch] font-sans text-base font-medium leading-relaxed text-white/80">
               TMH Records is where the radio show becomes vinyl. Underground house, tech house and techno from the roster.
               First catalogue drops in 2026.
             </p>
@@ -51,14 +52,15 @@ export default function RecordsSection() {
                   autoComplete="email"
                   required
                   placeholder="your@email.here"
-                  className="h-12 w-full rounded-none border-2 border-acid bg-ink px-4 font-grotesk text-sm text-white placeholder:text-smoke/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                  className="h-12 w-full rounded-none border-2 border-acid bg-ink px-4 font-sans text-sm text-white placeholder:text-smoke/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
                 />
-                <button
+                <PillButton
                   type="submit"
-                  className="inline-flex h-12 shrink-0 items-center justify-center rounded-none border border-acid bg-acid px-6 font-display text-xs uppercase tracking-[0.15em] text-ink transition-colors hover:bg-acid-deep hover:border-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                  variant="primary"
+                  className="h-12 shrink-0 px-8 py-0"
                 >
                   NOTIFY
-                </button>
+                </PillButton>
               </div>
               {submitted ? (
                 <p className="pt-1 font-display text-[11px] uppercase tracking-[0.18em] text-acid">Thanks — you&apos;re on the list</p>

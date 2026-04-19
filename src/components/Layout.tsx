@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import SocialLinks from './SocialLinks';
 import TopNav from './TopNav';
 import TMHWallpaper from './TMHWallpaper';
+import PillButton from './ui/PillButton';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -45,12 +46,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <div className="space-y-4">
               <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Booking</div>
-              <a
-                href="mailto:info@techmyhouse.it"
-                className="font-mono text-[11px] uppercase tracking-[0.26em] text-white transition-colors hover:text-acid"
-              >
-                info@techmyhouse.it
-              </a>
+              <PillButton href="mailto:info@techmyhouse.it" variant="ghost" ariaLabel="Booking">
+                BOOKING ↗
+              </PillButton>
             </div>
 
             <div className="space-y-4">

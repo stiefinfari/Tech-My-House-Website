@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Play } from 'lucide-react';
 import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
 import TMHWallpaper from '../../components/TMHWallpaper';
 import TopoBlob from '../../components/TopoBlob';
+import PillButton from '../../components/ui/PillButton';
 
 export default function HeroSection() {
   const shouldReduceMotion = useReducedMotionPreference();
@@ -70,18 +71,21 @@ export default function HeroSection() {
         </ul>
 
         <div className="mt-10 flex w-full max-w-lg flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
-          <Link
+          <PillButton
             to="/#podcast"
-            className="inline-flex items-center justify-center gap-2 rounded-none border border-acid bg-acid px-6 py-[14px] font-display text-xs uppercase tracking-[0.15em] text-ink transition-colors hover:bg-acid-deep hover:border-acid-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            variant="primary"
+            icon={<Play size={18} />}
+            ariaLabel="Latest episode"
           >
-            ▶ LATEST EPISODE
-          </Link>
-          <a
+            LATEST EPISODE
+          </PillButton>
+          <PillButton
             href="mailto:info@techmyhouse.it"
-            className="inline-flex items-center justify-center gap-2 rounded-none border border-white bg-transparent px-6 py-[14px] font-display text-xs uppercase tracking-[0.15em] text-white transition-colors hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            variant="ghost"
+            ariaLabel="Booking"
           >
             BOOKING ↗
-          </a>
+          </PillButton>
         </div>
       </motion.div>
     </section>
