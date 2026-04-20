@@ -6,7 +6,6 @@ import Marquee from '../components/Marquee';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
 import { mapFeedItems, DEFAULT_COVER, type FeedItem, type EpisodeFeedItem } from '../utils/episodeFeed';
-import { toSafeCoverUrl } from '../utils/imagePolicy';
 import { useEpisodeBookmarks } from '../hooks/useEpisodeBookmarks';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 import { getTracklistForEpisode } from '../data/tracklists';
@@ -80,11 +79,7 @@ export default function PodcastPage() {
         const data = (await response.json()) as RssResponse;
         if (data.status === 'ok') {
           const items = Array.isArray(data.items) ? data.items : [];
-          const parsedEpisodes = mapFeedItems(items.slice(0, 24)).map((episode) => ({
-            ...episode,
-            coverUrl: toSafeCoverUrl(episode.coverUrl, DEFAULT_COVER),
-          }));
-          setEpisodes(parsedEpisodes);
+          setEpisodes(mapFeedItems(items.slice(0, 24)));
         }
       } catch (error) {
         console.error("Error fetching podcast:", error);
@@ -179,7 +174,7 @@ export default function PodcastPage() {
               const isFeatured = i === 0;
               const formattedDate = new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
               const bookmarked = bookmarks.isBookmarked(ep.link);
-              const tlData = getTracklistForEpisode(ep.audioUrl);
+              const tlData = getTracklistForEpisode({ title: ep.title, link: ep.link, audioUrl: ep.audioUrl });
               const isTlOpen = openTracklists[ep.link] || false;
 
               return (

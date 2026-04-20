@@ -11,15 +11,16 @@ export function isUsableImageUrl(value: string): boolean {
 
 export function toSafeCoverUrl(value: string | undefined, fallback: string): string {
   if (!value) return fallback;
-  if (!isUsableImageUrl(value)) return fallback;
+  const trimmed = value.trim();
+  if (trimmed.startsWith('/api/image?url=')) return trimmed;
+  if (!isUsableImageUrl(trimmed)) return fallback;
   
   try {
-    const parsed = new URL(value);
-    // If it's a soundcloud artwork, route it through our proxy
+    const parsed = new URL(trimmed);
     if (parsed.hostname.endsWith('sndcdn.com')) {
-      return `/api/image?url=${encodeURIComponent(value)}`;
+      return `/api/image?url=${encodeURIComponent(trimmed)}`;
     }
-    return value;
+    return trimmed;
   } catch {
     return fallback;
   }

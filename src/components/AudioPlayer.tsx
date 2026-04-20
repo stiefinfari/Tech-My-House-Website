@@ -106,7 +106,7 @@ export default function AudioPlayer() {
   const shownTime = isSeeking && seekPreview != null ? seekPreview : progress;
   const seekPercent = Math.max(0, Math.min(100, duration > 0 ? (shownTime / duration) * 100 : 0));
 
-  const tracklistData = getTracklistForEpisode(track?.url);
+  const tracklistData = getTracklistForEpisode({ title: track?.title, audioUrl: track?.url });
   const currentTrackIndex = tracklistData ? getCurrentTrackIndex(tracklistData.tracks, progress) : -1;
 
   if (!track) return null;
