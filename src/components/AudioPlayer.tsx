@@ -7,6 +7,7 @@ import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 import useCoverTone from '../hooks/useCoverTone';
 import RadioTheatre from './radio/RadioTheatre';
 import RadioWaveform from './radio/RadioWaveform';
+import { getTracklistForEpisode, getCurrentTrackIndex } from '../data/tracklists';
 
 export default function AudioPlayer() {
   const { currentTrack, isPlaying, togglePlay, setIsPlaying, playNext, playPrevious } = usePlayer();
@@ -104,6 +105,9 @@ export default function AudioPlayer() {
 
   const shownTime = isSeeking && seekPreview != null ? seekPreview : progress;
   const seekPercent = Math.max(0, Math.min(100, duration > 0 ? (shownTime / duration) * 100 : 0));
+
+  const tracklistData = getTracklistForEpisode(track?.url);
+  const currentTrackIndex = tracklistData ? getCurrentTrackIndex(tracklistData.tracks, progress) : -1;
 
   if (!track) return null;
 
@@ -329,21 +333,64 @@ export default function AudioPlayer() {
         coverUrl={coverUrl}
         onClose={() => setIsTheatreOpen(false)}
       >
-        <div className="space-y-6">
-          <h3 className="font-display text-[clamp(1.5rem,4vw,2.6rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.03em] text-white">
-            {title || 'Select an episode'}
-          </h3>
-          <div className="font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
-            {isPlaying ? 'LIVE PLAYBACK' : 'PAUSED'}
+        <div className="space-y-6 flex flex-col h-full">
+          <div>
+            <h3 className="font-display text-[clamp(1.5rem,4vw,2.6rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.03em] text-white">
+              {title || 'Select an episode'}
+            </h3>
+            <div className="mt-6 font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
+              {isPlaying ? 'LIVE PLAYBACK' : 'PAUSED'}
+            </div>
           </div>
           <RadioWaveform isActive={isPlaying} accentRgb={accentRgb} />
-          <button
-            type="button"
-            onClick={() => setIsTheatreOpen(false)}
-            className="rounded-full border border-acid/75 px-5 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-acid transition-colors hover:bg-acid hover:text-ink"
-          >
-            CLOSE THEATRE
-          </button>
+          
+          {tracklistData && tracklistData.tracks.length > 0 && (
+            <div className="mt-8 flex-1 overflow-y-auto pr-2 max-h-[40vh] border-t border-white/10 pt-4">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-smoke mb-4 flex justify-between">
+                <span>Tracklist</span>
+                {tracklistData.sourceUrl && (
+                  <a href={tracklistData.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-acid hover:underline">
+                    1001Tracklists ↗
+                  </a>
+                )}
+              </div>
+              <div className="space-y-2">
+                {tracklistData.tracks.map((t, idx) => {
+                  const isCurrent = idx === currentTrackIndex;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => commitSeek(t.startSec)}
+                      className={`w-full text-left flex items-start gap-3 p-2 rounded transition-colors ${isCurrent ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                    >
+                      <div className={`font-mono text-[10px] mt-0.5 ${isCurrent ? 'text-acid' : 'text-smoke'}`}>
+                        {formatTime(t.startSec)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className={`truncate font-display text-[13px] font-extrabold uppercase ${isCurrent ? 'text-acid' : 'text-white'}`}>
+                          {t.title}
+                        </div>
+                        <div className={`truncate font-mono text-[9px] uppercase tracking-widest ${isCurrent ? 'text-white/80' : 'text-smoke'}`}>
+                          {t.artist} {t.label ? `[${t.label}]` : ''}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="pt-6 mt-auto">
+            <button
+              type="button"
+              onClick={() => setIsTheatreOpen(false)}
+              className="rounded-full border border-acid/75 px-5 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-acid transition-colors hover:bg-acid hover:text-ink"
+            >
+              CLOSE THEATRE
+            </button>
+          </div>
         </div>
       </RadioTheatre>
 

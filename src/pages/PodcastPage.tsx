@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bookmark, BookmarkCheck, Play } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Play, ChevronDown, ChevronUp } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import Marquee from '../components/Marquee';
 import { useSeo } from '../seo/useSeo';
@@ -9,6 +9,7 @@ import { mapFeedItems, DEFAULT_COVER, type FeedItem, type EpisodeFeedItem } from
 import { toSafeCoverUrl } from '../utils/imagePolicy';
 import { useEpisodeBookmarks } from '../hooks/useEpisodeBookmarks';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
+import { getTracklistForEpisode } from '../data/tracklists';
 
 type RssResponse = {
   status?: string;
@@ -25,6 +26,14 @@ export default function PodcastPage() {
   const shouldReduceMotion = useReducedMotionPreference();
   const bookmarks = useEpisodeBookmarks();
   const filterOptions: EpisodeFilter[] = ['ALL', 'HOUSE', 'TECH HOUSE', 'TECHNO', 'HARD TECHNO'];
+
+  const [openTracklists, setOpenTracklists] = useState<Record<string, boolean>>({});
+
+  const toggleTracklist = (link: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenTracklists(prev => ({ ...prev, [link]: !prev[link] }));
+  };
 
   const jsonLd = useMemo(() => {
     const safeIso = (d: string) => {
@@ -170,6 +179,8 @@ export default function PodcastPage() {
               const isFeatured = i === 0;
               const formattedDate = new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
               const bookmarked = bookmarks.isBookmarked(ep.link);
+              const tlData = getTracklistForEpisode(ep.audioUrl);
+              const isTlOpen = openTracklists[ep.link] || false;
 
               return (
                 <motion.article
@@ -234,7 +245,40 @@ export default function PodcastPage() {
                       {bookmarked ? <BookmarkCheck size={14} className="text-acid" /> : <Bookmark size={14} />}
                       {bookmarked ? 'BOOKMARKED' : 'BOOKMARK'}
                     </button>
+                    
+                    {tlData && tlData.tracks.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => toggleTracklist(ep.link, e)}
+                        className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke transition-colors hover:text-acid"
+                      >
+                        TRACKLIST {isTlOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                    )}
                   </div>
+
+                  {isTlOpen && tlData && (
+                    <div className="border-t border-white/10 bg-black/20 p-4">
+                      {tlData.sourceUrl && (
+                        <a href={tlData.sourceUrl} target="_blank" rel="noopener noreferrer" className="block text-right mb-3 font-mono text-[9px] text-acid uppercase tracking-widest hover:underline">
+                          View on 1001Tracklists ↗
+                        </a>
+                      )}
+                      <div className="space-y-3">
+                        {tlData.tracks.map((t, idx) => (
+                          <div key={idx} className="flex gap-3">
+                            <div className="font-mono text-[9px] text-smoke shrink-0 w-8">
+                              {Math.floor(t.startSec / 60)}:{(t.startSec % 60).toString().padStart(2, '0')}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-display text-[11px] font-bold text-white uppercase truncate">{t.title}</div>
+                              <div className="font-mono text-[9px] text-smoke uppercase truncate">{t.artist}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </motion.article>
               );
             })}
