@@ -1,51 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Play } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Play } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import Marquee from '../components/Marquee';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
-
-interface Episode {
-  title: string;
-  link: string;
-  pubDate: string;
-  audioUrl: string;
-  coverUrl?: string;
-  description?: string;
-}
-
-type RssItem = {
-  title?: string;
-  link?: string;
-  pubDate?: string;
-  thumbnail?: string;
-  description?: string;
-  enclosure?: {
-    link?: string;
-    thumbnail?: string;
-  };
-};
+import { mapFeedItems, DEFAULT_COVER, type FeedItem, type EpisodeFeedItem } from '../utils/episodeFeed';
+import { toSafeCoverUrl } from '../utils/imagePolicy';
+import { useEpisodeBookmarks } from '../hooks/useEpisodeBookmarks';
+import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 
 type RssResponse = {
   status?: string;
-  items?: RssItem[];
+  items?: FeedItem[];
 };
 
 type EpisodeFilter = 'ALL' | 'HOUSE' | 'TECH HOUSE' | 'TECHNO' | 'HARD TECHNO';
 
-function normalizeSoundCloudCover(url: string, size: number) {
-  const safe = url.trim();
-  if (!safe) return safe;
-  const s = Math.max(100, Math.min(3000, Math.floor(size)));
-  return safe.replace(/-t\d+x\d+(?=\.)/i, `-t${s}x${s}`);
-}
-
 export default function PodcastPage() {
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
+  const [episodes, setEpisodes] = useState<EpisodeFeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<EpisodeFilter>('ALL');
   const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const shouldReduceMotion = useReducedMotionPreference();
+  const bookmarks = useEpisodeBookmarks();
   const filterOptions: EpisodeFilter[] = ['ALL', 'HOUSE', 'TECH HOUSE', 'TECHNO', 'HARD TECHNO'];
 
   const jsonLd = useMemo(() => {
@@ -93,30 +71,10 @@ export default function PodcastPage() {
         const data = (await response.json()) as RssResponse;
         if (data.status === 'ok') {
           const items = Array.isArray(data.items) ? data.items : [];
-          const parsedEpisodes = items.slice(0, 20).map((item) => {
-            const coverRaw =
-              item.thumbnail ??
-              item.enclosure?.thumbnail ??
-              'https://i1.sndcdn.com/avatars-siKAkzoJZjIx8IDn-zpkRzw-original.jpg';
-
-            return {
-              title: item.title ?? 'Unknown Episode',
-              link: item.link ?? '#',
-              pubDate: item.pubDate ?? '',
-              audioUrl: item.enclosure?.link ?? '',
-              coverUrl: normalizeSoundCloudCover(coverRaw, 800),
-              description: item.description ?? '',
-            };
-          });
-
-          parsedEpisodes.sort((a, b) => {
-            const ad = new Date(a.pubDate).getTime();
-            const bd = new Date(b.pubDate).getTime();
-            if (Number.isNaN(ad) && Number.isNaN(bd)) return 0;
-            if (Number.isNaN(ad)) return 1;
-            if (Number.isNaN(bd)) return -1;
-            return bd - ad;
-          });
+          const parsedEpisodes = mapFeedItems(items.slice(0, 24)).map((episode) => ({
+            ...episode,
+            coverUrl: toSafeCoverUrl(episode.coverUrl, DEFAULT_COVER),
+          }));
           setEpisodes(parsedEpisodes);
         }
       } catch (error) {
@@ -133,6 +91,34 @@ export default function PodcastPage() {
     const lookup = filter.toLowerCase();
     return episodes.filter((ep) => ep.title.toLowerCase().includes(lookup));
   }, [episodes, filter]);
+
+  const buildPlaylist = (source: EpisodeFeedItem[]) => {
+    return source
+      .filter((entry) => Boolean(entry.audioUrl))
+      .map((entry) => ({
+        title: entry.title,
+        url: entry.audioUrl,
+        artist: 'Tech My House',
+        coverUrl: entry.coverUrl,
+      }));
+  };
+
+  const playEpisode = (episode: EpisodeFeedItem) => {
+    if (episode.audioUrl) {
+      playTrack(
+        {
+          title: episode.title,
+          url: episode.audioUrl,
+          artist: 'Tech My House',
+          coverUrl: episode.coverUrl,
+        },
+        buildPlaylist(filteredEpisodes)
+      );
+      return;
+    }
+
+    window.open(episode.link, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="min-h-screen pb-24 pt-28 sm:pt-32">
@@ -183,73 +169,73 @@ export default function PodcastPage() {
               const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
               const isFeatured = i === 0;
               const formattedDate = new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+              const bookmarked = bookmarks.isBookmarked(ep.link);
 
               return (
-                <motion.button
+                <motion.article
                   key={i}
-                  type="button"
-                  aria-label={`Play ${ep.title}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className={`group relative flex w-full cursor-pointer flex-col overflow-hidden border border-white/10 bg-ink text-left transition-colors duration-300 hover:border-acid/60 ${isFeatured ? 'md:col-span-2 md:row-span-2' : ''}`}
-                  onClick={() => {
-                    if (ep.audioUrl) {
-                      const playlist = filteredEpisodes
-                        .filter((e) => Boolean(e.audioUrl))
-                        .map((e) => ({
-                          title: e.title,
-                          url: e.audioUrl,
-                          artist: 'Tech My House',
-                          coverUrl: e.coverUrl,
-                        }));
-                      playTrack({
-                        title: ep.title,
-                        url: ep.audioUrl,
-                        artist: "Tech My House",
-                        coverUrl: ep.coverUrl
-                      }, playlist);
-                    } else {
-                      window.open(ep.link, '_blank');
-                    }
-                  }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.05 }}
+                  className={`group relative flex w-full flex-col overflow-hidden border border-white/10 bg-ink text-left transition-colors duration-300 hover:border-acid/60 ${isFeatured ? 'md:col-span-2 md:row-span-2' : ''}`}
                 >
-                  <div className={`relative w-full overflow-hidden bg-black ${isFeatured ? 'aspect-[4/5] md:h-[440px] md:aspect-auto' : 'aspect-square'}`}>
-                    <img
-                      src={ep.coverUrl}
-                      alt={ep.title}
-                      loading="lazy"
-                      className={`h-full w-full object-cover transition-transform duration-500 ${isCurrentlyPlaying ? 'scale-[1.04]' : 'group-hover:scale-[1.03]'}`}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent opacity-70" />
-                    <div className="absolute bottom-3 right-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-acid text-ink transition-transform duration-300 group-hover:scale-110">
-                        {isCurrentlyPlaying ? (
-                          <div className="flex gap-[4px] items-end h-5">
-                            <span className="h-full w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
-                            <span className="h-2/3 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '200ms' }} />
-                            <span className="h-4/5 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '400ms' }} />
-                          </div>
-                        ) : (
-                          <Play size={24} fill="currentColor" className="ml-1" />
+                  <button
+                    type="button"
+                    aria-label={`Play ${ep.title}`}
+                    onClick={() => playEpisode(ep)}
+                    className="w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                  >
+                    <div className={`relative w-full overflow-hidden bg-black ${isFeatured ? 'aspect-[4/5] md:h-[440px] md:aspect-auto' : 'aspect-square'}`}>
+                      <img
+                        src={ep.coverUrl}
+                        alt={ep.title}
+                        loading="lazy"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = DEFAULT_COVER;
+                        }}
+                        className={`h-full w-full object-cover transition-transform duration-500 ${isCurrentlyPlaying ? 'scale-[1.04]' : 'group-hover:scale-[1.03]'}`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent opacity-70" />
+                      <div className="absolute bottom-3 right-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-acid text-ink transition-transform duration-300 group-hover:scale-110">
+                          {isCurrentlyPlaying ? (
+                            <div className="flex gap-[4px] items-end h-5">
+                              <span className="h-full w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
+                              <span className="h-2/3 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '200ms' }} />
+                              <span className="h-4/5 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '400ms' }} />
+                            </div>
+                          ) : (
+                            <Play size={24} fill="currentColor" className="ml-1" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-1 flex-col p-4">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.26em] text-acid">EP.{Math.max(1, filteredEpisodes.length - i)}</div>
+                      <h3 className="mt-2 font-display text-lg font-extrabold uppercase leading-tight text-white line-clamp-2">
+                        {ep.title}
+                      </h3>
+                      <div className="mt-auto flex items-center justify-between pt-4 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
+                        <span>{formattedDate}</span>
+                        {isCurrentlyPlaying && (
+                          <span className="text-acid">▶ PLAYING</span>
                         )}
                       </div>
                     </div>
+                  </button>
+                  <div className="flex items-center justify-between px-4 pb-4">
+                    <button
+                      type="button"
+                      onClick={() => bookmarks.toggle(ep.link)}
+                      aria-label={bookmarked ? `Remove bookmark ${ep.title}` : `Bookmark ${ep.title}`}
+                      className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.24em] text-white/80 transition-colors hover:text-acid"
+                    >
+                      {bookmarked ? <BookmarkCheck size={14} className="text-acid" /> : <Bookmark size={14} />}
+                      {bookmarked ? 'BOOKMARKED' : 'BOOKMARK'}
+                    </button>
                   </div>
-
-                  <div className="flex flex-1 flex-col p-4">
-                    <div className="font-mono text-[9px] uppercase tracking-[0.26em] text-acid">EP.{Math.max(1, filteredEpisodes.length - i)}</div>
-                    <h3 className="mt-2 font-display text-lg font-extrabold uppercase leading-tight text-white line-clamp-2">
-                      {ep.title}
-                    </h3>
-                    <div className="mt-auto flex items-center justify-between pt-4 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
-                      <span>{formattedDate}</span>
-                      {isCurrentlyPlaying && (
-                        <span className="text-acid">▶ PLAYING</span>
-                      )}
-                    </div>
-                  </div>
-                </motion.button>
+                </motion.article>
               );
             })}
           </div>
