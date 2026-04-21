@@ -82,6 +82,10 @@ export function useRealTracklist(audioUrl?: string, title?: string): RealTrackli
             }));
         }
 
+        if (tracks.length > 0) {
+          tracks = [...tracks].sort((a, b) => a.startSec - b.startSec);
+        }
+
         setTracklistData({
           episodeCode,
           sourceUrl,

@@ -58,7 +58,7 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
       role="dialog"
       aria-modal="true"
       aria-label="Radio theatre mode"
-      className={`fixed inset-0 z-[140] bg-ink ${shouldReduceMotion ? '' : 'animate-fade-in'}`}
+      className={`fixed inset-0 z-[140] bg-ink cement-texture ${shouldReduceMotion ? '' : 'animate-fade-in'}`}
     >
       {coverUrl && (
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
@@ -67,7 +67,18 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
         </div>
       )}
 
+      <div className="absolute inset-0 z-0 pointer-events-none grain-heavy opacity-70" aria-hidden="true" />
+      <div className="absolute inset-0 z-0 pointer-events-none plastic-crinkle opacity-50" aria-hidden="true" />
+
       <div className="container-shell relative z-10 flex h-full flex-col py-8 sm:py-12">
+        <div className="tmh-wallpaper tmh-wallpaper--outline text-white/15" aria-hidden="true">
+          <span className="tmh-wallpaper__row" style={{ ['--wp-offset' as string]: '-8%' }}>
+            THEATRE MODE · TECH MY HOUSE ·
+          </span>
+          <span className="tmh-wallpaper__row" style={{ ['--wp-offset' as string]: '-18%' }}>
+            THEATRE MODE · TECH MY HOUSE ·
+          </span>
+        </div>
         <div className="flex items-center justify-between">
           <h2 className="font-display text-[13px] font-extrabold uppercase tracking-[0.2em] text-acid">
             Theatre Mode
@@ -84,7 +95,7 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
         </div>
 
         <div className="mt-8 grid flex-1 gap-12 lg:grid-cols-[minmax(400px,500px)_1fr] lg:items-center">
-          <div className="relative aspect-square w-full max-w-[500px] overflow-hidden rounded-sm shadow-2xl mx-auto lg:mx-0">
+          <div className="relative aspect-square w-full max-w-[500px] overflow-hidden rounded-3xl shadow-2xl mx-auto lg:mx-0 rotate-[-1deg] transform-gpu">
             {coverUrl ? (
               <img src={coverUrl} alt={title} className="h-full w-full object-cover" />
             ) : (
@@ -92,7 +103,8 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
                 No Cover
               </div>
             )}
-            <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] pointer-events-none" />
+            <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] pointer-events-none" />
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-black/35 via-transparent to-white/5" />
           </div>
           <div className="min-w-0 flex flex-col h-full justify-center">{children}</div>
         </div>

@@ -173,6 +173,8 @@ export default function AudioPlayer() {
 
   const baseButtonClass =
     'inline-flex items-center justify-center rounded-full p-2 text-smoke transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
+  const primaryTitle = nowPlayingTrack ? `${nowPlayingTrack.artist} — ${nowPlayingTrack.title}` : displayTitle;
+  const secondaryTitle = nowPlayingTrack ? displayTitle : displayArtist;
 
   return (
     <>
@@ -229,11 +231,17 @@ export default function AudioPlayer() {
                   aria-label="Open podcast page"
                   className="min-w-0 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
                 >
-                  <div className="truncate font-display text-[12px] font-extrabold uppercase tracking-[-0.01em] text-white md:text-[14px]">
-                    {displayTitle}
+                  <div
+                    className="truncate font-display text-[12px] font-extrabold uppercase tracking-[-0.01em] text-white md:text-[14px]"
+                    title={primaryTitle}
+                  >
+                    {primaryTitle}
                   </div>
-                  <div className="truncate font-mono text-[9px] uppercase tracking-[0.26em] text-smoke md:text-[10px]">
-                    {nowPlayingTrack ? `NOW PLAYING: ${nowPlayingTrack.artist} — ${nowPlayingTrack.title}` : displayArtist}
+                  <div
+                    className="truncate font-mono text-[9px] uppercase tracking-[0.26em] text-smoke md:text-[10px]"
+                    title={secondaryTitle}
+                  >
+                    {secondaryTitle}
                   </div>
                 </button>
                 <div className="hidden shrink-0 pl-4 font-mono text-[10px] uppercase tracking-[0.2em] text-smoke sm:block">
@@ -398,6 +406,11 @@ export default function AudioPlayer() {
             <h3 className="font-display text-[clamp(2rem,5vw,3.5rem)] font-extrabold uppercase leading-[0.9] tracking-tight text-white drop-shadow-lg">
               {displayTitle || 'Select an episode'}
             </h3>
+            {nowPlayingTrack ? (
+              <div className="mt-3 font-display text-[clamp(1.15rem,2.4vw,1.75rem)] font-extrabold uppercase leading-[1.05] tracking-[-0.02em] text-white/95">
+                <span className="text-acid">Now:</span> {nowPlayingTrack.artist} — {nowPlayingTrack.title}
+              </div>
+            ) : null}
             <div className="mt-4 flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.26em]">
               <span className={isPlaying ? 'text-acid' : 'text-smoke'}>
                 {isPlaying ? '▶ LIVE PLAYBACK' : 'PAUSED'}
@@ -432,15 +445,17 @@ export default function AudioPlayer() {
               ) : null}
             </div>
           ) : tracklistData?.status === 'ready' && tracklistData.tracks.length > 0 ? (
-            <div className="mt-8 flex-1 overflow-y-auto pr-4 max-h-[45vh] border-t border-white/10 pt-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
-              <div className="mb-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-smoke">
-                <span>Tracklist ({tracklistData.tracks.length})</span>
+            <div className="mt-8 flex-1 overflow-y-auto rounded-2xl border border-white/10 bg-black/25 px-2 py-4 pr-2 sm:px-4 sm:py-5 sm:pr-4 max-h-[50vh] sm:max-h-[55vh] scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+              <div className="sticky top-0 z-10 -mx-2 mb-5 flex items-center justify-between rounded-xl bg-ink/35 px-2 py-2 backdrop-blur-md sm:-mx-4 sm:px-4">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-smoke">
+                  Tracklist ({tracklistData.tracks.length})
+                </div>
                 {tracklistData.sourceUrl ? (
                   <a
                     href={tracklistData.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-acid transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                    className="font-mono text-[10px] uppercase tracking-widest text-acid transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
                   >
                     1001Tracklists ↗
                   </a>
@@ -459,18 +474,18 @@ export default function AudioPlayer() {
                       onMouseEnter={() => setSelectedTrackIndex(idx)}
                       onFocus={() => setSelectedTrackIndex(idx)}
                       onClick={() => commitSeek(t.startSec)}
-                      className={`group relative flex w-full items-start gap-4 rounded border p-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
+                      className={`group relative flex w-full items-start gap-4 rounded-xl border p-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
                         isSelected ? 'border-white/15' : 'border-transparent'
                       } ${isCurrent ? 'text-acid' : 'text-white'}`}
                     >
                       {!shouldReduceMotion && isCurrent ? (
                         <motion.div
                           layoutId="tmh-current-track"
-                          className="absolute inset-0 rounded bg-white/10"
+                          className="absolute inset-0 rounded-xl bg-white/10"
                           transition={{ duration: 0.22, ease: 'easeOut' }}
                         />
                       ) : isCurrent ? (
-                        <div className="absolute inset-0 rounded bg-white/10" />
+                        <div className="absolute inset-0 rounded-xl bg-white/10" />
                       ) : null}
 
                       <div className="relative mt-0.5 w-10 shrink-0 font-mono text-[10px] uppercase tracking-widest text-smoke group-hover:text-white/80">
@@ -484,6 +499,14 @@ export default function AudioPlayer() {
                           {t.artist} {t.label ? `[${t.label}]` : ''}
                         </div>
                       </div>
+
+                      {isCurrent ? (
+                        <div className="relative ml-auto shrink-0">
+                          <span className="inline-flex items-center rounded-full border border-acid/60 bg-acid/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-acid">
+                            Now
+                          </span>
+                        </div>
+                      ) : null}
                     </motion.button>
                   );
                 })}

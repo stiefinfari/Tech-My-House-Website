@@ -10,6 +10,7 @@ import { DEFAULT_COVER, type EpisodeFeedItem } from '../utils/episodeFeed';
 import { useEpisodeBookmarks } from '../hooks/useEpisodeBookmarks';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 import type { RadioEpisode } from '../lib/rssParse';
+import { generateEpisodeCode } from '../lib/episodeCode';
 import TMHLogoWhite from '../assets/TMH_LOGO_WHITE.png';
 
 type RadioFeedResponse = {
@@ -17,7 +18,7 @@ type RadioFeedResponse = {
 };
 
 type RadioEpisodeUi = EpisodeFeedItem & {
-  episodeCode: string | null;
+  episodeCode: string;
   durationSec: number | null;
   tracklistUrl: string | null;
 };
@@ -74,7 +75,14 @@ export default function PodcastPage() {
         const data = (await response.json()) as RadioFeedResponse;
         const raw = Array.isArray(data.episodes) ? data.episodes : [];
         const mapped: RadioEpisodeUi[] = raw.map((ep) => ({
-          episodeCode: ep.episodeCode ?? null,
+          episodeCode:
+            ep.episodeCode ??
+            generateEpisodeCode({
+              title: ep.title,
+              audioUrl: ep.audioUrl,
+              soundcloudUrl: ep.soundcloudUrl,
+              publishedAt: ep.publishedAt,
+            }),
           durationSec: ep.durationSec ?? null,
           tracklistUrl: ep.tracklistUrl ?? null,
           title: ep.title,
@@ -126,14 +134,19 @@ export default function PodcastPage() {
     <div className="min-h-screen pb-24 pt-28 sm:pt-32">
       <div className="container-shell mb-14 max-w-6xl">
         <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">THE ARCHIVE</div>
-        <div className="mt-4 flex items-center gap-2 sm:gap-3">
-          <h1 className="display-title text-[clamp(3rem,10vw,8rem)] leading-[0.9] text-white">RADIO SHOW</h1>
-          <img
-            src={TMHLogoWhite}
-            alt=""
-            aria-hidden="true"
-            className="h-16 w-16 shrink-0 origin-center motion-safe:animate-[spin_10s_linear_infinite] motion-reduce:animate-none sm:h-20 sm:w-20"
-          />
+        <div className="mt-5 grid grid-cols-[auto_1fr] items-end gap-4 sm:gap-6">
+          <div className="relative">
+            <div className="absolute inset-0 -z-10 rounded-full blur-2xl bg-acid/15" aria-hidden="true" />
+            <img
+              src={TMHLogoWhite}
+              alt=""
+              aria-hidden="true"
+              className="h-24 w-24 shrink-0 origin-center motion-safe:animate-[spin_14s_linear_infinite] motion-reduce:animate-none sm:h-32 sm:w-32"
+            />
+          </div>
+          <h1 className="display-title max-w-[10ch] text-[clamp(3rem,10vw,8rem)] leading-[0.9] text-white">
+            RADIO SHOW
+          </h1>
         </div>
         <p className="accent-script mt-4 -rotate-[1.5deg] text-[clamp(1.6rem,3.5vw,2.8rem)] text-acid">every episode, underground sound</p>
         <div className="mt-5 font-mono text-[10px] uppercase tracking-widest text-smoke">
@@ -149,7 +162,7 @@ export default function PodcastPage() {
             {Array.from({ length: 9 }).map((_, index) => (
               <div
                 key={index}
-                className={`relative overflow-hidden border border-white/10 bg-ink ${index === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}`}
+                className={`relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] ${index === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}`}
               >
                 <div className={`${index === 0 ? 'aspect-[4/5]' : 'aspect-[4/5]'} animate-pulse bg-white/10`} />
                 <div className="space-y-3 p-4">
@@ -170,9 +183,8 @@ export default function PodcastPage() {
                 ? ''
                 : dateValue.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
               const bookmarked = bookmarks.isBookmarked(ep.link);
-              const episodeLabel = ep.episodeCode
-                ? `EP${ep.episodeCode.replace(/^ep/i, '')}`
-                : `EP.${Math.max(1, episodes.length - i)}`;
+              const numericCode = ep.episodeCode.match(/^ep(\d{1,4})$/i)?.[1] ?? null;
+              const episodeLabel = numericCode ? `EP${numericCode}` : `EP.${Math.max(1, episodes.length - i)}`;
 
               return (
                 <motion.article
@@ -180,25 +192,15 @@ export default function PodcastPage() {
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.04, duration: 0.35, ease: 'easeOut' }}
-                  className={`group relative overflow-hidden border border-white/10 bg-ink transition-colors hover:border-acid/60 ${isFeatured ? 'sm:col-span-2 sm:row-span-2' : ''}`}
+                  className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] shadow-[0_0_0_1px_rgba(204,255,0,0.06),0_18px_45px_rgba(0,0,0,0.55)] transition-colors hover:border-acid/60 ${isFeatured ? 'sm:col-span-2 sm:row-span-2' : ''}`}
                 >
-                  {ep.episodeCode ? (
-                    <Link
-                      to={`/radio/${ep.episodeCode}`}
-                      className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-                      aria-label={`View ${ep.title}`}
-                    />
-                  ) : (
-                    <a
-                      href={ep.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-                      aria-label={`View ${ep.title} on SoundCloud`}
-                    />
-                  )}
+                  <Link
+                    to={`/radio/${ep.episodeCode}`}
+                    className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                    aria-label={`View ${ep.title}`}
+                  />
 
-                  <div className="relative z-0">
+                  <div className="relative z-20">
                     <div className="pointer-events-none">
                     <div className={`relative w-full overflow-hidden bg-black ${isFeatured ? 'aspect-[4/5]' : 'aspect-[4/5]'}`}>
                       <img
@@ -211,8 +213,8 @@ export default function PodcastPage() {
                         }}
                         className={`h-full w-full object-cover transition-transform duration-700 ${isCurrentlyPlaying ? 'scale-[1.04]' : 'group-hover:scale-[1.03]'}`}
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-transparent opacity-90" />
-                      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-transparent opacity-95" />
+                      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]" />
                     </div>
 
                     <div className="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-white/70">

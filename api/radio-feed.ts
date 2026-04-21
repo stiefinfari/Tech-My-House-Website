@@ -1,6 +1,7 @@
 import { XMLParser } from 'fast-xml-parser';
 import he from 'he';
 import { extractEpisodeCode, extractTracklistUrl, parseDurationToSeconds, type RadioEpisode } from '../src/lib/rssParse';
+import { generateEpisodeCode } from '../src/lib/episodeCode';
 import { normalizeSoundCloudCover } from '../src/utils/episodeFeed';
 import { toSafeCoverUrlNullable } from '../src/utils/imagePolicy';
 
@@ -130,8 +131,10 @@ export default async function handler(req: RequestLike, res: ResponseLike) {
           typeof item['itunes:duration'] === 'string' ? item['itunes:duration'] : undefined
         );
 
+        const extractedEpisodeCode = extractEpisodeCode(title) ?? (summary ? extractEpisodeCode(summary) : null);
+
         return {
-          episodeCode: extractEpisodeCode(title) ?? (summary ? extractEpisodeCode(summary) : null),
+          episodeCode: extractedEpisodeCode ?? generateEpisodeCode({ title, audioUrl: enclosureUrl, soundcloudUrl, publishedAt }),
           title,
           publishedAt,
           durationSec,
