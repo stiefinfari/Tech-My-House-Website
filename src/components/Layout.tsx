@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import SocialLinks from './SocialLinks';
 import TopNav from './TopNav';
@@ -8,10 +8,6 @@ import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const reducedMotion = useReducedMotionPreference();
-  const footerMask = useMemo(() => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240"><rect width="1200" height="240" fill="black"/><text x="600" y="175" text-anchor="middle" font-family="Syne, sans-serif" font-size="170" font-weight="800" letter-spacing="-10" fill="white">TECH MY HOUSE</text></svg>`;
-    return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-  }, []);
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-ink font-sans text-white selection:bg-acid selection:text-ink">
@@ -25,35 +21,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       <footer id="footer" className="relative z-20 border-t border-white/10 bg-ink/95">
-        {!reducedMotion ? (
-          <div className="hidden border-b border-white/10 bg-black/40 lg:block">
-            <div className="relative h-28 overflow-hidden">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover opacity-80 brightness-[0.9] contrast-[1.05]"
-                style={{
-                  WebkitMaskImage: footerMask,
-                  maskImage: footerMask,
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskSize: 'contain',
-                  maskSize: 'contain',
-                  WebkitMaskPosition: 'center',
-                  maskPosition: 'center',
-                }}
-              >
-                <source src="/assets/hero-video.webm" type="video/webm" />
-                <source src="/assets/hero-video.mp4" type="video/mp4" />
-              </video>
-            </div>
-          </div>
-        ) : null}
-
         <div className="container-shell py-12 sm:py-14">
           <div className="mb-8 border-b border-white/10 pb-7">
             <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">FOOTER NAVIGATION</div>
@@ -86,7 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="font-display text-[11px] uppercase tracking-[0.18em] text-acid">Explore</div>
               <div className="flex flex-col gap-3 font-mono text-[11px] uppercase tracking-[0.24em] text-smoke">
                 <Link to="/#records" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Records</Link>
-                <Link to="/podcast" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Radio</Link>
+                <Link to="/radio" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Radio</Link>
                 <Link to="/#artists" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Artists</Link>
                 <Link to="/contact" className="transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid">Contact</Link>
               </div>

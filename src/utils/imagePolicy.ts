@@ -25,3 +25,18 @@ export function toSafeCoverUrl(value: string | undefined, fallback: string): str
     return fallback;
   }
 }
+
+export function toSafeCoverUrlNullable(value: string | undefined): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('/api/image?url=')) return trimmed;
+  if (!isUsableImageUrl(trimmed)) return null;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.hostname.endsWith('sndcdn.com')) return `/api/image?url=${encodeURIComponent(trimmed)}`;
+    return trimmed;
+  } catch {
+    return null;
+  }
+}

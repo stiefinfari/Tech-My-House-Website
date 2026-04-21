@@ -87,7 +87,7 @@ export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerPro
               </div>
               <div className="mt-6">
                 <PillButton
-                  to="/podcast"
+                  to="/radio"
                   variant="primary"
                   className="w-full justify-center py-4"
                   ariaLabel="Listen live"

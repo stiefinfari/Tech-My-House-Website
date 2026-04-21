@@ -106,11 +106,6 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-0 right-0 px-8 lg:px-16">
-          <div className="flex items-center justify-end">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-smoke motion-reduce:animate-none animate-bounce">↓ SCROLL</div>
-          </div>
-        </div>
       </div>
     </section>
   );

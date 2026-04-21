@@ -9,7 +9,7 @@ import { cn } from '../lib/utils';
 
 const NAV_LINKS = [
   { label: 'Records', href: '/#records' },
-  { label: 'Radio', href: '/podcast' },
+  { label: 'Radio', href: '/radio' },
   { label: 'Artists', href: '/#artists' },
   { label: 'Contact', href: '/contact' },
 ];
@@ -70,8 +70,8 @@ export default function TopNav() {
           <nav className="hidden lg:flex items-center gap-1">
               {NAV_LINKS.map((link) => {
                 const active =
-                  link.href === '/podcast'
-                    ? location.pathname.startsWith('/podcast')
+                  link.href === '/radio'
+                    ? location.pathname.startsWith('/radio')
                     : link.href.startsWith('/#')
                       ? location.pathname === '/' && location.hash === link.href.replace('/#', '#')
                       : link.href === '/contact'

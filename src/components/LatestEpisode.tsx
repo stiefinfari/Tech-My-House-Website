@@ -150,14 +150,6 @@ export default function LatestEpisode() {
 
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/50" />
 
-          <button
-            type="button"
-            onClick={() => (isFallback ? window.open('https://soundcloud.com/techmyhouse', '_blank', 'noopener,noreferrer') : playEpisode(latest))}
-            aria-label={isFallback ? 'Listen on SoundCloud' : `Play episode: ${latest.title}`}
-            className="group absolute left-1/2 top-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-acid/60 bg-black/30 transition-transform hover:scale-[1.06] hover:border-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-          >
-            <Play size={40} className="text-acid" stroke="none" fill="currentColor" />
-          </button>
         </div>
       </div>
 

@@ -49,7 +49,8 @@ export default function TextLink(props: InternalProps | ExternalProps) {
     if (typeof props.to === 'string') {
       const path = props.to.split('?')[0].split('#')[0];
       if (path === '/') import('../pages/Home');
-      else if (path === '/podcast') import('../pages/PodcastPage');
+      else if (path === '/radio' || path === '/podcast') import('../pages/PodcastPage');
+      else if (path.startsWith('/radio/')) import('../pages/RadioEpisodePage');
       else if (path.startsWith('/artist/')) import('../pages/Artist');
     }
   };

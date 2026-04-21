@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Maximize2, Music, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,9 @@ import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 import useCoverTone from '../hooks/useCoverTone';
 import RadioTheatre from './radio/RadioTheatre';
 import RadioWaveform from './radio/RadioWaveform';
-import { getTracklistForEpisode, getCurrentTrackIndex } from '../data/tracklists';
+import { getCurrentTrackIndex } from '../data/tracklists';
+import { useRealTracklist } from '../hooks/useRealTracklist';
+import { getInitialSelectedIndex, getNextSelectedIndex } from '../lib/tracklistSelection';
 
 export default function AudioPlayer() {
   const { currentTrack, isPlaying, togglePlay, setIsPlaying, playNext, playPrevious } = usePlayer();
@@ -24,8 +26,15 @@ export default function AudioPlayer() {
   const [isMuted, setIsMuted] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
+  const currentTrackRowRef = useRef<HTMLButtonElement | null>(null);
+  const [selectedTrackIndex, setSelectedTrackIndex] = useState(-1);
 
-  const tone = useCoverTone(track?.coverUrl);
+  const tracklistData = useRealTracklist(track?.url, track?.title);
+  const displayTitle = tracklistData?.episodeTitle ?? track?.title ?? '';
+  const displayArtist = track?.artist ?? '';
+  const displayCoverUrl = (tracklistData?.episodeCoverUrl ?? track?.coverUrl) || undefined;
+
+  const tone = useCoverTone(displayCoverUrl);
   const accentRgb = tone?.rgb ?? '204 255 0';
   const onAccentColor = tone?.onTone === 'light' ? '#fff' : '#0A0A0A';
 
@@ -56,10 +65,6 @@ export default function AudioPlayer() {
     if (!audioRef.current) return;
     audioRef.current.volume = isMuted ? 0 : volume;
   }, [volume, isMuted]);
-
-  const title = track?.title ?? '';
-  const artist = track?.artist ?? '';
-  const coverUrl = track?.coverUrl;
 
   const handleTimeUpdate = () => {
     if (!audioRef.current || isSeeking) return;
@@ -92,7 +97,7 @@ export default function AudioPlayer() {
     return `${curMin} minute ${curSec} seconds of ${totalMin} minutes ${totalSec} seconds`;
   };
 
-  const commitSeek = (time: number) => {
+  const commitSeek = useCallback((time: number) => {
     if (duration <= 0) {
       setProgress(0);
       if (audioRef.current) audioRef.current.currentTime = 0;
@@ -101,13 +106,68 @@ export default function AudioPlayer() {
     const safe = Math.max(0, Math.min(duration, time));
     setProgress(safe);
     if (audioRef.current) audioRef.current.currentTime = safe;
-  };
+  }, [duration]);
 
   const shownTime = isSeeking && seekPreview != null ? seekPreview : progress;
   const seekPercent = Math.max(0, Math.min(100, duration > 0 ? (shownTime / duration) * 100 : 0));
 
-  const tracklistData = getTracklistForEpisode({ title: track?.title, audioUrl: track?.url });
-  const currentTrackIndex = tracklistData ? getCurrentTrackIndex(tracklistData.tracks, progress) : -1;
+  const currentTrackIndex =
+    tracklistData?.status === 'ready' ? getCurrentTrackIndex(tracklistData.tracks, progress) : -1;
+  const nowPlayingTrack =
+    tracklistData?.status === 'ready' && currentTrackIndex >= 0 ? tracklistData.tracks[currentTrackIndex] : null;
+
+  useEffect(() => {
+    if (!isTheatreOpen) {
+      setSelectedTrackIndex(-1);
+      return;
+    }
+    if (!tracklistData || tracklistData.status !== 'ready' || tracklistData.tracks.length === 0) {
+      setSelectedTrackIndex(-1);
+      return;
+    }
+    setSelectedTrackIndex((prev) =>
+      getInitialSelectedIndex({ previous: prev, current: currentTrackIndex, length: tracklistData.tracks.length })
+    );
+  }, [currentTrackIndex, isTheatreOpen, tracklistData]);
+
+  useEffect(() => {
+    if (!isTheatreOpen) return;
+    if (currentTrackIndex < 0) return;
+    if (!currentTrackRowRef.current) return;
+    currentTrackRowRef.current.scrollIntoView({
+      block: 'nearest',
+      behavior: shouldReduceMotion ? 'auto' : 'smooth',
+    });
+  }, [currentTrackIndex, isTheatreOpen, shouldReduceMotion]);
+
+  useEffect(() => {
+    if (!isTheatreOpen) return;
+    if (!tracklistData || tracklistData.status !== 'ready' || tracklistData.tracks.length === 0) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' || event.key === 'Escape') return;
+
+      const len = tracklistData.tracks.length;
+      const baseIndex = selectedTrackIndex >= 0 ? selectedTrackIndex : currentTrackIndex;
+
+      const next = getNextSelectedIndex({ key: event.key, selected: baseIndex, length: len });
+      if (next != null) {
+        event.preventDefault();
+        setSelectedTrackIndex(next);
+        return;
+      }
+
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const safeIndex = Math.max(0, Math.min(len - 1, baseIndex));
+        const t = tracklistData.tracks[safeIndex];
+        if (t) commitSeek(t.startSec);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [commitSeek, currentTrackIndex, isTheatreOpen, selectedTrackIndex, tracklistData]);
 
   if (!track) return null;
 
@@ -148,12 +208,12 @@ export default function AudioPlayer() {
 
             <button
               type="button"
-              onClick={() => navigate('/podcast')}
+              onClick={() => navigate('/radio')}
               aria-label="Open podcast page"
               className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-white/10 bg-black transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid md:h-14 md:w-14"
             >
-              {coverUrl ? (
-                <img src={coverUrl} alt={title} className="h-full w-full object-cover" />
+              {displayCoverUrl ? (
+                <img src={displayCoverUrl} alt={displayTitle} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
                   <Music className="h-5 w-5 text-acid" />
@@ -165,15 +225,15 @@ export default function AudioPlayer() {
               <div className="mb-1 flex items-end justify-between md:mb-2">
                 <button
                   type="button"
-                  onClick={() => navigate('/podcast')}
+                  onClick={() => navigate('/radio')}
                   aria-label="Open podcast page"
                   className="min-w-0 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
                 >
                   <div className="truncate font-display text-[12px] font-extrabold uppercase tracking-[-0.01em] text-white md:text-[14px]">
-                    {title}
+                    {displayTitle}
                   </div>
                   <div className="truncate font-mono text-[9px] uppercase tracking-[0.26em] text-smoke md:text-[10px]">
-                    {artist}
+                    {nowPlayingTrack ? `NOW PLAYING: ${nowPlayingTrack.artist} — ${nowPlayingTrack.title}` : displayArtist}
                   </div>
                 </button>
                 <div className="hidden shrink-0 pl-4 font-mono text-[10px] uppercase tracking-[0.2em] text-smoke sm:block">
@@ -329,64 +389,113 @@ export default function AudioPlayer() {
 
       <RadioTheatre
         open={isTheatreOpen}
-        title={title || 'Tech My House'}
-        coverUrl={coverUrl}
+        title={displayTitle || 'Tech My House'}
+        coverUrl={displayCoverUrl}
         onClose={() => setIsTheatreOpen(false)}
       >
-        <div className="space-y-6 flex flex-col h-full">
+        <div className="flex h-full flex-col space-y-8">
           <div>
-            <h3 className="font-display text-[clamp(1.5rem,4vw,2.6rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.03em] text-white">
-              {title || 'Select an episode'}
+            <h3 className="font-display text-[clamp(2rem,5vw,3.5rem)] font-extrabold uppercase leading-[0.9] tracking-tight text-white drop-shadow-lg">
+              {displayTitle || 'Select an episode'}
             </h3>
-            <div className="mt-6 font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
-              {isPlaying ? 'LIVE PLAYBACK' : 'PAUSED'}
+            <div className="mt-4 flex items-center gap-4 font-mono text-[11px] uppercase tracking-[0.26em]">
+              <span className={isPlaying ? 'text-acid' : 'text-smoke'}>
+                {isPlaying ? '▶ LIVE PLAYBACK' : 'PAUSED'}
+              </span>
+              <span className="text-white/40">|</span>
+              <span className="text-white/60">{formatTime(shownTime)} / {formatTime(duration)}</span>
             </div>
           </div>
+
           <RadioWaveform isActive={isPlaying} accentRgb={accentRgb} />
           
-          {tracklistData && tracklistData.tracks.length > 0 && (
-            <div className="mt-8 flex-1 overflow-y-auto pr-2 max-h-[40vh] border-t border-white/10 pt-4">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-smoke mb-4 flex justify-between">
-                <span>Tracklist</span>
-                {tracklistData.sourceUrl && (
-                  <a href={tracklistData.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-acid hover:underline">
+          {tracklistData?.status === 'loading' ? (
+            <div className="mt-8 flex-1 border-t border-white/10 pt-6 font-mono text-[10px] uppercase tracking-widest text-smoke">
+              Loading tracklist…
+            </div>
+          ) : tracklistData?.status === 'error' ? (
+            <div className="mt-8 flex-1 border-t border-white/10 pt-6 font-mono text-[10px] uppercase tracking-widest text-smoke">
+              Tracklist unavailable.
+            </div>
+          ) : tracklistData?.status === 'ready' && tracklistData.tracks.length === 0 ? (
+            <div className="mt-8 flex-1 border-t border-white/10 pt-6">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-smoke">Tracklist unavailable.</div>
+              {tracklistData.sourceUrl ? (
+                <a
+                  href={tracklistData.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex font-mono text-[10px] uppercase tracking-widest text-acid transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                >
+                  Open 1001Tracklists ↗
+                </a>
+              ) : null}
+            </div>
+          ) : tracklistData?.status === 'ready' && tracklistData.tracks.length > 0 ? (
+            <div className="mt-8 flex-1 overflow-y-auto pr-4 max-h-[45vh] border-t border-white/10 pt-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+              <div className="mb-6 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest text-smoke">
+                <span>Tracklist ({tracklistData.tracks.length})</span>
+                {tracklistData.sourceUrl ? (
+                  <a
+                    href={tracklistData.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-acid transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                  >
                     1001Tracklists ↗
                   </a>
-                )}
+                ) : null}
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {tracklistData.tracks.map((t, idx) => {
                   const isCurrent = idx === currentTrackIndex;
+                  const isSelected = idx === selectedTrackIndex;
                   return (
-                    <button
-                      key={idx}
+                    <motion.button
+                      key={`${t.startSec}-${t.artist}-${t.title}`}
+                      ref={isCurrent ? currentTrackRowRef : null}
+                      layout={!shouldReduceMotion}
                       type="button"
+                      onMouseEnter={() => setSelectedTrackIndex(idx)}
+                      onFocus={() => setSelectedTrackIndex(idx)}
                       onClick={() => commitSeek(t.startSec)}
-                      className={`w-full text-left flex items-start gap-3 p-2 rounded transition-colors ${isCurrent ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                      className={`group relative flex w-full items-start gap-4 rounded border p-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
+                        isSelected ? 'border-white/15' : 'border-transparent'
+                      } ${isCurrent ? 'text-acid' : 'text-white'}`}
                     >
-                      <div className={`font-mono text-[10px] mt-0.5 ${isCurrent ? 'text-acid' : 'text-smoke'}`}>
+                      {!shouldReduceMotion && isCurrent ? (
+                        <motion.div
+                          layoutId="tmh-current-track"
+                          className="absolute inset-0 rounded bg-white/10"
+                          transition={{ duration: 0.22, ease: 'easeOut' }}
+                        />
+                      ) : isCurrent ? (
+                        <div className="absolute inset-0 rounded bg-white/10" />
+                      ) : null}
+
+                      <div className="relative mt-0.5 w-10 shrink-0 font-mono text-[10px] uppercase tracking-widest text-smoke group-hover:text-white/80">
                         {formatTime(t.startSec)}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className={`truncate font-display text-[13px] font-extrabold uppercase ${isCurrent ? 'text-acid' : 'text-white'}`}>
+                      <div className="relative min-w-0 flex-1">
+                        <div className="truncate font-display text-[14px] font-extrabold uppercase text-white group-hover:text-acid/80">
                           {t.title}
                         </div>
-                        <div className={`truncate font-mono text-[9px] uppercase tracking-widest ${isCurrent ? 'text-white/80' : 'text-smoke'}`}>
+                        <div className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.2em] text-smoke group-hover:text-white/60">
                           {t.artist} {t.label ? `[${t.label}]` : ''}
                         </div>
                       </div>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
             </div>
-          )}
+          ) : null}
 
-          <div className="pt-6 mt-auto">
+          <div className="mt-auto pt-6">
             <button
               type="button"
               onClick={() => setIsTheatreOpen(false)}
-              className="rounded-full border border-acid/75 px-5 py-2 font-mono text-[10px] uppercase tracking-[0.24em] text-acid transition-colors hover:bg-acid hover:text-ink"
+              className="inline-flex rounded-full border border-acid/60 bg-transparent px-6 py-3 font-mono text-[10px] uppercase tracking-[0.24em] text-acid transition-colors hover:border-acid hover:bg-acid hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
             >
               CLOSE THEATRE
             </button>

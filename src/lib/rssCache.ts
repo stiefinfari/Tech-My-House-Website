@@ -1,3 +1,5 @@
+import { parseDurationToSeconds } from './rssParse';
+
 export type Episode = {
   title: string;
   link: string;
@@ -45,22 +47,6 @@ function normalizeSoundCloudCover(url: string, size: number) {
   return safe.replace(/-t\\d+x\\d+(?=\\.)/i, `-t${s}x${s}`);
 }
 
-function parseDurationToSeconds(value: string | undefined): number | undefined {
-  if (!value) return undefined;
-  const raw = value.trim();
-  if (!raw) return undefined;
-  if (/^\\d+$/.test(raw)) {
-    const sec = Number(raw);
-    return Number.isFinite(sec) ? sec : undefined;
-  }
-  const parts = raw.split(':').map((p) => p.trim()).filter(Boolean);
-  if (parts.length < 2 || parts.length > 3) return undefined;
-  const nums = parts.map((p) => Number(p));
-  if (nums.some((n) => !Number.isFinite(n))) return undefined;
-  if (nums.length === 2) return nums[0] * 60 + nums[1];
-  return nums[0] * 3600 + nums[1] * 60 + nums[2];
-}
-
 function getFallback(): RadioShowResult {
   const now = new Date().toISOString();
   return {
@@ -104,7 +90,7 @@ export async function fetchRadioShow(): Promise<RadioShowResult> {
         const coverUrlRaw = item.thumbnail ?? item.enclosure?.thumbnail ?? '';
         const durationSec =
           item.enclosure?.duration ??
-          parseDurationToSeconds(item.itunes?.duration);
+          (parseDurationToSeconds(item.itunes?.duration) ?? undefined);
 
         const ep: Episode = {
           title: item.title ?? 'Unknown Episode',

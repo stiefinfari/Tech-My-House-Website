@@ -1,38 +1,33 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bookmark, BookmarkCheck, Play, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { usePlayer } from '../context/PlayerContext';
 import Marquee from '../components/Marquee';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
-import { mapFeedItems, DEFAULT_COVER, type FeedItem, type EpisodeFeedItem } from '../utils/episodeFeed';
+import { DEFAULT_COVER, type EpisodeFeedItem } from '../utils/episodeFeed';
 import { useEpisodeBookmarks } from '../hooks/useEpisodeBookmarks';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
-import { getTracklistForEpisode } from '../data/tracklists';
+import type { RadioEpisode } from '../lib/rssParse';
+import TMHLogoWhite from '../assets/TMH_LOGO_WHITE.png';
 
-type RssResponse = {
-  status?: string;
-  items?: FeedItem[];
+type RadioFeedResponse = {
+  episodes?: RadioEpisode[];
 };
 
-type EpisodeFilter = 'ALL' | 'HOUSE' | 'TECH HOUSE' | 'TECHNO' | 'HARD TECHNO';
+type RadioEpisodeUi = EpisodeFeedItem & {
+  episodeCode: string | null;
+  durationSec: number | null;
+  tracklistUrl: string | null;
+};
 
 export default function PodcastPage() {
-  const [episodes, setEpisodes] = useState<EpisodeFeedItem[]>([]);
+  const [episodes, setEpisodes] = useState<RadioEpisodeUi[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<EpisodeFilter>('ALL');
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const shouldReduceMotion = useReducedMotionPreference();
   const bookmarks = useEpisodeBookmarks();
-  const filterOptions: EpisodeFilter[] = ['ALL', 'HOUSE', 'TECH HOUSE', 'TECHNO', 'HARD TECHNO'];
-
-  const [openTracklists, setOpenTracklists] = useState<Record<string, boolean>>({});
-
-  const toggleTracklist = (link: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setOpenTracklists(prev => ({ ...prev, [link]: !prev[link] }));
-  };
 
   const jsonLd = useMemo(() => {
     const safeIso = (d: string) => {
@@ -44,7 +39,7 @@ export default function PodcastPage() {
       '@context': 'https://schema.org',
       '@type': 'PodcastSeries',
       name: 'Tech My House Radio Show',
-      url: new URL('/podcast', SITE.url).toString(),
+      url: new URL('/radio', SITE.url).toString(),
       publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
       inLanguage: 'en',
       sameAs: [
@@ -65,8 +60,8 @@ export default function PodcastPage() {
   }, [episodes]);
 
   useSeo({
-    title: 'Podcast',
-    path: '/podcast',
+    title: 'Radio',
+    path: '/radio',
     description:
       'Dive into the underground sound. Listen to the latest sets, curated mixes, and exclusive tracks from the Tech My House radio show.',
     jsonLd,
@@ -75,12 +70,21 @@ export default function PodcastPage() {
   useEffect(() => {
     const fetchPodcast = async () => {
       try {
-        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://feeds.soundcloud.com/users/soundcloud:users:1042711684/sounds.rss')}`);
-        const data = (await response.json()) as RssResponse;
-        if (data.status === 'ok') {
-          const items = Array.isArray(data.items) ? data.items : [];
-          setEpisodes(mapFeedItems(items.slice(0, 24)));
-        }
+        const response = await fetch('/api/radio-feed');
+        const data = (await response.json()) as RadioFeedResponse;
+        const raw = Array.isArray(data.episodes) ? data.episodes : [];
+        const mapped: RadioEpisodeUi[] = raw.map((ep) => ({
+          episodeCode: ep.episodeCode ?? null,
+          durationSec: ep.durationSec ?? null,
+          tracklistUrl: ep.tracklistUrl ?? null,
+          title: ep.title,
+          link: ep.soundcloudUrl ?? '#',
+          pubDate: ep.publishedAt ?? '',
+          audioUrl: ep.audioUrl ?? '',
+          coverUrl: ep.coverUrl ?? DEFAULT_COVER,
+          description: ep.summary ?? '',
+        }));
+        setEpisodes(mapped);
       } catch (error) {
         console.error("Error fetching podcast:", error);
       } finally {
@@ -90,13 +94,7 @@ export default function PodcastPage() {
     fetchPodcast();
   }, []);
 
-  const filteredEpisodes = useMemo(() => {
-    if (filter === 'ALL') return episodes;
-    const lookup = filter.toLowerCase();
-    return episodes.filter((ep) => ep.title.toLowerCase().includes(lookup));
-  }, [episodes, filter]);
-
-  const buildPlaylist = (source: EpisodeFeedItem[]) => {
+  const buildPlaylist = (source: RadioEpisodeUi[]) => {
     return source
       .filter((entry) => Boolean(entry.audioUrl))
       .map((entry) => ({
@@ -107,7 +105,7 @@ export default function PodcastPage() {
       }));
   };
 
-  const playEpisode = (episode: EpisodeFeedItem) => {
+  const playEpisode = (episode: RadioEpisodeUi) => {
     if (episode.audioUrl) {
       playTrack(
         {
@@ -116,7 +114,7 @@ export default function PodcastPage() {
           artist: 'Tech My House',
           coverUrl: episode.coverUrl,
         },
-        buildPlaylist(filteredEpisodes)
+        buildPlaylist(episodes)
       );
       return;
     }
@@ -128,70 +126,81 @@ export default function PodcastPage() {
     <div className="min-h-screen pb-24 pt-28 sm:pt-32">
       <div className="container-shell mb-14 max-w-6xl">
         <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">THE ARCHIVE</div>
-        <h1 className="display-title mt-4 text-[clamp(3rem,10vw,8rem)] leading-[0.9] text-white">RADIO SHOW</h1>
+        <div className="mt-4 flex items-center gap-2 sm:gap-3">
+          <h1 className="display-title text-[clamp(3rem,10vw,8rem)] leading-[0.9] text-white">RADIO SHOW</h1>
+          <img
+            src={TMHLogoWhite}
+            alt=""
+            aria-hidden="true"
+            className="h-16 w-16 shrink-0 origin-center motion-safe:animate-[spin_10s_linear_infinite] motion-reduce:animate-none sm:h-20 sm:w-20"
+          />
+        </div>
         <p className="accent-script mt-4 -rotate-[1.5deg] text-[clamp(1.6rem,3.5vw,2.8rem)] text-acid">every episode, underground sound</p>
         <div className="mt-5 font-mono text-[10px] uppercase tracking-widest text-smoke">
           {episodes.length} EPISODES · UPDATED WEEKLY
         </div>
       </div>
 
-      <Marquee text="RADIO SHOW · TECH MY HOUSE · RADIO SHOW · TECH MY HOUSE" className="bg-acid text-ink" size="sm" density="tight" />
+      <Marquee text="RADIO SHOW · TECH MY HOUSE · RADIO SHOW · TECH MY HOUSE" className="relative z-30 bg-acid text-ink" size="sm" density="tight" />
 
-      <div className="container-shell">
-        <div className="mb-5 flex flex-wrap gap-2">
-          {filterOptions.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setFilter(option)}
-              className={`rounded-full border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.24em] transition-colors ${
-                filter === option ? 'border-acid bg-acid text-ink' : 'border-white/15 bg-ink text-white/80 hover:border-acid/60 hover:text-white'
-              }`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-
+      <div className="container-shell pt-6">
         {loading ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="overflow-hidden border border-white/10 bg-ink">
-                <div className="aspect-square animate-pulse bg-white/10" />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 9 }).map((_, index) => (
+              <div
+                key={index}
+                className={`relative overflow-hidden border border-white/10 bg-ink ${index === 0 ? 'sm:col-span-2 sm:row-span-2' : ''}`}
+              >
+                <div className={`${index === 0 ? 'aspect-[4/5]' : 'aspect-[4/5]'} animate-pulse bg-white/10`} />
                 <div className="space-y-3 p-4">
-                  <div className="h-2 w-20 animate-pulse bg-white/15" />
-                  <div className="h-5 w-11/12 animate-pulse bg-white/15" />
-                  <div className="h-5 w-8/12 animate-pulse bg-white/15" />
                   <div className="h-2 w-24 animate-pulse bg-white/15" />
+                  <div className="h-6 w-11/12 animate-pulse bg-white/15" />
+                  <div className="h-2 w-40 animate-pulse bg-white/15" />
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-            {filteredEpisodes.map((ep, i) => {
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {episodes.map((ep, i) => {
               const isCurrentlyPlaying = currentTrack?.url === ep.audioUrl && isPlaying;
               const isFeatured = i === 0;
-              const formattedDate = new Date(ep.pubDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+              const dateValue = new Date(ep.pubDate);
+              const formattedDate = Number.isNaN(dateValue.getTime())
+                ? ''
+                : dateValue.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
               const bookmarked = bookmarks.isBookmarked(ep.link);
-              const tlData = getTracklistForEpisode({ title: ep.title, link: ep.link, audioUrl: ep.audioUrl });
-              const isTlOpen = openTracklists[ep.link] || false;
+              const episodeLabel = ep.episodeCode
+                ? `EP${ep.episodeCode.replace(/^ep/i, '')}`
+                : `EP.${Math.max(1, episodes.length - i)}`;
 
               return (
                 <motion.article
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
+                  key={ep.audioUrl ?? ep.link}
+                  initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.05 }}
-                  className={`group relative flex w-full flex-col overflow-hidden border border-white/10 bg-ink text-left transition-colors duration-300 hover:border-acid/60 ${isFeatured ? 'md:col-span-2 md:row-span-2' : ''}`}
+                  transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.04, duration: 0.35, ease: 'easeOut' }}
+                  className={`group relative overflow-hidden border border-white/10 bg-ink transition-colors hover:border-acid/60 ${isFeatured ? 'sm:col-span-2 sm:row-span-2' : ''}`}
                 >
-                  <button
-                    type="button"
-                    aria-label={`Play ${ep.title}`}
-                    onClick={() => playEpisode(ep)}
-                    className="w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-                  >
-                    <div className={`relative w-full overflow-hidden bg-black ${isFeatured ? 'aspect-[4/5] md:h-[440px] md:aspect-auto' : 'aspect-square'}`}>
+                  {ep.episodeCode ? (
+                    <Link
+                      to={`/radio/${ep.episodeCode}`}
+                      className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                      aria-label={`View ${ep.title}`}
+                    />
+                  ) : (
+                    <a
+                      href={ep.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                      aria-label={`View ${ep.title} on SoundCloud`}
+                    />
+                  )}
+
+                  <div className="relative z-0">
+                    <div className="pointer-events-none">
+                    <div className={`relative w-full overflow-hidden bg-black ${isFeatured ? 'aspect-[4/5]' : 'aspect-[4/5]'}`}>
                       <img
                         src={ep.coverUrl}
                         alt={ep.title}
@@ -200,80 +209,64 @@ export default function PodcastPage() {
                           event.currentTarget.onerror = null;
                           event.currentTarget.src = DEFAULT_COVER;
                         }}
-                        className={`h-full w-full object-cover transition-transform duration-500 ${isCurrentlyPlaying ? 'scale-[1.04]' : 'group-hover:scale-[1.03]'}`}
+                        className={`h-full w-full object-cover transition-transform duration-700 ${isCurrentlyPlaying ? 'scale-[1.04]' : 'group-hover:scale-[1.03]'}`}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent opacity-70" />
-                      <div className="absolute bottom-3 right-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-acid text-ink transition-transform duration-300 group-hover:scale-110">
-                          {isCurrentlyPlaying ? (
-                            <div className="flex gap-[4px] items-end h-5">
-                              <span className="h-full w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
-                              <span className="h-2/3 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '200ms' }} />
-                              <span className="h-4/5 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '400ms' }} />
-                            </div>
-                          ) : (
-                            <Play size={24} fill="currentColor" className="ml-1" />
-                          )}
-                        </div>
-                      </div>
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/35 to-transparent opacity-90" />
+                      <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]" />
                     </div>
-                    <div className="flex flex-1 flex-col p-4">
-                      <div className="font-mono text-[9px] uppercase tracking-[0.26em] text-acid">EP.{Math.max(1, filteredEpisodes.length - i)}</div>
-                      <h3 className="mt-2 font-display text-lg font-extrabold uppercase leading-tight text-white line-clamp-2">
+
+                    <div className="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-white/70">
+                      <span className="text-acid">{episodeLabel}</span>
+                      {formattedDate ? <span className="hidden sm:inline">{formattedDate}</span> : null}
+                    </div>
+
+                    <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-none">
+                      <div className="font-display text-[clamp(1.35rem,2.5vw,2.25rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.03em] text-white drop-shadow">
                         {ep.title}
-                      </h3>
-                      <div className="mt-auto flex items-center justify-between pt-4 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
-                        <span>{formattedDate}</span>
-                        {isCurrentlyPlaying && (
-                          <span className="text-acid">▶ PLAYING</span>
-                        )}
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
+                        <span className="truncate">{isCurrentlyPlaying ? '▶ PLAYING' : 'VIEW TRACKLIST'}</span>
+                        {isFeatured ? <span className="text-white/50">FEATURED</span> : null}
                       </div>
                     </div>
-                  </button>
-                  <div className="flex items-center justify-between px-4 pb-4">
-                    <button
-                      type="button"
-                      onClick={() => bookmarks.toggle(ep.link)}
-                      aria-label={bookmarked ? `Remove bookmark ${ep.title}` : `Bookmark ${ep.title}`}
-                      className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.24em] text-white/80 transition-colors hover:text-acid"
-                    >
-                      {bookmarked ? <BookmarkCheck size={14} className="text-acid" /> : <Bookmark size={14} />}
-                      {bookmarked ? 'BOOKMARKED' : 'BOOKMARK'}
-                    </button>
-                    
-                    {tlData && tlData.tracks.length > 0 && (
+                    </div>
+
+                    <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 pointer-events-auto">
                       <button
                         type="button"
-                        onClick={(e) => toggleTracklist(ep.link, e)}
-                        className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke transition-colors hover:text-acid"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          playEpisode(ep);
+                        }}
+                        aria-label={`Play ${ep.title}`}
+                        className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-acid text-ink transition-transform duration-200 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                       >
-                        TRACKLIST {isTlOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                      </button>
-                    )}
-                  </div>
-
-                  {isTlOpen && tlData && (
-                    <div className="border-t border-white/10 bg-black/20 p-4">
-                      {tlData.sourceUrl && (
-                        <a href={tlData.sourceUrl} target="_blank" rel="noopener noreferrer" className="block text-right mb-3 font-mono text-[9px] text-acid uppercase tracking-widest hover:underline">
-                          View on 1001Tracklists ↗
-                        </a>
-                      )}
-                      <div className="space-y-3">
-                        {tlData.tracks.map((t, idx) => (
-                          <div key={idx} className="flex gap-3">
-                            <div className="font-mono text-[9px] text-smoke shrink-0 w-8">
-                              {Math.floor(t.startSec / 60)}:{(t.startSec % 60).toString().padStart(2, '0')}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-display text-[11px] font-bold text-white uppercase truncate">{t.title}</div>
-                              <div className="font-mono text-[9px] text-smoke uppercase truncate">{t.artist}</div>
-                            </div>
+                        {isCurrentlyPlaying ? (
+                          <div className="flex h-5 items-end gap-[4px]">
+                            <span className="h-full w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '0ms' }} />
+                            <span className="h-2/3 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '200ms' }} />
+                            <span className="h-4/5 w-1.5 bg-ink animate-[bounce_1s_infinite]" style={{ animationDelay: '400ms' }} />
                           </div>
-                        ))}
-                      </div>
+                        ) : (
+                          <Play size={22} fill="currentColor" className="ml-0.5" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          bookmarks.toggle(ep.link);
+                        }}
+                        aria-label={bookmarked ? `Remove bookmark ${ep.title}` : `Bookmark ${ep.title}`}
+                        className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-ink/60 text-white/80 backdrop-blur-md transition-colors hover:border-acid/60 hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                      >
+                        {bookmarked ? <BookmarkCheck size={16} className="text-acid" /> : <Bookmark size={16} />}
+                      </button>
                     </div>
-                  )}
+                  </div>
                 </motion.article>
               );
             })}

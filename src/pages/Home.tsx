@@ -7,16 +7,23 @@ import RecordsSection from '../sections/home/RecordsSection';
 import RadioShowSection from '../sections/home/RadioShowSection';
 import ArtistsSection from '../sections/home/ArtistsSection';
 import Marquee from '../components/Marquee';
+import { getScrollTopWithOffset } from '../lib/scrollOffset';
 
 export default function Home() {
   const location = useLocation();
 
   useEffect(() => {
+    const navOffset = 112;
     if (location.hash) {
       const id = location.hash.replace('#', '');
       const element = document.getElementById(id);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+        const nextTop = getScrollTopWithOffset({
+          elementTopInViewport: element.getBoundingClientRect().top,
+          scrollY: window.scrollY,
+          offset: navOffset,
+        });
+        window.scrollTo({ top: nextTop, behavior: 'smooth' });
       }
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -36,7 +43,7 @@ export default function Home() {
   return (
     <div className="w-full">
       <HeroSection />
-      <div className="relative z-10 space-y-24 pb-24 sm:space-y-32 sm:pb-32">
+      <div className="relative z-10 space-y-24 pb-36 sm:space-y-32 sm:pb-44">
         <RadioShowSection />
         <Marquee />
         <Marquee

@@ -9,7 +9,7 @@ const baseUrl = (process.env.VITE_SITE_URL || process.env.SITE_URL || 'https://t
 
 const src = fs.readFileSync(dataPath, 'utf8');
 
-const artistsBlock = src.match(/export\s+const\s+artists\s*=\s*\[([\s\S]*?)\]\s*;/);
+const artistsBlock = src.match(/export\s+const\s+artists(?:\s*:\s*[^=]+)?\s*=\s*\[([\s\S]*?)\]\s*;/);
 const ids = [];
 if (artistsBlock?.[1]) {
   const re = /id:\s*['"]([^'"]+)['"]/g;
@@ -19,7 +19,7 @@ if (artistsBlock?.[1]) {
   }
 }
 
-const routes = ['/', '/podcast', ...ids.map((id) => `/artist/${id}`)];
+const routes = ['/', '/radio', ...ids.map((id) => `/artist/${id}`)];
 
 const now = new Date().toISOString();
 const xml =
@@ -35,4 +35,3 @@ const xml =
 
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, xml, 'utf8');
-

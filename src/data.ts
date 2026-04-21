@@ -29,7 +29,7 @@ export const artists: Artist[] = [
     role: 'DJ / Host',
     bio: 'Tech house e host.',
     imageUrl: '/assets/phari.png',
-    latestMix: '/podcast',
+    latestMix: '/radio',
     socials: {
       facebook: 'https://www.facebook.com/djphari',
       website: 'https://linktr.ee/djphari',

@@ -58,9 +58,16 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
       role="dialog"
       aria-modal="true"
       aria-label="Radio theatre mode"
-      className={`fixed inset-0 z-[140] bg-ink/95 backdrop-blur-md ${shouldReduceMotion ? '' : 'animate-fade-in'}`}
+      className={`fixed inset-0 z-[140] bg-ink ${shouldReduceMotion ? '' : 'animate-fade-in'}`}
     >
-      <div className="container-shell flex h-full flex-col py-6">
+      {coverUrl && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
+          <img src={coverUrl} alt="" className="h-full w-full object-cover blur-3xl scale-110" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-transparent" />
+        </div>
+      )}
+
+      <div className="container-shell relative z-10 flex h-full flex-col py-8 sm:py-12">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-[13px] font-extrabold uppercase tracking-[0.2em] text-acid">
             Theatre Mode
@@ -70,23 +77,24 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
             type="button"
             onClick={onClose}
             aria-label="Close theatre mode"
-            className="inline-flex h-10 w-10 items-center justify-center border border-white/20 bg-black/40 text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:scale-105 hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="mt-6 grid flex-1 gap-6 lg:grid-cols-[minmax(320px,480px)_1fr] lg:items-center">
-          <div className="aspect-square overflow-hidden border border-white/10 bg-black">
+        <div className="mt-8 grid flex-1 gap-12 lg:grid-cols-[minmax(400px,500px)_1fr] lg:items-center">
+          <div className="relative aspect-square w-full max-w-[500px] overflow-hidden rounded-sm shadow-2xl mx-auto lg:mx-0">
             {coverUrl ? (
               <img src={coverUrl} alt={title} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
+              <div className="flex h-full w-full items-center justify-center bg-black/50 font-mono text-[11px] uppercase tracking-[0.26em] text-smoke">
                 No Cover
               </div>
             )}
+            <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] pointer-events-none" />
           </div>
-          <div className="min-w-0">{children}</div>
+          <div className="min-w-0 flex flex-col h-full justify-center">{children}</div>
         </div>
       </div>
     </div>
