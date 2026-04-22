@@ -2,10 +2,10 @@
 
 ## Context
 - Target page: `/` (`Home.tsx`).
-- Goal: add an immersive but subtle parallax effect **between home sections**.
+- Goal: add an immersive parallax effect **between home sections** that is clearly perceivable but still controlled.
 - Selected direction: hybrid of
-  - global soft background parallax layers, and
-  - animated inter-section dividers.
+  - global ambient background parallax layers, and
+  - “portal” inter-section transitions (taller dividers with layered motion).
 - Constraints:
   - keep current section content and hierarchy intact;
   - no changes to player/data/routing logic;
@@ -14,9 +14,9 @@
 
 ## Scope
 ### In scope
-- New decorative parallax backdrop in home section stack.
-- New divider component rendered between key sections.
-- Minimal CSS additions for divider visual language (band + texture + glow).
+- New decorative parallax backdrop in home section stack (ambient, non-dominant).
+- New portal divider component rendered between key sections.
+- Minimal CSS additions for portal visual language (tape edge + foil + texture).
 - Integration wiring in `Home.tsx`.
 
 ### Out of scope
@@ -26,8 +26,8 @@
 
 ## User Experience Intent
 - Perceived depth while scrolling from one section to the next.
-- Motion must feel cinematic-soft, never aggressive.
-- Dividers should read as visual transitions, not as blocking content.
+- Motion must feel cinematic but clearly readable (not “imperceptible”).
+- Portals should read as strong transitions with acid presence, without looking like flat yellow stripes.
 - Existing readability and CTA clarity must remain unchanged.
 
 ## Proposed Architecture
@@ -36,27 +36,28 @@
 - Placement: inside `Home` around section stack, below section content (`z` lower, `pointer-events-none`, `aria-hidden`).
 - Motion:
   - uses `framer-motion` `useScroll` + `useTransform`;
-  - each layer has a small differential Y offset (example ranges: `12px`, `22px`, `34px`);
-  - optional slight opacity drift if needed, but conservative.
+  - each layer has a small differential Y offset (example ranges: `10px`, `18px`, `28px`);
+  - avoid high-contrast shapes because some sections have full backgrounds (the portal is the primary transition).
 - Visual primitives: gradients/noise already compatible with project palette (`ink`, `acid`, white alpha).
 
-### 2) `SectionDividerParallax` (new component)
-- Responsibility: visual separator inserted between section blocks.
+### 2) `SectionPortalParallax` (new component)
+- Responsibility: a tall transition “portal” inserted between section blocks, with layered parallax to create depth.
 - Placement:
   - between `RadioShowSection` and `RecordsSection`;
   - between `RecordsSection` and `ArtistsSection`.
 - Motion:
-  - local scroll progress drives subtle translate/opacity;
-  - alternate directions between divider instances for rhythm.
+  - local scroll progress drives layered translate (3 layers) with alternating directions between portals;
+  - portal height must be large enough to be perceived (example: `h-44 sm:h-56`).
 - Visual language:
-  - slim tape/band strip + textured glow layer;
-  - low contrast by default, slightly brighter near center.
+  - base: dark band with rough edges (`tape-edge`) and a subtle border;
+  - foil: acid “foil” gradient (diagonal or radial) with controlled opacity (avoid pure flat yellow);
+  - texture: noise layer + optional scanline-like micro pattern.
 
 ### 3) Home integration changes
 - `Home.tsx` composes:
   - `HomeSectionParallaxBackdrop`,
   - existing sections,
-  - two `SectionDividerParallax` insertions.
+  - two `SectionPortalParallax` insertions.
 - Keep current marquee block intact.
 - Maintain scroll anchor behavior already present in `Home.tsx`.
 
@@ -71,22 +72,22 @@
   - decorative layers must not intercept pointer/focus.
 
 ## Performance Guardrails
-- Keep moving layers count low (max 3 backdrop layers + 2 divider instances).
+- Keep moving layers count low (max 3 backdrop layers + 2 portal instances).
 - Use conservative transform ranges.
 - Avoid high-frequency JS loops; rely on `framer-motion` mapping from scroll progress.
 - Ensure no extra media requests or external dependencies.
 
 ## Implementation Plan (Atomic)
 1. Add `src/components/home/HomeSectionParallaxBackdrop.tsx`.
-2. Add `src/components/home/SectionDividerParallax.tsx`.
+2. Add `src/components/home/SectionPortalParallax.tsx`.
 3. Add minimal CSS utility classes (if needed) in `src/index.css`.
 4. Wire components in `src/pages/Home.tsx`.
 5. Run diagnostics/build checks relevant to edited files.
 6. Manual visual QA on desktop + mobile viewport.
 
 ## Acceptance Criteria
-- On home scroll, depth is perceivable between sections without distraction.
-- Dividers are visible as transitions but do not overpower section content.
+- On home scroll, depth is clearly perceivable between sections and reads as a designed transition.
+- Portals look like acid “energy” transitions, not flat yellow stripes.
 - No regression in section spacing, clickability, or anchor navigation.
 - Reduced motion mode shows static, coherent visuals.
 - TypeScript/lint diagnostics for touched files are clean.
