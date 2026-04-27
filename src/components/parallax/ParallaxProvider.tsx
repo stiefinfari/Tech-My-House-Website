@@ -15,21 +15,16 @@ export default function ParallaxProvider({ children }: { children: React.ReactNo
   const rafRef = useRef<number | null>(null);
   const lastScrollYRef = useRef<number | null>(null);
   const lastViewportHRef = useRef<number | null>(null);
+  const runningRef = useRef(false);
 
-  const schedule = useCallback(() => {
-    if (!enabled) return;
-    if (rafRef.current != null) return;
-    rafRef.current = window.requestAnimationFrame(() => {
-      rafRef.current = null;
+  const loop = useCallback(() => {
+    if (!runningRef.current) return;
 
-      const viewportHeight = window.innerHeight || 0;
-      const scrollY = window.scrollY || 0;
+    const viewportHeight = window.innerHeight || 0;
+    const roundedScrollY = Math.round(window.scrollY || 0);
 
-      if (scrollY === lastScrollYRef.current && viewportHeight === lastViewportHRef.current) {
-        return;
-      }
-
-      lastScrollYRef.current = scrollY;
+    if (roundedScrollY !== lastScrollYRef.current || viewportHeight !== lastViewportHRef.current) {
+      lastScrollYRef.current = roundedScrollY;
       lastViewportHRef.current = viewportHeight;
 
       const current = itemsRef.current;
@@ -42,7 +37,7 @@ export default function ParallaxProvider({ children }: { children: React.ReactNo
         const y =
           item.config.mode === 'scroll'
             ? computeParallaxOffsetFromScrollY({
-                scrollY,
+                scrollY: roundedScrollY,
                 speed: item.config.speedY,
                 strength,
                 maxPx,
@@ -62,7 +57,7 @@ export default function ParallaxProvider({ children }: { children: React.ReactNo
           item.config.speedX !== 0
             ? item.config.mode === 'scroll'
               ? computeParallaxOffsetFromScrollY({
-                  scrollY,
+                  scrollY: roundedScrollY,
                   speed: item.config.speedX,
                   strength,
                   maxPx,
@@ -81,30 +76,46 @@ export default function ParallaxProvider({ children }: { children: React.ReactNo
 
         item.el.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
       }
-    });
-  }, [enabled, strength]);
+    }
+
+    rafRef.current = window.requestAnimationFrame(loop);
+  }, [strength]);
+
+  const start = useCallback(() => {
+    if (!enabled) return;
+    if (runningRef.current) return;
+    if (itemsRef.current.length === 0) return;
+    runningRef.current = true;
+    lastScrollYRef.current = null;
+    lastViewportHRef.current = null;
+    rafRef.current = window.requestAnimationFrame(loop);
+  }, [enabled, loop]);
+
+  const stop = useCallback(() => {
+    runningRef.current = false;
+    if (rafRef.current != null) window.cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+  }, []);
+
+  const schedule = useCallback(() => {
+    if (!enabled) return;
+    start();
+  }, [enabled, start]);
 
   useEffect(() => {
     if (!enabled) {
+      stop();
       for (const item of itemsRef.current) {
         item.el.style.transform = '';
       }
       return;
     }
-
-    const onScroll = () => schedule();
-    const onResize = () => schedule();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
     schedule();
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
-      if (rafRef.current != null) window.cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+      stop();
     };
-  }, [enabled, schedule]);
+  }, [enabled, schedule, stop]);
 
   const register = useCallback<ParallaxContextValue['register']>(
     (el, config) => {
@@ -121,9 +132,10 @@ export default function ParallaxProvider({ children }: { children: React.ReactNo
       schedule();
       return () => {
         itemsRef.current = itemsRef.current.filter((x) => x !== normalized);
+        if (itemsRef.current.length === 0) stop();
       };
     },
-    [schedule]
+    [schedule, stop]
   );
 
   const value = useMemo<ParallaxContextValue>(() => ({ register, strength, enabled }), [enabled, register, strength]);

@@ -1,8 +1,10 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import useInViewOnce from '../../hooks/useInViewOnce';
 import { artists } from '../../data';
 import TopoBlob from '../../components/TopoBlob';
 import PillButton from '../../components/ui/PillButton';
+import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
 
 function getInitials(name: string) {
   const parts = name.split(/\s+/).filter(Boolean);
@@ -12,6 +14,7 @@ function getInitials(name: string) {
 
 export default function ArtistsSection() {
   const { ref, inView } = useInViewOnce<HTMLElement>({ threshold: 0.2, rootMargin: '0px 0px -15% 0px' });
+  const shouldReduceMotion = useReducedMotionPreference();
 
   return (
     <section
@@ -24,7 +27,15 @@ export default function ArtistsSection() {
         <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between tmh-reveal-item" style={{ '--tmh-delay': '0ms' } as React.CSSProperties}>
           <div>
             <div className="section-tag">Roster</div>
-            <h2 className="display-title mt-3 text-[clamp(3rem,8vw,6.5rem)] text-white">ARTISTS</h2>
+            <motion.h2
+              className="display-title mt-3 text-[clamp(3rem,8vw,6.5rem)] text-white"
+              initial={shouldReduceMotion ? false : { clipPath: 'inset(100% 0 0 0)' }}
+              whileInView={{ clipPath: 'inset(0% 0 0 0)' }}
+              viewport={{ once: true, margin: '-10% 0px' }}
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.1, ease: [0.76, 0, 0.24, 1] }}
+            >
+              ARTISTS
+            </motion.h2>
           </div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-smoke">
             CURATED SELECTORS · UNDERGROUND ENERGY
@@ -33,10 +44,23 @@ export default function ArtistsSection() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {artists.map((artist, idx) => (
-            <div
+            <motion.div
               key={artist.id}
-              className="group border border-white/10 bg-white/[0.02] p-4 transition-colors transition-transform duration-300 hover:border-acid/45 hover:scale-[1.02] hover:-rotate-[0.5deg] tmh-reveal-item"
+              className="group border border-white/10 bg-white/[0.02] p-4 transition-colors duration-300 hover:border-acid/45 tmh-reveal-item"
               style={{ '--tmh-delay': `${120 + idx * 70}ms` } as React.CSSProperties}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 50, rotate: -1 }}
+              whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+              viewport={{ once: true, margin: '-10% 0px' }}
+              transition={
+                shouldReduceMotion
+                  ? { duration: 0 }
+                  : { delay: idx * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }
+              }
+              whileHover={
+                shouldReduceMotion
+                  ? undefined
+                  : { scale: 1.03, rotate: -0.5, transition: { type: 'spring', stiffness: 240, damping: 22 } }
+              }
             >
               <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-ink">
                 {artist.imageUrl ? (
@@ -77,7 +101,7 @@ export default function ArtistsSection() {
                   VIEW PROFILE
                 </PillButton>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
