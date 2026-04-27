@@ -46,7 +46,7 @@ export default function ArtistsSection() {
           {artists.map((artist, idx) => (
             <motion.div
               key={artist.id}
-              className="group border border-white/10 bg-white/[0.02] p-4 transition-colors duration-300 hover:border-acid/45 tmh-reveal-item"
+              className="group border border-white/10 bg-white/[0.02] p-4 transition-colors duration-300 hover:border-acid/45"
               style={{ '--tmh-delay': `${120 + idx * 70}ms` } as React.CSSProperties}
               initial={shouldReduceMotion ? false : { opacity: 0, y: 50, rotate: -1 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}

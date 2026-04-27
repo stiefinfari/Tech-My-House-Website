@@ -40,12 +40,19 @@ class RadioShowErrorBoundary extends React.Component<
 export default function RadioShowSection() {
   const { ref, inView } = useInViewOnce<HTMLElement>({ threshold: 0.2, rootMargin: '0px 0px -15% 0px' });
   const shouldReduceMotion = useReducedMotionPreference();
-  const { scrollY } = useScroll();
-  const decorY = useTransform(scrollY, (v) => v * -0.2);
+  const sectionRef = React.useRef<HTMLElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const decorY = useTransform(scrollYProgress, [0, 1], [60, -60]);
 
   return (
     <section
-      ref={ref}
+      ref={(el) => {
+        ref.current = el;
+        sectionRef.current = el;
+      }}
       id="podcast"
       data-inview={inView ? 'true' : 'false'}
       className="py-20 sm:py-24 lg:py-28 tmh-reveal-scope"
@@ -68,7 +75,7 @@ export default function RadioShowSection() {
 
         <div className="container-shell">
           <motion.div
-            className="mb-12 max-w-6xl tmh-reveal-item"
+            className="mb-12 max-w-6xl"
             style={{ '--tmh-delay': '0ms' } as React.CSSProperties}
             initial={shouldReduceMotion ? false : { opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}

@@ -8,8 +8,12 @@ export default function RecordsSection() {
   const [submitted, setSubmitted] = React.useState(false);
   const { ref, inView } = useInViewOnce<HTMLElement>({ threshold: 0.2, rootMargin: '0px 0px -15% 0px' });
   const shouldReduceMotion = useReducedMotionPreference();
-  const { scrollY } = useScroll();
-  const circleY = useTransform(scrollY, [0, 2000], [-200, 200]);
+  const sectionRef = React.useRef<HTMLElement | null>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const circleY = useTransform(scrollYProgress, [0, 1], [-80, 80]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -18,7 +22,10 @@ export default function RecordsSection() {
 
   return (
     <section
-      ref={ref}
+      ref={(el) => {
+        ref.current = el;
+        sectionRef.current = el;
+      }}
       id="records"
       data-inview={inView ? 'true' : 'false'}
       className="cement-texture relative isolate overflow-hidden py-20 sm:py-24 lg:py-28 scroll-mt-28 tmh-reveal-scope"
@@ -69,7 +76,7 @@ export default function RecordsSection() {
               ].map((item, idx) => (
                 <motion.div
                   key={item.k}
-                  className="border-l-2 border-acid/55 pl-4 tmh-reveal-item"
+                  className="border-l-2 border-acid/55 pl-4"
                   style={{ '--tmh-delay': `${200 + idx * 80}ms` } as React.CSSProperties}
                   initial={shouldReduceMotion ? false : { opacity: 0, x: -24 }}
                   whileInView={{ opacity: 1, x: 0 }}

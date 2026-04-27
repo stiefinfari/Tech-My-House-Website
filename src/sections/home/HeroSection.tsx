@@ -8,9 +8,8 @@ export default function HeroSection() {
   const shouldReduceMotion = useReducedMotionPreference();
 
   const { scrollY } = useScroll();
-  const videoY = useTransform(scrollY, (v) => v * 0.35);
-  const overlayY = useTransform(scrollY, (v) => v * -0.15);
-  const textY = useTransform(scrollY, (v) => v * -0.2);
+  const videoY = useTransform(scrollY, [0, 800], [0, -200]);
+  const textY = useTransform(scrollY, [0, 600], [0, -60]);
 
   const titleWords = ['TECH', 'MY', 'HOUSE'] as const;
 
@@ -26,7 +25,7 @@ export default function HeroSection() {
             poster="/assets/hero-poster.jpg"
             preload="metadata"
             aria-hidden="true"
-            className="tmh-hero-media absolute inset-0 h-full w-full object-cover opacity-50 brightness-[0.85] contrast-[1.08]"
+            className="tmh-hero-media absolute inset-[-8%] h-[116%] w-[116%] object-cover opacity-50 brightness-[0.85] contrast-[1.08]"
           >
             <source src="/assets/hero-video.webm" type="video/webm" />
             <source src="/assets/hero-video.mp4" type="video/mp4" />
@@ -43,10 +42,9 @@ export default function HeroSection() {
         )}
       </motion.div>
 
-      <motion.div
+      <div
         className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(ellipse_at_30%_50%,transparent_0%,rgba(10,10,10,0.55)_60%,rgba(10,10,10,0.95)_100%)]"
         aria-hidden="true"
-        style={!shouldReduceMotion ? { y: overlayY } : undefined}
       />
       <div className="pointer-events-none absolute inset-0 z-20" aria-hidden="true">
         <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-b from-transparent via-transparent to-ink" />
