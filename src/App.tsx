@@ -23,6 +23,7 @@ function App() {
               <Route path="/radio/:episodeCode" element={<RadioEpisodePage />} />
               <Route path="/podcast" element={<Navigate to="/radio" replace />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/contatti" element={<Navigate to="/contact" replace />} />
             </Routes>
           </Suspense>
         </Layout>

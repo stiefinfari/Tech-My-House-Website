@@ -14,7 +14,6 @@ export type ParsedTracklist = {
 
 const ALLOW = new Set(['1001.tl', 'www.1001.tl', '1001tracklists.com', 'www.1001tracklists.com']);
 const UPSTREAM_TIMEOUT_MS = 10_000;
-const MAX_REDIRECTS = 5;
 const MAX_HTML_BYTES = 2_500_000;
 
 type RequestLike = {
@@ -110,41 +109,36 @@ function isAllowed(u: URL): boolean {
   return ALLOW.has(u.hostname);
 }
 
-function isRedirectStatus(s: number): boolean {
-  return s === 301 || s === 302 || s === 303 || s === 307 || s === 308;
-}
-
 async function fetchHtmlAllowed(url: URL, signal: AbortSignal): Promise<{ html: string; finalUrl: string }> {
-  let current = url;
-  for (let i = 0; i <= MAX_REDIRECTS; i++) {
-    if (!isAllowed(current)) throw new Error('not_allowed');
+  if (!isAllowed(url)) throw new Error('not_allowed');
 
-    const r = await fetch(current.toString(), {
-      redirect: 'manual',
-      signal,
-      headers: {
-        accept: 'text/html, application/xhtml+xml;q=0.9, */*;q=0.1',
-        'user-agent': 'TechMyHouseBot/1.0 (+https://techmyhouse.it)',
-      },
-    });
+  const r = await fetch(url.toString(), {
+    redirect: 'follow',
+    signal,
+    headers: {
+      accept: 'text/html, application/xhtml+xml;q=0.9, */*;q=0.1',
+      'user-agent': 'TechMyHouseBot/1.0 (+https://techmyhouse.it)',
+    },
+  });
 
-    if (isRedirectStatus(r.status)) {
-      const loc = r.headers.get('location');
-      if (!loc) throw new Error('bad_redirect');
-      current = new URL(loc, current);
-      continue;
+  const resolvedUrl = (() => {
+    try {
+      return r.url ? new URL(r.url) : url;
+    } catch {
+      return url;
     }
+  })();
 
-    if (!r.ok) throw new Error('upstream');
+  if (!isAllowed(resolvedUrl)) throw new Error('not_allowed');
 
-    const ct = (r.headers.get('content-type') ?? '').toLowerCase();
-    if (!(ct.includes('text/html') || ct.includes('application/xhtml+xml'))) throw new Error('bad_content_type');
+  if (!r.ok) throw new Error('upstream');
 
-    const html = await r.text();
-    if (html.length > MAX_HTML_BYTES) throw new Error('too_large');
-    return { html, finalUrl: current.toString() };
-  }
-  throw new Error('too_many_redirects');
+  const ct = (r.headers.get('content-type') ?? '').toLowerCase();
+  if (!(ct.includes('text/html') || ct.includes('application/xhtml+xml'))) throw new Error('bad_content_type');
+
+  const html = await r.text();
+  if (html.length > MAX_HTML_BYTES) throw new Error('too_large');
+  return { html, finalUrl: resolvedUrl.toString() };
 }
 
 export default async function handler(req: RequestLike, res: ResponseLike) {

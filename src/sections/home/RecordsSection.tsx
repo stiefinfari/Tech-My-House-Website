@@ -1,11 +1,10 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
+import useInViewOnce from '../../hooks/useInViewOnce';
 import PillButton from '../../components/ui/PillButton';
 
 export default function RecordsSection() {
   const [submitted, setSubmitted] = React.useState(false);
-  const reducedMotion = useReducedMotionPreference();
+  const { ref, inView } = useInViewOnce<HTMLElement>({ threshold: 0.2, rootMargin: '0px 0px -15% 0px' });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -13,26 +12,19 @@ export default function RecordsSection() {
   };
 
   return (
-    <motion.section
+    <section
+      ref={ref}
       id="records"
-      className="cement-texture relative isolate overflow-hidden py-20 sm:py-24 lg:py-28 scroll-mt-28"
-      initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
+      data-inview={inView ? 'true' : 'false'}
+      className="cement-texture relative isolate overflow-hidden py-20 sm:py-24 lg:py-28 scroll-mt-28 tmh-reveal-scope"
     >
       <div className="container-shell relative z-10">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-16">
-          <motion.div
-            initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={reducedMotion ? { duration: 0 } : { duration: 0.55, ease: 'easeOut' }}
-          >
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.4fr_1fr] lg:items-start lg:gap-16 xl:grid-cols-[1.55fr_1fr]">
+          <div className="tmh-reveal-item" style={{ '--tmh-delay': '0ms' } as React.CSSProperties}>
             <div className="section-tag">Imprint</div>
             <h2 className="mt-4 text-white leading-[0.86]">
-              <span className="display-title block text-[clamp(4.5rem,16vw,13rem)]">TMH</span>
-              <span className="accent-script block -mt-2 text-[clamp(3.6rem,14vw,12.5rem)] text-white">Records</span>
+              <span className="display-title block text-[clamp(4rem,13vw,12rem)]">TMH</span>
+              <span className="accent-script block -mt-2 text-[clamp(3.3rem,12vw,11.5rem)] text-white">Records</span>
             </h2>
             <p className="mt-5 max-w-xl text-sm text-white/72">
               Curated underground releases with a raw imprint identity. First drops are incoming.
@@ -41,31 +33,22 @@ export default function RecordsSection() {
               <span className="tape-strip">CATALOGUE 2026</span>
               <span className="font-mono text-[10px] uppercase tracking-widest text-smoke">LIMITED IMPRINT RELEASES</span>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="space-y-8"
-            initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut', delay: 0.08 }}
-          >
+          <div className="space-y-8 tmh-reveal-item" style={{ '--tmh-delay': '120ms' } as React.CSSProperties}>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {[
                 { k: 'FORMAT', v: 'DIGITAL + SPECIAL CUTS' },
                 { k: 'STATUS', v: 'COMING SOON' },
               ].map((item, idx) => (
-                <motion.div
+                <div
                   key={item.k}
-                  className="border-l-2 border-acid/55 pl-4"
-                  initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.3 }}
-                  transition={reducedMotion ? { duration: 0 } : { duration: 0.45, ease: 'easeOut', delay: 0.14 + idx * 0.08 }}
+                  className="border-l-2 border-acid/55 pl-4 tmh-reveal-item"
+                  style={{ '--tmh-delay': `${200 + idx * 80}ms` } as React.CSSProperties}
                 >
                   <div className="font-mono text-[10px] uppercase tracking-widest text-acid">{item.k}</div>
                   <div className="mt-2 font-display text-[17px] font-extrabold uppercase tracking-[0.1em] text-white/92">{item.v}</div>
-                </motion.div>
+                </div>
               ))}
             </div>
 
@@ -91,9 +74,9 @@ export default function RecordsSection() {
                 <p className="pt-1 font-display text-[11px] uppercase tracking-[0.18em] text-acid">Thanks — you&apos;re on the list</p>
               ) : null}
             </form>
-          </motion.div>
+          </div>
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

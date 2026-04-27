@@ -5,10 +5,12 @@ import { ArrowLeft, Facebook, Globe, Instagram, Youtube } from 'lucide-react';
 import { artists, type ArtistSocialKey } from '../data';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
+import useParallaxItem from '../hooks/useParallaxItem';
 
 export default function Artist() {
   const { id } = useParams<{ id: string }>();
   const artist = artists.find(a => a.id === id);
+  const mediaRef = useParallaxItem<HTMLDivElement>({ speedY: 0.05, maxPx: 120 });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -104,18 +106,20 @@ export default function Artist() {
           transition={{ duration: 0.6 }}
           className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10 bg-black"
         >
-          {artist.imageUrl ? (
-            <img src={artist.imageUrl} alt={artist.name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_40%_30%,rgba(204,255,0,0.10),transparent_55%)]">
-              <div className="relative inline-flex h-40 w-40 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/[0.02]">
-                <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] border border-acid/35 mix-blend-screen" />
-                <span className="font-display text-6xl font-extrabold uppercase tracking-[-0.06em] text-white/90">
-                  {initials || 'TM'}
-                </span>
+          <div ref={mediaRef} className="tmh-parallax-layer absolute inset-0">
+            {artist.imageUrl ? (
+              <img src={artist.imageUrl} alt={artist.name} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_40%_30%,rgba(204,255,0,0.10),transparent_55%)]">
+                <div className="relative inline-flex h-40 w-40 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/[0.02]">
+                  <div className="pointer-events-none absolute inset-0 rounded-[2.5rem] border border-acid/35 mix-blend-screen" />
+                  <span className="font-display text-6xl font-extrabold uppercase tracking-[-0.06em] text-white/90">
+                    {initials || 'TM'}
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
           <div className="pointer-events-none absolute inset-0 border border-acid/25 mix-blend-screen" />
         </motion.div>
 

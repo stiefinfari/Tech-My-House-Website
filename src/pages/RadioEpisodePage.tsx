@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Play } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
+import useParallaxItem from '../hooks/useParallaxItem';
 import { useSeo } from '../seo/useSeo';
 import { SITE } from '../seo/site';
 import { DEFAULT_COVER } from '../utils/episodeFeed';
 import type { RadioEpisode } from '../lib/rssParse';
 import { type TracklistResponse, parseTracklistFromSummary } from '../lib/tracklistHelper';
+import { dispatchSeek } from '../lib/seekBridge';
 
 type RadioFeedResponse = {
   episodes?: RadioEpisode[];
@@ -32,6 +34,7 @@ export default function RadioEpisodePage() {
   const { episodeCode } = useParams<{ episodeCode: string }>();
   const shouldReduceMotion = useReducedMotionPreference();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const coverRef = useParallaxItem<HTMLImageElement>({ speedY: 0.07, maxPx: 160 });
 
   const [loading, setLoading] = useState(true);
   const [episodes, setEpisodes] = useState<RadioEpisode[]>([]);
@@ -191,6 +194,10 @@ export default function RadioEpisodePage() {
   const tracklistItems =
     tracklist?.items?.length ? tracklist.items : fallbackItems.length ? fallbackItems : null;
   const tracklistCaption = 'Tracklist';
+  const tracklistHref =
+    episode.tracklistUrl && episode.tracklistUrl.trim().length > 0
+      ? episode.tracklistUrl
+      : 'https://www.1001tracklists.com/dj/techmyhouse/index.html';
 
   return (
     <div className="min-h-screen pb-24">
@@ -200,11 +207,12 @@ export default function RadioEpisodePage() {
         transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
         className="relative flex min-h-[60vh] w-full flex-col justify-end pt-32 pb-12 sm:min-h-[70vh]"
       >
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <img
+            ref={coverRef}
             src={episode.coverUrlResolved}
             alt=""
-            className="h-full w-full object-cover"
+            className="tmh-parallax-layer h-[110%] w-full object-cover"
             onError={(event) => {
               event.currentTarget.onerror = null;
               event.currentTarget.src = DEFAULT_COVER;
@@ -284,13 +292,23 @@ export default function RadioEpisodePage() {
       <div className="container-shell mt-16 max-w-6xl">
         <div className="grid gap-16">
           <div>
-            <div className="mb-8 border-b border-white/10 pb-4 flex items-baseline justify-between">
+            <div className="mb-8 flex items-baseline justify-between border-b border-white/10 pb-4">
               <h2 className="font-display text-3xl font-extrabold uppercase text-white">{tracklistCaption}</h2>
-              {tracklistItems?.length ? (
-                <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
-                  {tracklistItems.length} tracks
-                </div>
-              ) : null}
+              <div className="flex items-center gap-4">
+                {tracklistItems?.length ? (
+                  <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-smoke">
+                    {tracklistItems.length} tracks
+                  </div>
+                ) : null}
+                <a
+                  href={tracklistHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-smoke transition-colors hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                >
+                  View on 1001Tracklists ↗
+                </a>
+              </div>
             </div>
 
             {tracklistLoading ? (
@@ -319,11 +337,21 @@ export default function RadioEpisodePage() {
                         </div>
                       )}
                     </div>
-                    {t.timeText && (
-                      <div className="shrink-0 text-right font-mono text-[10px] uppercase tracking-[0.24em] text-smoke/60">
-                        {t.timeText}
-                      </div>
-                    )}
+                    <div className="shrink-0 text-right font-mono text-[10px] uppercase tracking-[0.24em] text-smoke/60">
+                      {t.timeText && t.timeSec != null ? (
+                        <button
+                          type="button"
+                          onClick={() => dispatchSeek(t.timeSec as number)}
+                          className="transition-colors hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                        >
+                          {t.timeText}
+                        </button>
+                      ) : t.timeText ? (
+                        <span>{t.timeText}</span>
+                      ) : (
+                        <span>—</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

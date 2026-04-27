@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tsconfigPaths from "vite-tsconfig-paths";
 import { XMLParser } from 'fast-xml-parser';
 import he from 'he';
+import { generateEpisodeCode } from './src/lib/episodeCode';
 
 const devImageProxy = (): Plugin => ({
   name: 'dev-image-proxy',
@@ -175,9 +176,18 @@ const devRadioApi = (): Plugin => ({
               (typeof item['itunes:summary'] === 'string' && String(item['itunes:summary']).trim()) ||
               '';
             const summary = description ? stripToText(description) : null;
+            const extractedEpisodeCode = extractEpisodeCode(title) ?? (summary ? extractEpisodeCode(summary) : null);
+            const episodeCode =
+              extractedEpisodeCode ??
+              generateEpisodeCode({
+                title,
+                audioUrl,
+                soundcloudUrl,
+                publishedAt: pubDate,
+              });
 
             return {
-              episodeCode: extractEpisodeCode(title) ?? (summary ? extractEpisodeCode(summary) : null),
+              episodeCode,
               title,
               publishedAt: pubDate,
               durationSec,

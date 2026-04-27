@@ -10,6 +10,8 @@ import RadioWaveform from './radio/RadioWaveform';
 import { getCurrentTrackIndex } from '../data/tracklists';
 import { useRealTracklist } from '../hooks/useRealTracklist';
 import { getInitialSelectedIndex, getNextSelectedIndex } from '../lib/tracklistSelection';
+import { addSeekListener } from '../lib/seekBridge';
+import { getDockTitles } from '../lib/audioPlayerTitles';
 
 export default function AudioPlayer() {
   const { currentTrack, isPlaying, togglePlay, setIsPlaying, playNext, playPrevious } = usePlayer();
@@ -28,10 +30,10 @@ export default function AudioPlayer() {
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
   const currentTrackRowRef = useRef<HTMLButtonElement | null>(null);
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(-1);
+  const pendingSeekRef = useRef<number | null>(null);
 
   const tracklistData = useRealTracklist(track?.url, track?.title);
   const displayTitle = tracklistData?.episodeTitle ?? track?.title ?? '';
-  const displayArtist = track?.artist ?? '';
   const displayCoverUrl = (tracklistData?.episodeCoverUrl ?? track?.coverUrl) || undefined;
 
   const tone = useCoverTone(displayCoverUrl);
@@ -45,6 +47,7 @@ export default function AudioPlayer() {
     setIsSeeking(false);
     setSeekPreview(null);
     setIsDismissed(false);
+    pendingSeekRef.current = null;
     audioRef.current?.load();
   }, [track?.url]);
 
@@ -107,6 +110,24 @@ export default function AudioPlayer() {
     setProgress(safe);
     if (audioRef.current) audioRef.current.currentTime = safe;
   }, [duration]);
+
+  useEffect(() => {
+    return addSeekListener((timeSec) => {
+      if (duration > 0) {
+        commitSeek(timeSec);
+        return;
+      }
+      pendingSeekRef.current = timeSec;
+    });
+  }, [commitSeek, duration]);
+
+  useEffect(() => {
+    if (duration <= 0) return;
+    if (pendingSeekRef.current == null) return;
+    const t = pendingSeekRef.current;
+    pendingSeekRef.current = null;
+    commitSeek(t);
+  }, [commitSeek, duration]);
 
   const shownTime = isSeeking && seekPreview != null ? seekPreview : progress;
   const seekPercent = Math.max(0, Math.min(100, duration > 0 ? (shownTime / duration) * 100 : 0));
@@ -173,8 +194,10 @@ export default function AudioPlayer() {
 
   const baseButtonClass =
     'inline-flex items-center justify-center rounded-full p-2 text-smoke transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
-  const primaryTitle = nowPlayingTrack ? `${nowPlayingTrack.artist} — ${nowPlayingTrack.title}` : displayTitle;
-  const secondaryTitle = nowPlayingTrack ? displayTitle : displayArtist;
+  const { primary: primaryTitle, secondary: secondaryTitle } = getDockTitles({
+    episodeTitle: displayTitle,
+    nowPlayingTrack: nowPlayingTrack ? { artist: nowPlayingTrack.artist, title: nowPlayingTrack.title } : null,
+  });
 
   return (
     <>
@@ -399,11 +422,12 @@ export default function AudioPlayer() {
         open={isTheatreOpen}
         title={displayTitle || 'Tech My House'}
         coverUrl={displayCoverUrl}
+        accentRgb={accentRgb}
         onClose={() => setIsTheatreOpen(false)}
       >
         <div className="flex h-full flex-col space-y-8">
           <div>
-            <h3 className="font-display text-[clamp(2rem,5vw,3.5rem)] font-extrabold uppercase leading-[0.9] tracking-tight text-white drop-shadow-lg">
+            <h3 className="font-display text-[clamp(2.2rem,5vw,3.5rem)] font-extrabold uppercase leading-[0.9] tracking-tight text-white drop-shadow-lg">
               {displayTitle || 'Select an episode'}
             </h3>
             {nowPlayingTrack ? (
@@ -445,7 +469,7 @@ export default function AudioPlayer() {
               ) : null}
             </div>
           ) : tracklistData?.status === 'ready' && tracklistData.tracks.length > 0 ? (
-            <div className="mt-8 flex-1 overflow-y-auto rounded-2xl border border-white/10 bg-black/25 px-2 py-4 pr-2 sm:px-4 sm:py-5 sm:pr-4 max-h-[50vh] sm:max-h-[55vh] scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+            <div className="mt-8 max-h-[45vh] flex-1 overflow-y-auto rounded-2xl border border-white/10 bg-black/25 px-2 py-4 pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 sm:px-4 sm:py-5 sm:pr-4">
               <div className="sticky top-0 z-10 -mx-2 mb-5 flex items-center justify-between rounded-xl bg-ink/35 px-2 py-2 backdrop-blur-md sm:-mx-4 sm:px-4">
                 <div className="font-mono text-[10px] uppercase tracking-widest text-smoke">
                   Tracklist ({tracklistData.tracks.length})
@@ -476,34 +500,42 @@ export default function AudioPlayer() {
                       onClick={() => commitSeek(t.startSec)}
                       className={`group relative flex w-full items-start gap-4 rounded-xl border p-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid ${
                         isSelected ? 'border-white/15' : 'border-transparent'
-                      } ${isCurrent ? 'text-acid' : 'text-white'}`}
+                      } ${isCurrent ? 'text-white' : 'text-white'}`}
                     >
                       {!shouldReduceMotion && isCurrent ? (
                         <motion.div
                           layoutId="tmh-current-track"
-                          className="absolute inset-0 rounded-xl bg-white/10"
+                          className="absolute inset-0 rounded-xl bg-white/10 ring-1 ring-white/10"
                           transition={{ duration: 0.22, ease: 'easeOut' }}
                         />
                       ) : isCurrent ? (
-                        <div className="absolute inset-0 rounded-xl bg-white/10" />
+                        <div className="absolute inset-0 rounded-xl bg-white/10 ring-1 ring-white/10" />
                       ) : null}
 
                       <div className="relative mt-0.5 w-10 shrink-0 font-mono text-[10px] uppercase tracking-widest text-smoke group-hover:text-white/80">
                         {formatTime(t.startSec)}
                       </div>
                       <div className="relative min-w-0 flex-1">
-                        <div className="truncate font-display text-[14px] font-extrabold uppercase text-white group-hover:text-acid/80">
-                          {t.title}
+                        <div className="flex min-w-0 items-baseline gap-2">
+                          <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.22em] text-smoke">
+                            {t.artist}
+                          </span>
+                          <span className="shrink-0 text-white/30">—</span>
+                          <span className="min-w-0 flex-1 truncate font-display text-[14px] font-extrabold uppercase text-white">
+                            {t.title}
+                          </span>
                         </div>
-                        <div className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.2em] text-smoke group-hover:text-white/60">
-                          {t.artist} {t.label ? `[${t.label}]` : ''}
-                        </div>
+                        {t.label ? (
+                          <div className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.2em] text-smoke">
+                            {t.label}
+                          </div>
+                        ) : null}
                       </div>
 
                       {isCurrent ? (
                         <div className="relative ml-auto shrink-0">
                           <span className="inline-flex items-center rounded-full border border-acid/60 bg-acid/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-acid">
-                            Now
+                            NOW
                           </span>
                         </div>
                       ) : null}

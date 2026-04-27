@@ -6,11 +6,12 @@ type RadioTheatreProps = {
   open: boolean;
   title: string;
   coverUrl?: string;
+  accentRgb?: string;
   onClose: () => void;
   children: React.ReactNode;
 };
 
-export default function RadioTheatre({ open, title, coverUrl, onClose, children }: RadioTheatreProps) {
+export default function RadioTheatre({ open, title, coverUrl, accentRgb, onClose, children }: RadioTheatreProps) {
   const shouldReduceMotion = useReducedMotionPreference();
   const closeBtnRef = React.useRef<HTMLButtonElement | null>(null);
   const lastFocusedRef = React.useRef<HTMLElement | null>(null);
@@ -61,9 +62,15 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
       className={`fixed inset-0 z-[140] bg-ink cement-texture ${shouldReduceMotion ? '' : 'animate-fade-in'}`}
     >
       {coverUrl && (
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-40">
-          <img src={coverUrl} alt="" className="h-full w-full object-cover blur-3xl scale-110" />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-30">
+          <img src={coverUrl} alt="" className="h-full w-full scale-110 object-cover blur-3xl" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0.95) 100%)',
+            }}
+          />
         </div>
       )}
 
@@ -80,22 +87,20 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[13px] font-extrabold uppercase tracking-[0.2em] text-acid">
-            Theatre Mode
-          </h2>
+          <h2 className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">THEATRE MODE</h2>
           <button
             ref={closeBtnRef}
             type="button"
             onClick={onClose}
             aria-label="Close theatre mode"
-            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-all hover:scale-105 hover:border-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-md transition-colors hover:border-acid/60 hover:text-acid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
           >
             <X size={20} />
           </button>
         </div>
 
         <div className="mt-8 grid flex-1 gap-12 lg:grid-cols-[minmax(400px,500px)_1fr] lg:items-center">
-          <div className="relative aspect-square w-full max-w-[500px] overflow-hidden rounded-3xl shadow-2xl mx-auto lg:mx-0 rotate-[-1deg] transform-gpu">
+          <div className="relative mx-auto aspect-square w-full max-w-[500px] rotate-[-1.5deg] transform-gpu overflow-hidden rounded-3xl shadow-2xl lg:mx-0">
             {coverUrl ? (
               <img src={coverUrl} alt={title} className="h-full w-full object-cover" />
             ) : (
@@ -105,6 +110,14 @@ export default function RadioTheatre({ open, title, coverUrl, onClose, children 
             )}
             <div className="absolute inset-0 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)] pointer-events-none" />
             <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-black/35 via-transparent to-white/5" />
+            {accentRgb ? (
+              <div
+                className="pointer-events-none absolute inset-0 opacity-20 mix-blend-screen"
+                style={{
+                  background: `radial-gradient(120% 90% at 30% 20%, rgb(${accentRgb} / 0.9) 0%, transparent 70%)`,
+                }}
+              />
+            ) : null}
           </div>
           <div className="min-w-0 flex flex-col h-full justify-center">{children}</div>
         </div>

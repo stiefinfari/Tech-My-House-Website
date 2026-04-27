@@ -26,29 +26,22 @@ const links = [
     label: '1001Tracklists',
     href: 'https://www.1001tracklists.com/dj/techmyhouse/index.html',
     icon: ListMusic,
-    iconOnly: true,
   },
 ];
 
 export default function SocialLinks() {
   return (
-    <ul className="flex flex-wrap items-center gap-x-5 gap-y-3">
-      {links.map(({ label, href, icon: Icon, iconOnly }) => (
+    <ul className="flex flex-col gap-3">
+      {links.map(({ label, href, icon: Icon }) => (
         <li key={label}>
           <a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="textlink font-mono text-[10px] uppercase tracking-[0.24em]"
-            aria-label={iconOnly ? label : undefined}
-            title={iconOnly ? label : undefined}
+            className="social-link-text"
           >
-            <Icon className="h-4 w-4 text-white/60" aria-hidden="true" />
-            {iconOnly ? (
-              <span className="sr-only">{label}</span>
-            ) : (
-              <span className="text-white/70">{label}</span>
-            )}
+            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{label}</span>
           </a>
         </li>
       ))}

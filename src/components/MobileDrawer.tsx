@@ -83,7 +83,7 @@ export default function MobileDrawer({ isOpen, onClose, links }: MobileDrawerPro
 
             <div className="mt-auto pt-12">
               <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-smoke">
-                Discover your underground mood
+                Where music unites!
               </div>
               <div className="mt-6">
                 <PillButton

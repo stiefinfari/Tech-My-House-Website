@@ -69,7 +69,19 @@ function Skeleton({ shimmer }: { shimmer: boolean }) {
   );
 }
 
-export default function LatestEpisode() {
+type LatestEpisodeProps = {
+  showPrevious?: boolean;
+  showAllEpisodesCta?: boolean;
+  showGoToRadioCta?: boolean;
+  goToRadioTo?: string;
+};
+
+export default function LatestEpisode({
+  showPrevious = true,
+  showAllEpisodesCta = true,
+  showGoToRadioCta = false,
+  goToRadioTo = '/radio',
+}: LatestEpisodeProps) {
   const { playTrack } = usePlayer();
   const [loading, setLoading] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
@@ -123,9 +135,21 @@ export default function LatestEpisode() {
   if (!latest) {
     return (
       <div className="w-full border border-white/10 bg-white/[0.02] p-8">
-        <PillButton href="https://soundcloud.com/techmyhouse" target="_blank" variant="ghost" ariaLabel="Listen on SoundCloud">
-          LISTEN ON SOUNDCLOUD ↗
-        </PillButton>
+        <div className="flex flex-wrap items-center gap-4">
+          <PillButton
+            href="https://soundcloud.com/techmyhouse"
+            target="_blank"
+            variant="ghost"
+            ariaLabel="Listen on SoundCloud"
+          >
+            LISTEN ON SOUNDCLOUD ↗
+          </PillButton>
+          {showGoToRadioCta ? (
+            <PillButton to={goToRadioTo} variant="ghost" ariaLabel="Vai alla pagina Radio">
+              VAI A RADIO
+            </PillButton>
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -181,45 +205,54 @@ export default function LatestEpisode() {
               PLAY EPISODE
             </PillButton>
           )}
-          <PillButton
-            href="https://soundcloud.com/techmyhouse"
-            target="_blank"
-            variant="ghost"
-            ariaLabel="All episodes"
-          >
-            ALL EPISODES ↗
-          </PillButton>
+          {showAllEpisodesCta ? (
+            <PillButton
+              href="https://soundcloud.com/techmyhouse"
+              target="_blank"
+              variant="ghost"
+              ariaLabel="All episodes"
+            >
+              ALL EPISODES ↗
+            </PillButton>
+          ) : null}
+          {showGoToRadioCta ? (
+            <PillButton to={goToRadioTo} variant="ghost" ariaLabel="Vai alla pagina Radio">
+              VAI A RADIO
+            </PillButton>
+          ) : null}
         </div>
 
-        <div className="mt-10 border-t border-acid/30 pt-8">
-          <div className="font-mono text-[10px] uppercase tracking-widest text-smoke">PREVIOUSLY ON TMH</div>
-          <div className="mt-4 space-y-2">
-            {previous.slice(0, 3).map((ep) => (
-              <button
-                key={ep.audioUrl || ep.link || ep.title}
-                type="button"
-                onClick={() => playEpisode(ep)}
-                className="group flex w-full items-center gap-4 rounded-none px-3 py-3 text-left transition-colors hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
-                aria-label={`Play: ${ep.title}`}
-              >
-                <div className="h-14 w-14 shrink-0 overflow-hidden bg-white/5">
-                  {ep.coverUrl ? (
-                    <img src={ep.coverUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full bg-white/5" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-display text-[17px] font-extrabold text-white/95">{ep.title}</div>
-                  <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-smoke">{formatDate(ep.pubDate)}</div>
-                </div>
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-acid/40 text-acid/80 transition-colors group-hover:border-acid/80 group-hover:text-acid">
-                  <Play size={14} stroke="none" fill="currentColor" />
-                </div>
-              </button>
-            ))}
+        {showPrevious && previous.length ? (
+          <div className="mt-10 border-t border-acid/30 pt-8">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-smoke">PREVIOUSLY ON TMH</div>
+            <div className="mt-4 space-y-2">
+              {previous.slice(0, 3).map((ep) => (
+                <button
+                  key={ep.audioUrl || ep.link || ep.title}
+                  type="button"
+                  onClick={() => playEpisode(ep)}
+                  className="group flex w-full items-center gap-4 rounded-none px-3 py-3 text-left transition-colors hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid"
+                  aria-label={`Play: ${ep.title}`}
+                >
+                  <div className="h-14 w-14 shrink-0 overflow-hidden bg-white/5">
+                    {ep.coverUrl ? (
+                      <img src={ep.coverUrl} alt="" aria-hidden="true" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="h-full w-full bg-white/5" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-display text-[17px] font-extrabold text-white/95">{ep.title}</div>
+                    <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-smoke">{formatDate(ep.pubDate)}</div>
+                  </div>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-acid/40 text-acid/80 transition-colors group-hover:border-acid/80 group-hover:text-acid">
+                    <Play size={14} stroke="none" fill="currentColor" />
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSeo } from '../seo/useSeo';
 import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
+import useParallaxItem from '../hooks/useParallaxItem';
 import PillButton from '../components/ui/PillButton';
 
 type TabKey = 'info' | 'booking' | 'demo';
@@ -49,6 +50,7 @@ function getSubjectPrefix(tab: TabKey) {
 
 export default function Contact() {
   const shouldReduceMotion = useReducedMotionPreference();
+  const blobRef = useParallaxItem<HTMLDivElement>({ speedY: 0.06, maxPx: 140 });
   const [tab, setTab] = useState<TabKey>('info');
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -273,7 +275,12 @@ export default function Contact() {
     'rounded-full border border-acid/40 px-5 py-2 font-display text-[11px] uppercase tracking-[0.18em] transition-colors outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-acid';
 
   return (
-    <div className="container-shell pb-20 pt-28 sm:pt-32">
+    <div className="container-shell relative pb-20 pt-28 sm:pt-32">
+      <div
+        ref={blobRef}
+        aria-hidden="true"
+        className="tmh-parallax-layer pointer-events-none absolute -top-20 right-[-10%] h-[420px] w-[520px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(204,255,0,0.10),transparent_70%)]"
+      />
       <div className="max-w-5xl">
         <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">GET IN TOUCH</div>
         <h1 className="mt-4 font-display font-extrabold uppercase leading-[0.92] tracking-[-0.07em] text-white text-[clamp(2.5rem,7vw,5rem)]">

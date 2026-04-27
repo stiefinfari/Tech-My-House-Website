@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
+import useInViewOnce from '../../hooks/useInViewOnce';
 import { artists } from '../../data';
 import TopoBlob from '../../components/TopoBlob';
 import PillButton from '../../components/ui/PillButton';
@@ -12,19 +11,17 @@ function getInitials(name: string) {
 }
 
 export default function ArtistsSection() {
-  const reducedMotion = useReducedMotionPreference();
+  const { ref, inView } = useInViewOnce<HTMLElement>({ threshold: 0.2, rootMargin: '0px 0px -15% 0px' });
 
   return (
-    <motion.section
+    <section
+      ref={ref}
       id="artists"
-      className="py-20 sm:py-24 lg:py-28 relative border-t border-white/5"
-      initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
+      data-inview={inView ? 'true' : 'false'}
+      className="py-20 sm:py-24 lg:py-28 relative border-t border-white/5 tmh-reveal-scope"
     >
       <div className="container-shell relative z-10">
-        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between tmh-reveal-item" style={{ '--tmh-delay': '0ms' } as React.CSSProperties}>
           <div>
             <div className="section-tag">Roster</div>
             <h2 className="display-title mt-3 text-[clamp(3rem,8vw,6.5rem)] text-white">ARTISTS</h2>
@@ -35,15 +32,11 @@ export default function ArtistsSection() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {artists.map((artist) => (
-            <motion.div
+          {artists.map((artist, idx) => (
+            <div
               key={artist.id}
-              initial={reducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: reducedMotion ? 0 : 0.5 }}
-              whileHover={reducedMotion ? undefined : { scale: 1.02, rotate: -0.5 }}
-              className="group border border-white/10 bg-white/[0.02] p-4 transition-colors hover:border-acid/45"
+              className="group border border-white/10 bg-white/[0.02] p-4 transition-colors transition-transform duration-300 hover:border-acid/45 hover:scale-[1.02] hover:-rotate-[0.5deg] tmh-reveal-item"
+              style={{ '--tmh-delay': `${120 + idx * 70}ms` } as React.CSSProperties}
             >
               <div className="relative aspect-[4/5] overflow-hidden border border-white/10 bg-ink">
                 {artist.imageUrl ? (
@@ -84,10 +77,10 @@ export default function ArtistsSection() {
                   VIEW PROFILE
                 </PillButton>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

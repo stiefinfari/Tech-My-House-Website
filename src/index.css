@@ -188,6 +188,35 @@
     outline-offset: 4px;
   }
 
+  .social-link-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.72);
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 180ms ease;
+    min-height: 32px;
+  }
+
+  .social-link-text:hover,
+  .social-link-text:focus-visible {
+    color: theme('colors.acid');
+    outline: none;
+  }
+
+  .social-link-text svg {
+    color: rgba(255, 255, 255, 0.55);
+    transition: color 180ms ease;
+  }
+
+  .social-link-text:hover svg {
+    color: theme('colors.acid');
+  }
+
   .grain-heavy {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E");
   }
@@ -355,6 +384,149 @@
 @media (prefers-reduced-motion: no-preference) {
   .hero-glow-word {
     animation: heroWordGlow 2.8s ease-in-out infinite;
+  }
+}
+
+.tmh-reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 700ms ease;
+  transition-delay: var(--tmh-delay, 0ms);
+  will-change: transform, opacity;
+}
+
+[data-inview="true"].tmh-reveal,
+.tmh-reveal[data-inview="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.tmh-reveal-scope .tmh-reveal-item {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 700ms ease;
+  transition-delay: var(--tmh-delay, 0ms);
+  will-change: transform, opacity;
+}
+
+.tmh-reveal-scope[data-inview="true"] .tmh-reveal-item {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.tmh-parallax-layer {
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.tmh-ambient-layer {
+  background: radial-gradient(circle at center, rgba(204, 255, 0, 0.05), rgba(204, 255, 0, 0) 68%);
+  will-change: transform;
+}
+
+.tmh-ambient-layer--b {
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 66%);
+}
+
+.tmh-ambient-layer--c {
+  background: radial-gradient(circle at center, rgba(204, 255, 0, 0.04), rgba(204, 255, 0, 0) 64%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tmh-ambient-layer--a {
+    animation: tmhAmbientA 18s ease-in-out infinite;
+  }
+  .tmh-ambient-layer--b {
+    animation: tmhAmbientB 22s ease-in-out infinite;
+  }
+  .tmh-ambient-layer--c {
+    animation: tmhAmbientC 26s ease-in-out infinite;
+  }
+}
+
+@keyframes tmhAmbientA {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-0.5deg) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0) rotate(0.6deg) scale(1.02);
+  }
+}
+
+@keyframes tmhAmbientB {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0.4deg) scale(1);
+  }
+  50% {
+    transform: translate3d(0, 18px, 0) rotate(-0.5deg) scale(1.015);
+  }
+}
+
+@keyframes tmhAmbientC {
+  0%,
+  100% {
+    transform: translate3d(-50%, 0, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(-50%, -22px, 0) rotate(0.6deg) scale(1.02);
+  }
+}
+
+.tmh-hero-media {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tmh-hero-media {
+    animation: tmhHeroMedia 14s ease-in-out infinite;
+  }
+}
+
+@keyframes tmhHeroMedia {
+  0%,
+  100% {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.06) translate3d(0, 10px, 0);
+  }
+}
+
+.tmh-hero-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  animation: tmhHeroWordIn 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--tmh-delay, 0ms);
+}
+
+@keyframes tmhHeroWordIn {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tmh-nav-enter {
+    animation: tmhNavEnter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes tmhNavEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 

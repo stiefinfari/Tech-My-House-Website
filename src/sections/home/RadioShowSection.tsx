@@ -1,7 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import LatestEpisode from '../../components/LatestEpisode';
-import useReducedMotionPreference from '../../hooks/useReducedMotionPreference';
+import useInViewOnce from '../../hooks/useInViewOnce';
+import TMHLogoWhite from '../../assets/TMH_LOGO_WHITE.png';
 
 class RadioShowErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -36,21 +36,38 @@ class RadioShowErrorBoundary extends React.Component<
 }
 
 export default function RadioShowSection() {
-  const reducedMotion = useReducedMotionPreference();
+  const { ref, inView } = useInViewOnce<HTMLElement>({ threshold: 0.2, rootMargin: '0px 0px -15% 0px' });
   return (
-    <motion.section
+    <section
+      ref={ref}
       id="podcast"
-      className="py-20 sm:py-24 lg:py-28"
-      initial={reducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={reducedMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
+      data-inview={inView ? 'true' : 'false'}
+      className="py-20 sm:py-24 lg:py-28 tmh-reveal-scope"
     >
       <div className="container-shell">
-        <RadioShowErrorBoundary>
-          <LatestEpisode />
-        </RadioShowErrorBoundary>
+        <div className="mb-12 max-w-6xl tmh-reveal-item" style={{ '--tmh-delay': '0ms' } as React.CSSProperties}>
+          <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-acid">RADIO</div>
+          <div className="mt-3 flex items-center gap-2 sm:gap-3">
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 -z-10 scale-110 rounded-full blur-3xl bg-acid/20" aria-hidden="true" />
+              <img
+                src={TMHLogoWhite}
+                alt=""
+                aria-hidden="true"
+                className="h-24 w-24 sm:h-32 sm:w-32 origin-[55.44%_42.84%] drop-shadow-[0_0_24px_rgba(204,255,0,0.25)] motion-safe:animate-[spin_14s_linear_infinite] motion-reduce:animate-none"
+              />
+            </div>
+            <h2 className="display-title text-[clamp(2.8rem,8vw,6rem)] leading-[0.9] text-white">LATEST EPISODE</h2>
+          </div>
+          <p className="accent-script mt-4 -rotate-[1.5deg] text-[clamp(1.3rem,3vw,2.2rem)] text-acid">fresh underground sound</p>
+          <div className="mt-5 font-mono text-[10px] uppercase tracking-widest text-smoke">UPDATED WEEKLY</div>
+        </div>
+        <div className="tmh-reveal-item" style={{ '--tmh-delay': '120ms' } as React.CSSProperties}>
+          <RadioShowErrorBoundary>
+            <LatestEpisode showPrevious={false} showAllEpisodesCta={false} showGoToRadioCta goToRadioTo="/radio" />
+          </RadioShowErrorBoundary>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 }

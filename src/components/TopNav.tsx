@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
-import { motion } from 'framer-motion';
 import MobileDrawer from './MobileDrawer';
 import TMHLogoLiquid from './TMHLogoLiquid';
-import useReducedMotionPreference from '../hooks/useReducedMotionPreference';
 import { cn } from '../lib/utils';
 
 const NAV_LINKS = [
@@ -17,16 +15,7 @@ const NAV_LINKS = [
 export default function TopNav() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const shouldReduceMotion = useReducedMotionPreference();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   useEffect(() => {
     const check = () => setIsPlayerExpanded(document.body.dataset.playerExpanded === 'true');
@@ -38,20 +27,12 @@ export default function TopNav() {
 
   return (
     <>
-      <motion.header
-        initial={shouldReduceMotion ? { y: 0, opacity: 1 } : { y: -16, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, ease: 'easeOut' }}
-        className={`fixed left-0 right-0 top-4 z-50 px-4 pt-[env(safe-area-inset-top)] ${isPlayerExpanded ? 'hidden' : ''}`}
+      <header
+        className={`tmh-nav-enter fixed left-0 right-0 top-4 z-50 px-4 pt-[env(safe-area-inset-top)] ${isPlayerExpanded ? 'hidden' : ''}`}
       >
-        <motion.div
-          className="mx-auto flex items-center justify-between rounded-full border border-acid/40 bg-ink/70 backdrop-blur-xl px-3 pl-4 pr-2 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+        <div
+          className="mx-auto flex h-14 max-w-5xl items-center justify-between rounded-full border border-acid/40 bg-ink/70 backdrop-blur-xl px-3 pl-4 pr-2 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
           style={{ width: '100%' }}
-          animate={{
-            height: isScrolled ? 48 : 56,
-            maxWidth: isScrolled ? 896 : 1024,
-          }}
-          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.24, ease: 'easeOut' }}
         >
           <div className="flex items-center">
             <Link
@@ -100,8 +81,8 @@ export default function TopNav() {
           >
             <Menu size={28} />
           </button>
-        </motion.div>
-      </motion.header>
+        </div>
+      </header>
 
       <MobileDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} links={NAV_LINKS} />
     </>
